@@ -1,0 +1,2324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanjeevni - Volunteer Attendance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Sign-In -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(160deg, #dff6f0 0%, #e8eef8 40%, #f5e6f0 70%, #e0f4f1 100%);
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        /* Main Layout - 2 Columns */
+        .main-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 16px;
+            max-width: 1400px;
+            margin: 0 auto;
+            height: calc(100vh - 32px);
+        }
+
+        /* Form Section - Left */
+        .form-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Data Section - Center (includes pivots) */
+        .data-section {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            gap: 16px;
+        }
+
+        /* Pivot Section - Now inside data section */
+        .pivot-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card.form-card {
+            height: 100%;
+        }
+
+        .card.data-card {
+            flex: 0 0 auto;
+            height: 55vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #4ECDC4 0%, #9B8EC7 100%);
+            color: white;
+            padding: 10px 14px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .card-body {
+            padding: 12px;
+            flex: 1;
+            overflow: auto;
+            min-height: 0;
+        }
+
+        /* Form Styles */
+        .form-header {
+            background: linear-gradient(135deg, #4ECDC4 0%, #9B8EC7 100%);
+            color: white;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .lotus-icon {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 4px;
+        }
+
+        .form-header h1 {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+
+        .form-header .subtitle {
+            font-size: 0.7rem;
+            opacity: 0.9;
+        }
+
+        .form-body {
+            padding: 12px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .form-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .form-table tr {
+            border-bottom: 1px solid #e8f5f1;
+        }
+
+        .form-table td {
+            padding: 6px 4px;
+            vertical-align: middle;
+        }
+
+        .form-table td:first-child {
+            width: 80px;
+            font-weight: 500;
+            font-size: 0.7rem;
+            color: #3D4852;
+            background: #f8fbfa;
+            padding-left: 8px;
+        }
+
+        .form-table input,
+        .form-table select,
+        .form-table textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #e0eeeb;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-family: 'Poppins', sans-serif;
+            color: #3D4852;
+            background: white;
+        }
+
+        .form-table input:focus,
+        .form-table select:focus,
+        .form-table textarea:focus {
+            outline: none;
+            border-color: #4ECDC4;
+            box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.1);
+        }
+
+        .form-table select {
+            cursor: pointer;
+        }
+
+        .form-table textarea {
+            min-height: 40px;
+            resize: none;
+        }
+
+        /* Custom Dropdown */
+        .custom-dropdown {
+            position: relative;
+        }
+
+        .custom-dropdown-trigger {
+            width: 100%;
+            padding: 6px 24px 6px 8px;
+            border: 1px solid #e0eeeb;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-family: 'Poppins', sans-serif;
+            color: #3D4852;
+            background: white;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .custom-dropdown-trigger::after {
+            content: '▼';
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 8px;
+            color: #4ECDC4;
+        }
+
+        .custom-dropdown.open .custom-dropdown-trigger::after {
+            content: '▲';
+        }
+
+        .custom-dropdown-trigger.placeholder {
+            color: #9ca3af;
+        }
+
+        .custom-dropdown-panel {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #4ECDC4;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .custom-dropdown.open .custom-dropdown-panel {
+            display: block;
+        }
+
+        .custom-dropdown.open .custom-dropdown-trigger {
+            border-color: #4ECDC4;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .custom-dropdown-search {
+            padding: 6px;
+            border-bottom: 1px solid #e8f5f1;
+        }
+
+        .custom-dropdown-search input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #e0eeeb;
+            border-radius: 4px;
+            font-size: 0.7rem;
+        }
+
+        .custom-dropdown-list {
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .custom-dropdown-item {
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .custom-dropdown-item:hover {
+            background: #E8F5F1;
+        }
+
+        .custom-dropdown-item.selected {
+            background: #4ECDC4;
+            color: white;
+        }
+
+        .custom-dropdown-item.hidden {
+            display: none;
+        }
+
+        .custom-dropdown-empty {
+            padding: 10px;
+            color: #9ca3af;
+            text-align: center;
+            font-size: 0.7rem;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #4ECDC4 0%, #9B8EC7 100%);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Volunteer Data Container */
+        #volunteerData {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* Data Table - Spreadsheet Style */
+        .data-table-wrapper {
+            flex: 1;
+            overflow-x: auto;
+            overflow-y: scroll;
+            min-height: 0;
+            max-height: 100%;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.7rem;
+            min-width: 800px;
+        }
+
+        .data-table th {
+            background: #f0f5f3;
+            padding: 8px 6px;
+            text-align: left;
+            font-weight: 600;
+            color: #3D4852;
+            border: 1px solid #d0e0dc;
+            font-size: 0.65rem;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table td {
+            padding: 6px;
+            border: 1px solid #e8f0ed;
+            color: #3D4852;
+            background: white;
+        }
+
+        .data-table tr:hover td {
+            background: #f8fcfb;
+        }
+
+        .data-table .sno {
+            width: 35px;
+            text-align: center;
+            background: #f8fbfa;
+            font-weight: 500;
+        }
+
+        .data-placeholder {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .data-placeholder-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+            opacity: 0.5;
+        }
+
+        .volunteer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #f8fbfa;
+            border-bottom: 1px solid #e8f5f1;
+            flex-shrink: 0;
+        }
+
+        .volunteer-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .volunteer-header h3 {
+            font-size: 0.85rem;
+            color: #3D4852;
+        }
+
+        .volunteer-header .badge {
+            background: linear-gradient(135deg, #4ECDC4, #9B8EC7);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.65rem;
+        }
+
+        /* Pivot Tables - Spreadsheet Style */
+        .pivot-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .pivot-header {
+            background: linear-gradient(135deg, #4ECDC4, #9B8EC7);
+            color: white;
+            padding: 8px 12px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .pivot-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.7rem;
+        }
+
+        .pivot-table th {
+            background: #f0f5f3;
+            padding: 6px 8px;
+            text-align: center;
+            font-weight: 600;
+            color: #3D4852;
+            border: 1px solid #d0e0dc;
+            font-size: 0.65rem;
+        }
+
+        .pivot-table th:first-child {
+            text-align: left;
+        }
+
+        .pivot-table td {
+            padding: 6px 8px;
+            border: 1px solid #e8f0ed;
+            text-align: center;
+            color: #3D4852;
+        }
+
+        .pivot-table td:first-child {
+            text-align: left;
+            background: #f8fbfa;
+            font-weight: 500;
+        }
+
+        .pivot-table tr.total-row {
+            background: #f0f7f5;
+            font-weight: 600;
+        }
+
+        .pivot-table tr.total-row td {
+            border-top: 2px solid #4ECDC4;
+        }
+
+        /* Extra Hours Pivot */
+        .extra-hours-table td:last-child {
+            font-weight: 600;
+            color: #4ECDC4;
+        }
+
+        /* Success Modal */
+        .success-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .success-modal.show { display: flex; }
+
+        .success-content {
+            background: white;
+            padding: 24px 32px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .success-content h2 {
+            color: #4ECDC4;
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+
+        .success-content p {
+            color: #3D4852;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+        }
+
+        .success-content button {
+            background: linear-gradient(135deg, #4ECDC4, #9B8EC7);
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1001;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+                height: auto;
+            }
+            .data-section {
+                min-height: 400px;
+            }
+            .pivot-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 8px; }
+            .main-container { gap: 10px; }
+            .pivot-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Login Overlay */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(160deg, #dff6f0 0%, #e8eef8 40%, #f5e6f0 70%, #e0f4f1 100%);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-overlay.hidden {
+            display: none;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-card .lotus-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 16px;
+        }
+
+        .login-card h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #4ECDC4, #9B8EC7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .login-card .subtitle {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+        }
+
+        .login-card .google-signin-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #3D4852;
+            transition: all 0.2s;
+        }
+
+        .login-card .google-signin-btn:hover {
+            border-color: #4ECDC4;
+            box-shadow: 0 2px 8px rgba(78, 205, 196, 0.2);
+        }
+
+        .login-card .google-signin-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .login-error {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+        }
+
+        .login-divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            color: #999;
+            font-size: 0.8rem;
+        }
+
+        .login-divider::before,
+        .login-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e0e0e0;
+        }
+
+        .login-divider::before {
+            margin-right: 12px;
+        }
+
+        .login-divider::after {
+            margin-left: 12px;
+        }
+
+        .email-login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .email-login-form input {
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .email-login-form input:focus {
+            border-color: #4ECDC4;
+        }
+
+        .email-login-btn {
+            background: linear-gradient(135deg, #4ECDC4, #9B8EC7);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .email-login-btn:hover {
+            opacity: 0.9;
+        }
+
+        .email-login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* User Header Bar */
+        .user-header {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 10px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-header.hidden {
+            display: none;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4ECDC4, #9B8EC7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #3D4852;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: capitalize;
+        }
+
+        .user-role.admin {
+            color: #9B8EC7;
+            font-weight: 500;
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .admin-panel-btn {
+            background: linear-gradient(135deg, #9B8EC7, #4ECDC4);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .admin-panel-btn:hover {
+            opacity: 0.9;
+        }
+
+        .admin-panel-btn.hidden {
+            display: none;
+        }
+
+        .signout-btn {
+            background: #f0f0f0;
+            color: #666;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .signout-btn:hover {
+            background: #e0e0e0;
+        }
+
+        /* Admin Panel Modal */
+        .admin-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1500;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .admin-modal.show {
+            display: flex;
+        }
+
+        .admin-modal-content {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-modal-header {
+            background: linear-gradient(135deg, #9B8EC7, #4ECDC4);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-modal-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .admin-modal-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .admin-modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .admin-section {
+            margin-bottom: 24px;
+        }
+
+        .admin-section h3 {
+            font-size: 0.9rem;
+            color: #3D4852;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e8f5f1;
+        }
+
+        .user-list {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .user-list-header {
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr 80px;
+            background: #f8fbfa;
+            padding: 10px 12px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #3D4852;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .user-list-row {
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr 80px;
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.8rem;
+            align-items: center;
+        }
+
+        .user-list-row:last-child {
+            border-bottom: none;
+        }
+
+        .user-list-row:hover {
+            background: #f8fbfa;
+        }
+
+        .user-list-row .role-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .user-list-row .role-badge.admin {
+            background: #f0ebf8;
+            color: #9B8EC7;
+        }
+
+        .user-list-row .role-badge.volunteer {
+            background: #e8f5f1;
+            color: #4ECDC4;
+        }
+
+        .user-list-row .delete-user-btn {
+            background: #fee;
+            color: #e74c3c;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .user-list-row .delete-user-btn:hover {
+            background: #fdd;
+        }
+
+        .add-user-form {
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr auto;
+            gap: 10px;
+            align-items: end;
+        }
+
+        .add-user-form .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .add-user-form label {
+            font-size: 0.7rem;
+            color: #666;
+        }
+
+        .add-user-form input,
+        .add-user-form select {
+            padding: 8px 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .add-user-form .add-user-btn {
+            background: linear-gradient(135deg, #4ECDC4, #9B8EC7);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            height: 36px;
+        }
+
+        .add-user-form .add-user-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Hide elements based on role */
+        .admin-only {
+            display: none;
+        }
+
+        body.is-admin .admin-only {
+            display: block;
+        }
+
+        body.is-admin .admin-panel-btn {
+            display: inline-block;
+        }
+
+        /* Volunteer role restrictions */
+        body.is-volunteer .volunteer-dropdown-row {
+            display: none;
+        }
+
+        body.is-volunteer .custom-dropdown {
+            pointer-events: none;
+        }
+
+        .volunteer-name-display {
+            padding: 6px 8px;
+            background: #f0f5f3;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: #3D4852;
+            font-weight: 500;
+        }
+
+        .volunteer-name-row {
+            display: none;
+        }
+
+        body.is-volunteer .volunteer-name-row {
+            display: table-row;
+        }
+
+        /* App container wrapper for layout with user header */
+        .app-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-wrapper .main-container {
+            flex: 1;
+            min-height: 0;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Overlay -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-card">
+            <svg class="lotus-icon" viewBox="0 0 100 100" fill="none">
+                <ellipse cx="50" cy="75" rx="35" ry="8" fill="rgba(78,205,196,0.3)"/>
+                <path d="M50 70 C50 50, 30 40, 20 55 C30 45, 45 50, 50 70" fill="#4ECDC4"/>
+                <path d="M50 70 C50 50, 70 40, 80 55 C70 45, 55 50, 50 70" fill="#4ECDC4"/>
+                <path d="M50 65 C50 40, 25 30, 15 45 C30 35, 45 45, 50 65" fill="#9B8EC7"/>
+                <path d="M50 65 C50 40, 75 30, 85 45 C70 35, 55 45, 50 65" fill="#9B8EC7"/>
+                <circle cx="50" cy="72" r="6" fill="#FFE66D"/>
+            </svg>
+            <h1>Sanjeevni</h1>
+            <p class="subtitle">Volunteer Attendance System</p>
+            <div class="email-login-form">
+                <input type="email" id="loginEmail" placeholder="Enter your email address">
+                <input type="password" id="loginPin" placeholder="Enter your PIN" maxlength="6" inputmode="numeric" pattern="[0-9]*">
+                <button class="email-login-btn" id="emailLoginBtn" onclick="loginWithEmail()">Sign In</button>
+            </div>
+            <p class="login-error" id="loginError">Access denied. Please contact administrator.</p>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div class="admin-modal" id="adminModal">
+        <div class="admin-modal-content">
+            <div class="admin-modal-header">
+                <h2>Admin Panel - User Management</h2>
+                <button class="admin-modal-close" onclick="closeAdminPanel()">&times;</button>
+            </div>
+            <div class="admin-modal-body">
+                <div class="admin-section">
+                    <h3>Add New User</h3>
+                    <div class="add-user-form">
+                        <div class="form-field">
+                            <label>Email</label>
+                            <input type="email" id="newUserEmail" placeholder="user@example.com">
+                        </div>
+                        <div class="form-field">
+                            <label>Name</label>
+                            <input type="text" id="newUserName" placeholder="Full Name">
+                        </div>
+                        <div class="form-field">
+                            <label>Role</label>
+                            <select id="newUserRole">
+                                <option value="volunteer">Volunteer</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <button class="add-user-btn" onclick="addUser()">Add User</button>
+                    </div>
+                </div>
+                <div class="admin-section">
+                    <h3>User List</h3>
+                    <div class="user-list">
+                        <div class="user-list-header">
+                            <span>Email</span>
+                            <span>Name</span>
+                            <span>Role</span>
+                            <span>Actions</span>
+                        </div>
+                        <div id="userListBody">
+                            <!-- Users will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Wrapper -->
+    <div class="app-wrapper">
+        <!-- User Header -->
+        <div class="user-header hidden" id="userHeader">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">?</div>
+                <div class="user-details">
+                    <span class="user-name" id="userName">User</span>
+                    <span class="user-role" id="userRole">volunteer</span>
+                </div>
+            </div>
+            <div class="user-actions">
+                <button class="admin-panel-btn hidden" id="adminPanelBtn" onclick="openAdminPanel()">Admin Panel</button>
+                <button class="signout-btn" onclick="signOut()">Sign Out</button>
+            </div>
+        </div>
+
+        <div class="main-container">
+        <!-- Left: Form Section -->
+        <div class="form-section">
+            <div class="card form-card">
+                <div class="form-header">
+                    <svg class="lotus-icon" viewBox="0 0 100 100" fill="none">
+                        <ellipse cx="50" cy="75" rx="35" ry="8" fill="rgba(255,255,255,0.3)"/>
+                        <path d="M50 70 C50 50, 30 40, 20 55 C30 45, 45 50, 50 70" fill="rgba(255,255,255,0.9)"/>
+                        <path d="M50 70 C50 50, 70 40, 80 55 C70 45, 55 50, 50 70" fill="rgba(255,255,255,0.9)"/>
+                        <path d="M50 65 C50 40, 25 30, 15 45 C30 35, 45 45, 50 65" fill="rgba(255,255,255,0.75)"/>
+                        <path d="M50 65 C50 40, 75 30, 85 45 C70 35, 55 45, 50 65" fill="rgba(255,255,255,0.75)"/>
+                        <circle cx="50" cy="72" r="6" fill="rgba(255,255,255,0.95)"/>
+                    </svg>
+                    <h1>Sanjeevni</h1>
+                    <p class="subtitle">Volunteer Attendance</p>
+                </div>
+
+                <form id="attendanceForm" class="form-body">
+                    <table class="form-table">
+                        <tr>
+                            <td>Volunteer Name</td>
+                            <td>
+                                <input type="hidden" id="volunteer-name" name="volunteer_name" required>
+                                <div class="custom-dropdown" id="volunteerDropdown">
+                                    <button type="button" class="custom-dropdown-trigger placeholder" id="volunteerTrigger">Select...</button>
+                                    <div class="custom-dropdown-panel">
+                                        <div class="custom-dropdown-search">
+                                            <input type="text" id="volunteerSearch" placeholder="Search..." autocomplete="off">
+                                        </div>
+                                        <div class="custom-dropdown-list" id="volunteerList">
+                                            <div class="custom-dropdown-item" data-value="Akshith">Akshith</div>
+                                            <div class="custom-dropdown-item" data-value="Archana">Archana</div>
+                                            <div class="custom-dropdown-item" data-value="Azhar">Azhar</div>
+                                            <div class="custom-dropdown-item" data-value="Bhavna">Bhavna</div>
+                                            <div class="custom-dropdown-item" data-value="Binu">Binu</div>
+                                            <div class="custom-dropdown-item" data-value="Dharini">Dharini</div>
+                                            <div class="custom-dropdown-item" data-value="Divya">Divya</div>
+                                            <div class="custom-dropdown-item" data-value="Dolly">Dolly</div>
+                                            <div class="custom-dropdown-item" data-value="Fiesal">Fiesal</div>
+                                            <div class="custom-dropdown-item" data-value="Geeta">Geeta</div>
+                                            <div class="custom-dropdown-item" data-value="Gopal">Gopal</div>
+                                            <div class="custom-dropdown-item" data-value="K. Narayan">K. Narayan</div>
+                                            <div class="custom-dropdown-item" data-value="Kalpana">Kalpana</div>
+                                            <div class="custom-dropdown-item" data-value="Kavita">Kavita</div>
+                                            <div class="custom-dropdown-item" data-value="Madhu">Madhu</div>
+                                            <div class="custom-dropdown-item" data-value="Mamta V">Mamta V</div>
+                                            <div class="custom-dropdown-item" data-value="Manas">Manas</div>
+                                            <div class="custom-dropdown-item" data-value="Manish">Manish</div>
+                                            <div class="custom-dropdown-item" data-value="Meera">Meera</div>
+                                            <div class="custom-dropdown-item" data-value="Neelam">Neelam</div>
+                                            <div class="custom-dropdown-item" data-value="Niharika">Niharika</div>
+                                            <div class="custom-dropdown-item" data-value="Parul A">Parul A</div>
+                                            <div class="custom-dropdown-item" data-value="Parul P">Parul P</div>
+                                            <div class="custom-dropdown-item" data-value="Praveen">Praveen</div>
+                                            <div class="custom-dropdown-item" data-value="Prerona">Prerona</div>
+                                            <div class="custom-dropdown-item" data-value="Radhika">Radhika</div>
+                                            <div class="custom-dropdown-item" data-value="Ranjita">Ranjita</div>
+                                            <div class="custom-dropdown-item" data-value="Ritu">Ritu</div>
+                                            <div class="custom-dropdown-item" data-value="Shivani S">Shivani S</div>
+                                            <div class="custom-dropdown-item" data-value="Shuchi">Shuchi</div>
+                                            <div class="custom-dropdown-item" data-value="Simran">Simran</div>
+                                            <div class="custom-dropdown-item" data-value="Smita">Smita</div>
+                                            <div class="custom-dropdown-item" data-value="Sonia">Sonia</div>
+                                            <div class="custom-dropdown-item" data-value="Suminder">Suminder</div>
+                                            <div class="custom-dropdown-item" data-value="Tanishqa">Tanishqa</div>
+                                            <div class="custom-dropdown-item" data-value="Tanuja">Tanuja</div>
+                                            <div class="custom-dropdown-item" data-value="Varun">Varun</div>
+                                            <div class="custom-dropdown-item" data-value="Veena A">Veena A</div>
+                                            <div class="custom-dropdown-item" data-value="Veena M">Veena M</div>
+                                            <div class="custom-dropdown-item" data-value="Vickie">Vickie</div>
+                                            <div class="custom-dropdown-item" data-value="Vidhu">Vidhu</div>
+                                        </div>
+                                        <div class="custom-dropdown-empty" style="display:none;">No match</div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Date</td>
+                            <td><input type="date" id="date" name="date" required></td>
+                        </tr>
+                        <tr>
+                            <td>Time</td>
+                            <td>
+                                <select id="time" name="time" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="2pm-5:30pm">2pm-5:30pm</option>
+                                    <option value="10am-2pm">10am-2pm</option>
+                                    <option value="Full Day">Full Day</option>
+                                    <option value="extra time">extra time</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Extra Time (From)</td>
+                            <td><input type="time" id="extra-time-from" name="extra_time_from"></td>
+                        </tr>
+                        <tr>
+                            <td>Extra Time (till)</td>
+                            <td><input type="time" id="extra-time-till" name="extra_time_till"></td>
+                        </tr>
+                        <tr>
+                            <td>Reason (for Others)</td>
+                            <td><input type="text" id="reason-other-duty" name="reason_other_duty" placeholder="If applicable"></td>
+                        </tr>
+                        <tr>
+                            <td>Duty</td>
+                            <td>
+                                <select id="duty" name="duty" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="CI">CI</option>
+                                    <option value="Supervisor meeting">Supervisor meeting</option>
+                                    <option value="Supervision Given">Supervision Given</option>
+                                    <option value="Supervision Taken">Supervision Taken</option>
+                                    <option value="EC meeting">EC meeting</option>
+                                    <option value="Trainings">Trainings</option>
+                                    <option value="COP">COP</option>
+                                    <option value="Tie Ups">Tie Ups</option>
+                                    <option value="Sub-committee meeting">Sub-committee meeting</option>
+                                    <option value="Workshop">Workshop</option>
+                                    <option value="Orientation">Orientation</option>
+                                    <option value="Volunteer Meeting">Volunteer Meeting</option>
+                                    <option value="Others">Others</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>No. of Hours</td>
+                            <td><input type="text" id="no-of-hours" name="no_of_hours" placeholder="Auto-calculated" readonly style="background-color: #f0f0f0; cursor: not-allowed;"></td>
+                        </tr>
+                        <tr>
+                            <td>Duty From</td>
+                            <td>
+                                <select id="duty-from" name="duty_from" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="Centre">Centre</option>
+                                    <option value="Home">Home</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Remarks</td>
+                            <td><textarea id="remarks" name="remarks" placeholder="Any remarks..."></textarea></td>
+                        </tr>
+                    </table>
+                    <button type="submit" class="submit-btn">Submit Attendance</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Center: Data Section -->
+        <div class="data-section">
+            <div class="card data-card">
+                <div class="card-header">
+                    Attendance for <span id="headerVolunteerName">_______</span>
+                </div>
+                <div id="dataPlaceholder" class="data-placeholder">
+                    <div class="data-placeholder-icon">👤</div>
+                    <p>Please select your name from the Dropdown to autofill your data</p>
+                </div>
+                <div id="volunteerData" style="display:none;">
+                    <div class="volunteer-header">
+                        <div class="volunteer-header-left">
+                            <span>Attendance for</span>
+                            <strong id="volunteerNameDisplay">Volunteer</strong>
+                        </div>
+                        <span class="badge" id="recordCount">0 records</span>
+                    </div>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>S. No</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Extra Time (From)</th>
+                                    <th>Extra Time (till)</th>
+                                    <th>Reason for extra time</th>
+                                    <th>Duty</th>
+                                    <th>No.Of Hours</th>
+                                    <th>Duty from Centre/Home</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dataTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pivot Section - Under Attendance -->
+            <div class="pivot-section">
+                <!-- COUNTA of Duty Pivot -->
+                <div class="pivot-card">
+                    <div class="pivot-header">COUNTA of Duty</div>
+                    <table class="pivot-table">
+                        <thead>
+                            <tr>
+                                <th>Duty</th>
+                                <th>Duty from Centre/Home</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                            <tr>
+                                <th></th>
+                                <th>Centre</th>
+                                <th>Home</th>
+                                <th>Grand Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dutyPivotBody">
+                            <tr><td>CI</td><td id="ci-centre">0</td><td id="ci-home">0</td><td id="ci-total">0</td></tr>
+                            <tr><td>Supervisor meeting</td><td id="sm-centre">0</td><td id="sm-home">0</td><td id="sm-total">0</td></tr>
+                            <tr><td>EC meeting</td><td id="ec-centre">0</td><td id="ec-home">0</td><td id="ec-total">0</td></tr>
+                            <tr class="total-row">
+                                <td>Grand Total</td>
+                                <td id="grand-centre">0</td>
+                                <td id="grand-home">0</td>
+                                <td id="grand-total">0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Total Extra Hours Pivot -->
+                <div class="pivot-card">
+                    <div class="pivot-header">Total Extra Hours</div>
+                    <table class="pivot-table extra-hours-table">
+                        <thead>
+                            <tr>
+                                <th>Volunteer</th>
+                                <th>Total Extra Hours</th>
+                            </tr>
+                        </thead>
+                        <tbody id="extraHoursPivotBody">
+                            <tr>
+                                <td id="eh-volunteer">-</td>
+                                <td id="eh-total">0:00:00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div> <!-- End app-wrapper -->
+
+    <!-- Success Modal -->
+    <div class="success-modal" id="successModal">
+        <div class="success-content">
+            <h2>Hooray!</h2>
+            <p>Thank you for submitting the attendance</p>
+            <button onclick="closeModal()">Close</button>
+        </div>
+    </div>
+    <canvas id="confetti-canvas"></canvas>
+
+    <script>
+        // =====================================================
+        // RBAC CONFIGURATION
+        // =====================================================
+        // IMPORTANT: Replace this with your Google Cloud OAuth Client ID
+        const GOOGLE_CLIENT_ID = '1063776413612-4uq4eraauljf5bhqc5nbc34orlch1qv2.apps.googleusercontent.com';
+
+        // Google Apps Script Web App URL for fetching data
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbylN9goG44Twx9_saG2hdAUrBJuH_ehzrGC7atJQ8JB6KnD423yONJAxG9J00me0PQv/exec";
+
+        // =====================================================
+        // AUTHENTICATION STATE
+        // =====================================================
+        let currentUser = null;
+        let googleAuth = null;
+
+        // Check for existing session on page load
+        function checkExistingSession() {
+            const savedUser = localStorage.getItem('sanjeevni_user');
+            const savedToken = localStorage.getItem('sanjeevni_token');
+
+            if (savedUser && savedToken) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    // Verify token is still valid
+                    verifyAndInitSession(savedToken);
+                } catch (e) {
+                    clearSession();
+                }
+            }
+        }
+
+        // Initialize Google Sign-In
+        function initializeGoogleSignIn() {
+            if (typeof google !== 'undefined' && google.accounts) {
+                google.accounts.id.initialize({
+                    client_id: GOOGLE_CLIENT_ID,
+                    callback: handleGoogleSignIn,
+                    auto_select: false
+                });
+            } else {
+                // Retry after a short delay if Google library not loaded yet
+                setTimeout(initializeGoogleSignIn, 500);
+            }
+        }
+
+        // Trigger Google Sign-In popup
+        function initiateGoogleSignIn() {
+            if (typeof google !== 'undefined' && google.accounts) {
+                google.accounts.id.prompt((notification) => {
+                    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                        // Fall back to button-triggered popup
+                        google.accounts.id.renderButton(
+                            document.createElement('div'),
+                            { theme: 'outline', size: 'large' }
+                        );
+                        google.accounts.oauth2.initTokenClient({
+                            client_id: GOOGLE_CLIENT_ID,
+                            scope: 'email profile',
+                            callback: (response) => {
+                                if (response.access_token) {
+                                    fetchUserInfoAndAuthenticate(response.access_token);
+                                }
+                            }
+                        }).requestAccessToken();
+                    }
+                });
+            } else {
+                showLoginError('Google Sign-In not loaded. Please refresh the page.');
+            }
+        }
+
+        // Handle Google Sign-In callback
+        async function handleGoogleSignIn(response) {
+            if (response.credential) {
+                const idToken = response.credential;
+                await authenticateWithBackend(idToken);
+            } else {
+                showLoginError('Sign-in failed. Please try again.');
+            }
+        }
+
+        // Fetch user info with access token (fallback method)
+        async function fetchUserInfoAndAuthenticate(accessToken) {
+            try {
+                const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+                const userInfo = await response.json();
+                await authenticateWithBackendByEmail(userInfo.email, userInfo.name, accessToken);
+            } catch (error) {
+                showLoginError('Failed to get user info. Please try again.');
+            }
+        }
+
+        // Authenticate with backend using ID token
+        async function authenticateWithBackend(idToken) {
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=authenticate&idToken=${encodeURIComponent(idToken)}`);
+                const result = await response.json();
+
+                if (result.status === 'success' && result.user) {
+                    currentUser = result.user;
+                    localStorage.setItem('sanjeevni_user', JSON.stringify(currentUser));
+                    localStorage.setItem('sanjeevni_token', idToken);
+                    onLoginSuccess();
+                } else {
+                    showLoginError(result.message || 'Access denied. Please contact administrator.');
+                }
+            } catch (error) {
+                console.error('Authentication error:', error);
+                showLoginError('Authentication failed. Please try again.');
+            }
+        }
+
+        // Authenticate with backend by email (fallback)
+        async function authenticateWithBackendByEmail(email, name, token) {
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=authenticateByEmail&email=${encodeURIComponent(email)}`);
+                const result = await response.json();
+
+                if (result.status === 'success' && result.user) {
+                    currentUser = result.user;
+                    localStorage.setItem('sanjeevni_user', JSON.stringify(currentUser));
+                    localStorage.setItem('sanjeevni_token', token);
+                    onLoginSuccess();
+                } else {
+                    showLoginError(result.message || 'Access denied. Please contact administrator.');
+                }
+            } catch (error) {
+                console.error('Authentication error:', error);
+                showLoginError('Authentication failed. Please try again.');
+            }
+        }
+
+        // Simple email + PIN login function
+        async function loginWithEmail() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pin = document.getElementById('loginPin').value.trim();
+
+            if (!email) {
+                showLoginError('Please enter your email address.');
+                return;
+            }
+
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showLoginError('Please enter a valid email address.');
+                return;
+            }
+
+            if (!pin) {
+                showLoginError('Please enter your PIN.');
+                return;
+            }
+
+            // Validate PIN format (4-6 digits)
+            if (!/^\d{4,6}$/.test(pin)) {
+                showLoginError('PIN must be 4-6 digits.');
+                return;
+            }
+
+            const btn = document.getElementById('emailLoginBtn');
+            btn.disabled = true;
+            btn.textContent = 'Signing in...';
+
+            // Hide any previous error
+            document.getElementById('loginError').classList.remove('show');
+
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=authenticateByEmail&email=${encodeURIComponent(email)}&pin=${encodeURIComponent(pin)}`);
+                const result = await response.json();
+
+                if (result.status === 'success' && result.user) {
+                    currentUser = result.user;
+                    localStorage.setItem('sanjeevni_user', JSON.stringify(currentUser));
+                    localStorage.setItem('sanjeevni_token', 'email_auth_' + Date.now());
+                    onLoginSuccess();
+                    // Clear the PIN field for security
+                    document.getElementById('loginPin').value = '';
+                } else {
+                    showLoginError(result.message || 'Access denied. Invalid email or PIN.');
+                }
+            } catch (error) {
+                console.error('Authentication error:', error);
+                showLoginError('Authentication failed. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Sign In';
+            }
+        }
+
+        // Verify existing session token
+        async function verifyAndInitSession(token) {
+            // For now, trust the saved session but we can add token verification here
+            onLoginSuccess();
+        }
+
+        // Clear session data
+        function clearSession() {
+            currentUser = null;
+            localStorage.removeItem('sanjeevni_user');
+            localStorage.removeItem('sanjeevni_token');
+        }
+
+        // Called when login is successful
+        function onLoginSuccess() {
+            // Hide login overlay
+            document.getElementById('loginOverlay').classList.add('hidden');
+
+            // Show user header
+            const userHeader = document.getElementById('userHeader');
+            userHeader.classList.remove('hidden');
+
+            // Update user info display
+            document.getElementById('userName').textContent = currentUser.name || currentUser.email;
+            document.getElementById('userAvatar').textContent = (currentUser.name || currentUser.email).charAt(0).toUpperCase();
+
+            const roleEl = document.getElementById('userRole');
+            roleEl.textContent = currentUser.role;
+
+            // Remove any existing role classes
+            document.body.classList.remove('is-admin', 'is-volunteer');
+
+            // Reset dropdown visibility first
+            resetDropdownItems();
+
+            if (currentUser.role === 'admin') {
+                roleEl.classList.add('admin');
+                document.body.classList.add('is-admin');
+                document.getElementById('adminPanelBtn').classList.remove('hidden');
+                // Admins can see all volunteers in dropdown - no filtering needed
+            } else if (currentUser.role === 'volunteer') {
+                document.body.classList.add('is-volunteer');
+                // For volunteers, filter dropdown to only show their name
+                if (currentUser.volunteerSheetName) {
+                    filterDropdownForVolunteer(currentUser.volunteerSheetName);
+                    autoSelectVolunteer(currentUser.volunteerSheetName);
+                }
+            }
+        }
+
+        // Filter dropdown to only show the volunteer's own name
+        function filterDropdownForVolunteer(volunteerName) {
+            const items = document.querySelectorAll('#volunteerList .custom-dropdown-item');
+            const normalizedName = volunteerName.toLowerCase().trim();
+
+            items.forEach(item => {
+                const itemName = item.dataset.value.toLowerCase().trim();
+                if (itemName !== normalizedName) {
+                    item.style.display = 'none';
+                } else {
+                    item.style.display = 'block';
+                }
+            });
+        }
+
+        // Reset dropdown items visibility (for sign out or admin login)
+        function resetDropdownItems() {
+            const items = document.querySelectorAll('#volunteerList .custom-dropdown-item');
+            items.forEach(item => {
+                item.style.display = 'block';
+            });
+        }
+
+        // Auto-select volunteer in dropdown (case-insensitive)
+        function autoSelectVolunteer(name) {
+            const items = document.querySelectorAll('#volunteerList .custom-dropdown-item');
+            const normalizedName = name.toLowerCase().trim();
+
+            items.forEach(item => {
+                if (item.dataset.value.toLowerCase().trim() === normalizedName) {
+                    item.click();
+                }
+            });
+        }
+
+        // Show login error message
+        function showLoginError(message) {
+            const errorEl = document.getElementById('loginError');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+        }
+
+        // Sign out
+        function signOut() {
+            clearSession();
+            document.body.classList.remove('is-admin', 'is-volunteer');
+            document.getElementById('userHeader').classList.add('hidden');
+            document.getElementById('adminPanelBtn').classList.add('hidden');
+            document.getElementById('loginOverlay').classList.remove('hidden');
+            document.getElementById('loginError').classList.remove('show');
+
+            // Reset the data display
+            document.getElementById('dataPlaceholder').innerHTML = `<div class="data-placeholder-icon">👤</div><p>Please select your name from the Dropdown to autofill your data</p>`;
+            document.getElementById('dataPlaceholder').style.display = 'block';
+            document.getElementById('volunteerData').style.display = 'none';
+            document.getElementById('headerVolunteerName').textContent = '_______';
+
+            // Reset volunteer dropdown
+            volunteerTrigger.textContent = 'Select...';
+            volunteerTrigger.classList.add('placeholder');
+            document.getElementById('volunteer-name').value = '';
+
+            // Reset dropdown items visibility
+            resetDropdownItems();
+
+            // Clear form
+            document.getElementById('attendanceForm').reset();
+
+            // Revoke Google token if possible
+            if (typeof google !== 'undefined' && google.accounts) {
+                google.accounts.id.disableAutoSelect();
+            }
+        }
+
+        // =====================================================
+        // ADMIN PANEL FUNCTIONS
+        // =====================================================
+        function openAdminPanel() {
+            if (currentUser && currentUser.role === 'admin') {
+                document.getElementById('adminModal').classList.add('show');
+                loadUserList();
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('adminModal').classList.remove('show');
+        }
+
+        // Load user list for admin panel
+        async function loadUserList() {
+            const listBody = document.getElementById('userListBody');
+            listBody.innerHTML = '<div style="padding:20px;text-align:center;color:#999;">Loading users...</div>';
+
+            try {
+                const token = localStorage.getItem('sanjeevni_token');
+                const response = await fetch(`${SCRIPT_URL}?action=getUsers&token=${encodeURIComponent(token)}`);
+                const result = await response.json();
+
+                if (result.status === 'success' && result.users) {
+                    listBody.innerHTML = result.users.map(user => `
+                        <div class="user-list-row">
+                            <span>${user.email}</span>
+                            <span>${user.name}</span>
+                            <span><span class="role-badge ${user.role}">${user.role}</span></span>
+                            <span>
+                                ${user.email !== currentUser.email ?
+                                    `<button class="delete-user-btn" onclick="deleteUser('${user.email}')">Delete</button>` :
+                                    '<span style="color:#999;font-size:0.7rem;">You</span>'
+                                }
+                            </span>
+                        </div>
+                    `).join('');
+                } else {
+                    listBody.innerHTML = '<div style="padding:20px;text-align:center;color:#e74c3c;">Failed to load users</div>';
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+                listBody.innerHTML = '<div style="padding:20px;text-align:center;color:#e74c3c;">Error loading users</div>';
+            }
+        }
+
+        // Add new user
+        async function addUser() {
+            const email = document.getElementById('newUserEmail').value.trim();
+            const name = document.getElementById('newUserName').value.trim();
+            const role = document.getElementById('newUserRole').value;
+
+            if (!email || !name) {
+                alert('Please fill in email and name');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('sanjeevni_token');
+                const response = await fetch(`${SCRIPT_URL}?action=addUser&token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&role=${encodeURIComponent(role)}`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    document.getElementById('newUserEmail').value = '';
+                    document.getElementById('newUserName').value = '';
+                    document.getElementById('newUserRole').value = 'volunteer';
+                    loadUserList();
+                } else {
+                    alert(result.message || 'Failed to add user');
+                }
+            } catch (error) {
+                console.error('Error adding user:', error);
+                alert('Error adding user');
+            }
+        }
+
+        // Delete user
+        async function deleteUser(email) {
+            if (!confirm(`Are you sure you want to delete ${email}?`)) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('sanjeevni_token');
+                const response = await fetch(`${SCRIPT_URL}?action=deleteUser&token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    loadUserList();
+                } else {
+                    alert(result.message || 'Failed to delete user');
+                }
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert('Error deleting user');
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeGoogleSignIn();
+            checkExistingSession();
+
+            // Add Enter key support for email and PIN login
+            const loginEmailInput = document.getElementById('loginEmail');
+            const loginPinInput = document.getElementById('loginPin');
+
+            if (loginEmailInput) {
+                loginEmailInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        loginPinInput.focus(); // Move to PIN field
+                    }
+                });
+            }
+
+            if (loginPinInput) {
+                loginPinInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        loginWithEmail();
+                    }
+                });
+            }
+        });
+
+        // DOM Elements
+        const volunteerDropdown = document.getElementById('volunteerDropdown');
+        const volunteerTrigger = document.getElementById('volunteerTrigger');
+        const volunteerList = document.getElementById('volunteerList');
+        const volunteerInput = document.getElementById('volunteer-name');
+        const volunteerSearch = document.getElementById('volunteerSearch');
+        const volunteerItems = volunteerList.querySelectorAll('.custom-dropdown-item');
+        const emptyMessage = volunteerDropdown.querySelector('.custom-dropdown-empty');
+
+        // Dropdown functionality
+        volunteerTrigger.addEventListener('click', () => {
+            volunteerDropdown.classList.toggle('open');
+            if (volunteerDropdown.classList.contains('open')) {
+                setTimeout(() => volunteerSearch.focus(), 100);
+            }
+        });
+
+        volunteerSearch.addEventListener('input', function() {
+            const term = this.value.toLowerCase();
+            let count = 0;
+            volunteerItems.forEach(item => {
+                const match = item.textContent.toLowerCase().includes(term);
+                item.classList.toggle('hidden', !match);
+                if (match) count++;
+            });
+            emptyMessage.style.display = count === 0 ? 'block' : 'none';
+        });
+
+        volunteerSearch.addEventListener('click', e => e.stopPropagation());
+
+        volunteerList.addEventListener('click', function(e) {
+            if (e.target.classList.contains('custom-dropdown-item')) {
+                const value = e.target.dataset.value;
+                volunteerInput.value = value;
+                volunteerTrigger.textContent = value;
+                volunteerTrigger.classList.remove('placeholder');
+
+                volunteerItems.forEach(item => item.classList.remove('selected'));
+                e.target.classList.add('selected');
+
+                volunteerSearch.value = '';
+                volunteerItems.forEach(item => item.classList.remove('hidden'));
+                emptyMessage.style.display = 'none';
+                volunteerDropdown.classList.remove('open');
+
+                // Update header and load data
+                document.getElementById('headerVolunteerName').textContent = value;
+                loadVolunteerData(value);
+            }
+        });
+
+        document.addEventListener('click', e => {
+            if (!volunteerDropdown.contains(e.target)) {
+                volunteerDropdown.classList.remove('open');
+            }
+        });
+
+        // Auto-calculate No. of Hours from Extra Time fields
+        const extraTimeFrom = document.getElementById('extra-time-from');
+        const extraTimeTill = document.getElementById('extra-time-till');
+        const noOfHours = document.getElementById('no-of-hours');
+
+        function calculateExtraHours() {
+            const fromVal = extraTimeFrom.value;
+            const tillVal = extraTimeTill.value;
+
+            if (fromVal && tillVal) {
+                const [fromHrs, fromMins] = fromVal.split(':').map(Number);
+                const [tillHrs, tillMins] = tillVal.split(':').map(Number);
+
+                let fromTotalMins = fromHrs * 60 + fromMins;
+                let tillTotalMins = tillHrs * 60 + tillMins;
+
+                // Handle overnight (if till is less than from, assume next day)
+                if (tillTotalMins < fromTotalMins) {
+                    tillTotalMins += 24 * 60;
+                }
+
+                const diffMins = tillTotalMins - fromTotalMins;
+                const hours = Math.floor(diffMins / 60);
+                const mins = diffMins % 60;
+
+                noOfHours.value = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+            } else {
+                noOfHours.value = '';
+            }
+        }
+
+        extraTimeFrom.addEventListener('change', calculateExtraHours);
+        extraTimeTill.addEventListener('change', calculateExtraHours);
+
+        // Parse time string to minutes (handles ISO, 24-hour, 12-hour AM/PM formats)
+        function parseTimeToMinutes(timeStr) {
+            if (!timeStr) return null;
+            const str = timeStr.toString();
+
+            // Handle ISO date strings (e.g., "1899-12-30T22:00:00.000Z")
+            if (str.includes('T')) {
+                try {
+                    const date = new Date(str);
+                    if (!isNaN(date.getTime())) {
+                        return date.getUTCHours() * 60 + date.getUTCMinutes();
+                    }
+                } catch (e) { }
+                return null;
+            }
+
+            // Handle 12-hour format with AM/PM (e.g., "2:00:00 PM")
+            const ampmMatch = str.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)/i);
+            if (ampmMatch) {
+                let hours = parseInt(ampmMatch[1]) || 0;
+                const mins = parseInt(ampmMatch[2]) || 0;
+                const ampm = ampmMatch[4].toUpperCase();
+                if (ampm === 'PM' && hours !== 12) hours += 12;
+                if (ampm === 'AM' && hours === 12) hours = 0;
+                return hours * 60 + mins;
+            }
+
+            // Handle 24-hour format (e.g., "14:00" or "14:00:00")
+            const parts = str.split(':');
+            if (parts.length >= 2) {
+                const hours = parseInt(parts[0]) || 0;
+                const mins = parseInt(parts[1]) || 0;
+                if (hours >= 0 && hours < 24 && mins >= 0 && mins < 60) {
+                    return hours * 60 + mins;
+                }
+            }
+
+            return null;
+        }
+
+        // Calculate hours difference between two time values
+        function calculateHoursDiff(fromStr, tillStr) {
+            const fromMins = parseTimeToMinutes(fromStr);
+            const tillMins = parseTimeToMinutes(tillStr);
+
+            if (fromMins === null || tillMins === null) return '';
+
+            let diff = tillMins - fromMins;
+            // Handle overnight (if till is less than from)
+            if (diff < 0) {
+                diff += 24 * 60;
+            }
+
+            const hours = Math.floor(diff / 60);
+            const mins = diff % 60;
+
+            return `${hours}:${mins.toString().padStart(2, '0')}:00`;
+        }
+
+        // Format time for display (handles ISO date strings)
+        function formatTime(timeStr) {
+            if (!timeStr) return '';
+            const str = timeStr.toString();
+
+            // Handle ISO date strings
+            if (str.includes('T')) {
+                try {
+                    const date = new Date(str);
+                    let hours = date.getUTCHours();
+                    const mins = date.getUTCMinutes();
+                    const secs = date.getUTCSeconds();
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    hours = hours % 12 || 12;
+                    return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')} ${ampm}`;
+                } catch (e) {
+                    return str;
+                }
+            }
+            return str;
+        }
+
+        // Load volunteer data from Google Sheets
+        async function loadVolunteerData(name) {
+            const placeholder = document.getElementById('dataPlaceholder');
+            const dataSection = document.getElementById('volunteerData');
+            const tableBody = document.getElementById('dataTableBody');
+
+            // Show loading state
+            placeholder.innerHTML = `<div class="data-placeholder-icon">⏳</div><p>Loading attendance data for ${name}...</p>`;
+            placeholder.style.display = 'block';
+            dataSection.style.display = 'none';
+
+            try {
+                // Fetch data from Google Sheets via Apps Script
+                // Include user email for authentication
+                const userEmail = currentUser ? currentUser.email : '';
+                const response = await fetch(`${SCRIPT_URL}?action=getData&volunteer=${encodeURIComponent(name)}&email=${encodeURIComponent(userEmail)}`);
+                const result = await response.json();
+
+                if (result.status === 'error') {
+                    throw new Error(result.message || 'Failed to fetch data');
+                }
+
+                const data = result.data || [];
+
+                if (data.length === 0) {
+                    placeholder.innerHTML = `<div class="data-placeholder-icon">📭</div><p>No attendance records found for ${name}</p>`;
+                    placeholder.style.display = 'block';
+                    dataSection.style.display = 'none';
+                    resetPivots();
+                    return;
+                }
+
+                placeholder.style.display = 'none';
+                dataSection.style.display = 'block';
+
+                document.getElementById('volunteerNameDisplay').textContent = name;
+                document.getElementById('recordCount').textContent = `${data.length} records`;
+
+                tableBody.innerHTML = data.map((row, index) => `
+                    <tr>
+                        <td class="sno">${index + 1}</td>
+                        <td>${row.date || ''}</td>
+                        <td>${row.time || ''}</td>
+                        <td>${formatTime(row.extraFrom)}</td>
+                        <td>${formatTime(row.extraTill)}</td>
+                        <td>${row.reason || ''}</td>
+                        <td>${row.duty || ''}</td>
+                        <td>${calculateHoursDiff(row.extraFrom, row.extraTill)}</td>
+                        <td>${row.dutyFrom || ''}</td>
+                        <td>${row.remarks || ''}</td>
+                    </tr>
+                `).join('');
+
+                updatePivots(data, name);
+
+                // Pre-fill form with last entry
+                if (data.length > 0) {
+                    prefillFormWithLastEntry(data[data.length - 1]);
+                }
+
+            } catch (error) {
+                console.error('Error fetching volunteer data:', error);
+                placeholder.innerHTML = `<div class="data-placeholder-icon">❌</div><p>Error loading data: ${error.message}</p><p style="font-size:0.7rem;color:#999;">Check browser console for details</p>`;
+                placeholder.style.display = 'block';
+                dataSection.style.display = 'none';
+                resetPivots();
+            }
+        }
+
+        // Pre-fill form with last entry data
+        function prefillFormWithLastEntry(lastEntry) {
+            if (!lastEntry) return;
+
+            // Date field - set to today's date instead of last entry
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+
+            // Time
+            if (lastEntry.time) {
+                document.getElementById('time').value = lastEntry.time;
+            }
+
+            // Extra Time From
+            if (lastEntry.extraFrom) {
+                document.getElementById('extra-time-from').value = lastEntry.extraFrom;
+            }
+
+            // Extra Time Till
+            if (lastEntry.extraTill) {
+                document.getElementById('extra-time-till').value = lastEntry.extraTill;
+            }
+
+            // Trigger calculation of No. of Hours
+            calculateExtraHours();
+
+            // Reason
+            if (lastEntry.reason) {
+                document.getElementById('reason-other-duty').value = lastEntry.reason;
+            }
+
+            // Duty
+            if (lastEntry.duty) {
+                document.getElementById('duty').value = lastEntry.duty;
+            }
+
+            // Duty From
+            if (lastEntry.dutyFrom) {
+                document.getElementById('duty-from').value = lastEntry.dutyFrom;
+            }
+
+            // Remarks - clear it for new entry
+            document.getElementById('remarks').value = '';
+        }
+
+        function updatePivots(data, name) {
+            // Duty mapping: duty name -> element prefix (only 3 main duties for pivot)
+            const dutyMap = {
+                'CI': 'ci',
+                'Supervisor meeting': 'sm',
+                'EC meeting': 'ec'
+            };
+
+            // Reset counts
+            const dutyCounts = {};
+            Object.keys(dutyMap).forEach(duty => {
+                dutyCounts[duty] = { Centre: 0, Home: 0 };
+            });
+
+            let totalExtraMinutes = 0;
+
+            data.forEach(row => {
+                if (row.duty && dutyCounts[row.duty]) {
+                    const loc = row.dutyFrom === 'Centre' ? 'Centre' : 'Home';
+                    dutyCounts[row.duty][loc]++;
+                }
+
+                // Calculate extra hours from Extra Time From and Till fields
+                if (row.extraFrom && row.extraTill) {
+                    const fromMins = parseTimeToMinutes(row.extraFrom);
+                    const tillMins = parseTimeToMinutes(row.extraTill);
+
+                    if (fromMins !== null && tillMins !== null) {
+                        let diff = tillMins - fromMins;
+                        // Handle overnight
+                        if (diff < 0) {
+                            diff += 24 * 60;
+                        }
+                        if (diff > 0 && diff < 24 * 60) {
+                            totalExtraMinutes += diff;
+                        }
+                    }
+                }
+            });
+
+            // Update duty pivot for each duty type
+            Object.entries(dutyMap).forEach(([duty, prefix]) => {
+                const centreEl = document.getElementById(`${prefix}-centre`);
+                const homeEl = document.getElementById(`${prefix}-home`);
+                const totalEl = document.getElementById(`${prefix}-total`);
+                if (centreEl) centreEl.textContent = dutyCounts[duty].Centre;
+                if (homeEl) homeEl.textContent = dutyCounts[duty].Home;
+                if (totalEl) totalEl.textContent = dutyCounts[duty].Centre + dutyCounts[duty].Home;
+            });
+
+            // Grand totals
+            let grandCentre = 0, grandHome = 0;
+            Object.values(dutyCounts).forEach(d => {
+                grandCentre += d.Centre;
+                grandHome += d.Home;
+            });
+            document.getElementById('grand-centre').textContent = grandCentre;
+            document.getElementById('grand-home').textContent = grandHome;
+            document.getElementById('grand-total').textContent = grandCentre + grandHome;
+
+            // Extra hours pivot - sum of all No. of Hours (format: H:MM:SS)
+            const hours = Math.floor(totalExtraMinutes / 60);
+            const mins = totalExtraMinutes % 60;
+            document.getElementById('eh-volunteer').textContent = name;
+            const extraHoursDisplay = `${hours}:${mins.toString().padStart(2, '0')}:00`;
+            document.getElementById('eh-total').textContent = extraHoursDisplay;
+        }
+
+        function resetPivots() {
+            ['ci', 'sm', 'ec', 'grand'].forEach(prefix => {
+                const centreEl = document.getElementById(`${prefix}-centre`);
+                const homeEl = document.getElementById(`${prefix}-home`);
+                const totalEl = document.getElementById(`${prefix}-total`);
+                if (centreEl) centreEl.textContent = '0';
+                if (homeEl) homeEl.textContent = '0';
+                if (totalEl) totalEl.textContent = '0';
+            });
+            document.getElementById('eh-volunteer').textContent = '-';
+            document.getElementById('eh-total').textContent = '0:00:00';
+        }
+
+        // Confetti
+        const confettiCanvas = document.getElementById('confetti-canvas');
+        const ctx = confettiCanvas.getContext('2d');
+        let confettiPieces = [];
+
+        function resizeCanvas() {
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const colors = ['#4ECDC4', '#9B8EC7', '#FFE66D', '#FF6B6B', '#95E1D3'];
+
+        class Confetti {
+            constructor() {
+                this.x = Math.random() * confettiCanvas.width;
+                this.y = -10;
+                this.size = Math.random() * 8 + 4;
+                this.speedY = Math.random() * 3 + 2;
+                this.speedX = Math.random() * 4 - 2;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.rotation = Math.random() * 360;
+                this.opacity = 1;
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                this.rotation += 5;
+                this.opacity -= 0.005;
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation * Math.PI / 180);
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.size/2, -this.size/4, this.size, this.size/2);
+                ctx.restore();
+            }
+        }
+
+        function startConfetti() {
+            confettiPieces = Array.from({length: 100}, () => new Confetti());
+            animateConfetti();
+        }
+
+        function animateConfetti() {
+            ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            confettiPieces = confettiPieces.filter(p => p.opacity > 0);
+            confettiPieces.forEach(p => { p.update(); p.draw(); });
+            if (confettiPieces.length > 0) requestAnimationFrame(animateConfetti);
+        }
+
+        function showSuccessModal() {
+            document.getElementById('successModal').classList.add('show');
+            startConfetti();
+        }
+
+        function closeModal() {
+            document.getElementById('successModal').classList.remove('show');
+            confettiPieces = [];
+            ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        }
+
+        // Form submission
+        document.getElementById('attendanceForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.querySelector('.submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+
+            const payload = {
+                volunteerName: document.getElementById('volunteer-name').value,
+                date: document.getElementById('date').value,
+                time: document.getElementById('time').value,
+                extraFrom: document.getElementById('extra-time-from').value,
+                extraTill: document.getElementById('extra-time-till').value,
+                reason: document.getElementById('reason-other-duty').value,
+                duty: document.getElementById('duty').value,
+                hours: document.getElementById('no-of-hours').value,
+                dutyFrom: document.getElementById('duty-from').value,
+                remarks: document.getElementById('remarks').value
+            };
+
+            const volunteerName = payload.volunteerName;
+
+            fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                showSuccessModal();
+                e.target.reset();
+                volunteerTrigger.textContent = 'Select...';
+                volunteerTrigger.classList.add('placeholder');
+                volunteerItems.forEach(item => item.classList.remove('selected'));
+                document.getElementById('headerVolunteerName').textContent = '_______';
+
+                // Refresh the data table after a short delay to allow sheet to update
+                if (volunteerName) {
+                    setTimeout(() => {
+                        volunteerTrigger.textContent = volunteerName;
+                        volunteerTrigger.classList.remove('placeholder');
+                        document.getElementById('volunteer-name').value = volunteerName;
+                        document.getElementById('headerVolunteerName').textContent = volunteerName;
+                        loadVolunteerData(volunteerName);
+                    }, 2000);
+                }
+            })
+            .catch(() => alert("Submission failed."))
+            .finally(() => {
+                btn.disabled = false;
+                btn.textContent = 'Submit Attendance';
+            });
+        });
+    </script>
+</body>
+</html>
