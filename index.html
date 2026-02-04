@@ -2274,6 +2274,7 @@
             btn.textContent = 'Submitting...';
 
             const payload = {
+                email: currentUser ? currentUser.email : '',
                 volunteerName: document.getElementById('volunteer-name').value,
                 date: document.getElementById('date').value,
                 time: document.getElementById('time').value,
