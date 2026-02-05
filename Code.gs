@@ -131,9 +131,9 @@ function doPost(e) {
         sheet = ss.insertSheet(sheetName);
         sheet.appendRow([
           "Timestamp",
+          "Supervision Date",
           "Supervisor Name",
           "Time (in Hrs)",
-          "Supervision Date",
           "Remark"
         ]);
         sheet.getRange(1, 1, 1, 5).setFontWeight("bold");
@@ -141,9 +141,9 @@ function doPost(e) {
 
       sheet.appendRow([
         new Date(),
+        payload.date || "",
         payload.supervisorName || "",
         payload.timeInHrs || "",
-        payload.date || "",
         payload.remark || ""
       ]);
 
@@ -153,9 +153,9 @@ function doPost(e) {
         masterSheet.appendRow([
           new Date(),
           volunteerName,
+          payload.date || "",
           payload.supervisorName || "",
           payload.timeInHrs || "",
-          payload.date || "",
           payload.remark || ""
         ]);
       }
@@ -500,15 +500,15 @@ function getSupervisionDataRaw(volunteerName) {
     const values = sheet.getDataRange().getValues();
     const data = [];
 
-    // Columns: Timestamp | Supervisor Name | Time (in Hrs) | Supervision Date | Remark
+    // Columns: Timestamp | Supervision Date | Supervisor Name | Time (in Hrs) | Remark
     for (let i = 1; i < values.length; i++) {
       const row = values[i];
       if (!row[1] && !row[2]) continue;
 
       data.push({
-        supervisorName: row[1] || "",
-        timeInHrs: row[2] !== undefined && row[2] !== "" ? String(row[2]) : "",
-        date: formatDate(row[3]) || (row[3] ? String(row[3]) : ""),
+        date: formatDate(row[1]) || (row[1] ? String(row[1]) : ""),
+        supervisorName: row[2] || "",
+        timeInHrs: row[3] !== undefined && row[3] !== "" ? String(row[3]) : "",
         remark: row[4] || ""
       });
     }

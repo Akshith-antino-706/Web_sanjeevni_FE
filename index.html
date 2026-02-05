@@ -1572,18 +1572,6 @@
                                     <td><input type="date" id="sup-date" name="sup_date" required></td>
                                 </tr>
                                 <tr>
-                                    <td>Time Slot</td>
-                                    <td>
-                                        <select id="sup-time-slot" name="sup_time_slot">
-                                            <option value="" disabled selected>Select</option>
-                                            <option value="10am-2pm">10am-2pm</option>
-                                            <option value="2pm-5:30pm">2pm-5:30pm</option>
-                                            <option value="5:30pm-7:30pm">5:30pm-7:30pm</option>
-                                            <option value="extra time">extra time</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
                                     <td>Supervisor</td>
                                     <td>
                                         <input type="hidden" id="supervisor-name" name="supervisor_name" required>
@@ -1596,12 +1584,15 @@
                                                         autocomplete="off">
                                                 </div>
                                                 <div class="custom-dropdown-list" id="supervisorList">
+                                                    <div class="custom-dropdown-item" data-value="Feisal">Feisal</div>
+                                                    <div class="custom-dropdown-item" data-value="Kavita">Kavita</div>
+                                                    <div class="custom-dropdown-item" data-value="Kalpana">Kalpana</div>
+                                                    <div class="custom-dropdown-item" data-value="Mamta">Mamta</div>
+                                                    <div class="custom-dropdown-item" data-value="Neelam">Neelam</div>
+                                                    <div class="custom-dropdown-item" data-value="Niharika">Niharika</div>
+                                                    <div class="custom-dropdown-item" data-value="Praveen">Praveen</div>
+                                                    <div class="custom-dropdown-item" data-value="Ranjita">Ranjita</div>
                                                     <div class="custom-dropdown-item" data-value="Vickie">Vickie</div>
-                                                    <div class="custom-dropdown-item" data-value="Geeta">Geeta</div>
-                                                    <div class="custom-dropdown-item" data-value="Mamta V">Mamta V</div>
-                                                    <div class="custom-dropdown-item" data-value="Manish">Manish</div>
-                                                    <div class="custom-dropdown-item" data-value="Smita">Smita</div>
-                                                    <div class="custom-dropdown-item" data-value="Madhu">Madhu</div>
                                                 </div>
                                                 <div class="custom-dropdown-empty" style="display:none;">No match</div>
                                             </div>
@@ -1610,9 +1601,14 @@
                                 </tr>
 
                                 <tr>
-                                    <td>No. of Hours</td>
-                                    <td><input type="number" id="sup-time-hrs" name="sup_time_hrs" step="0.01" min="0"
-                                            placeholder="e.g. 0.25, 0.5, 1" required></td>
+                                    <td>Time (in minutes)</td>
+                                    <td><input type="number" id="sup-time-hrs" name="sup_time_hrs" step="1" min="0"
+                                            placeholder="e.g. 30, 60, 90" required></td>
+                                </tr>
+                                <tr>
+                                    <td>Remark</td>
+                                    <td><input type="text" id="sup-remark" name="sup_remark"
+                                            placeholder="Optional remarks"></td>
                                 </tr>
                             </table>
                             <button type="submit" class="submit-btn">Submit Supervision</button>
@@ -1758,9 +1754,9 @@
                                         <tr>
                                             <th>S. No</th>
                                             <th>Date</th>
-                                            <th>Time Slot</th>
                                             <th>Supervisor</th>
                                             <th>Time (in Hrs)</th>
+                                            <th>Remark</th>
                                         </tr>
                                     </thead>
                                     <tbody id="supervisionTableBody">
@@ -2894,9 +2890,9 @@
                 <tr>
                     <td class="sno">${index + 1}</td>
                     <td>${row.date || ''}</td>
-                    <td>${row.timeSlot || ''}</td>
                     <td>${row.supervisorName || ''}</td>
                     <td>${row.timeInHrs || ''}</td>
+                    <td>${row.remark || ''}</td>
                 </tr>
             `).join('');
 
@@ -3181,14 +3177,18 @@
             btn.disabled = true;
             btn.textContent = 'Submitting...';
 
+            // Convert minutes to hours
+            const timeInMinutes = parseFloat(document.getElementById('sup-time-hrs').value) || 0;
+            const timeInHours = (timeInMinutes / 60).toFixed(2);
+
             const payload = {
                 type: 'supervision',
                 email: currentUser ? currentUser.email : '',
                 volunteerName: document.getElementById('sup-volunteer-name').value,
                 supervisorName: document.getElementById('supervisor-name').value,
-                timeSlot: document.getElementById('sup-time-slot').value,
-                timeInHrs: document.getElementById('sup-time-hrs').value,
-                date: document.getElementById('sup-date').value
+                timeInHrs: timeInHours,
+                date: document.getElementById('sup-date').value,
+                remark: document.getElementById('sup-remark').value
             };
 
             const volunteerName = payload.volunteerName;
