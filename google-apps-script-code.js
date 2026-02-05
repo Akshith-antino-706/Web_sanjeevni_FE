@@ -13,9 +13,14 @@
 function doGet(e) {
   const action = e.parameter.action;
   const volunteerName = e.parameter.volunteer;
+  const email = e.parameter.email;
 
   if (action === 'getData' && volunteerName) {
-    return getVolunteerData(volunteerName);
+    return getVolunteerData(volunteerName, email);
+  }
+
+  if (action === 'getSupervisionData' && volunteerName) {
+    return getSupervisionData(volunteerName, email);
   }
 
   return ContentService
@@ -24,7 +29,8 @@ function doGet(e) {
 }
 
 // Fetch volunteer data from their sheet
-function getVolunteerData(volunteerName) {
+// email param optional - for RBAC when merged with apps-script-rbac.js (validate volunteerSheetName for volunteers)
+function getVolunteerData(volunteerName, email) {
   try {
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 
@@ -68,6 +74,59 @@ function getVolunteerData(volunteerName) {
         hours: row[6] || '',             // Column G: No. of Hours
         location: row[7] || '',          // Column H: Duty From (Centre/Home)
         remarks: row[8] || ''            // Column I: Remarks
+      });
+    }
+
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        status: 'success',
+        data: data
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (error) {
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        status: 'error',
+        message: error.toString()
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// Fetch supervision data from volunteer's name_Supervision sheet
+// Sheet columns: Timestamp | Supervisor Name | Time (in Hrs) | Supervision Date | Remark
+// email param optional - for RBAC when merged with apps-script-rbac.js
+function getSupervisionData(volunteerName, email) {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheetName = (volunteerName || '').trim() + '_Supervision';
+
+    const sheet = spreadsheet.getSheetByName(sheetName);
+
+    if (!sheet) {
+      return ContentService
+        .createTextOutput(JSON.stringify({
+          status: 'success',
+          data: [],
+          message: 'No supervision sheet found'
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+
+    const data = [];
+    for (let i = 1; i < values.length; i++) {
+      const row = values[i];
+      if (!row[0] && !row[1] && !row[2]) continue;
+
+      data.push({
+        supervisorName: row[1] || '',
+        timeInHrs: row[2] !== undefined && row[2] !== '' ? String(row[2]) : '',
+        date: formatDate(row[3]) || (row[3] ? String(row[3]) : ''),
+        remark: row[4] || ''
       });
     }
 

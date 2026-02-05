@@ -373,11 +373,22 @@ function doGet(e) {
       .setMimeType(ContentService.MimeType.JSON);
   }
 
-  // Original getData action - keep your existing implementation
+  // Attendance getData - calls getVolunteerData from google-apps-script-code.js
   if (action === 'getData') {
     const volunteer = e.parameter.volunteer;
-    // ... your existing getData logic here ...
-    // This should return the attendance data for the volunteer
+    const email = e.parameter.email;
+    if (volunteer && typeof getVolunteerData === 'function') {
+      return getVolunteerData(volunteer, email);
+    }
+  }
+
+  // Supervision getSupervisionData - calls getSupervisionData from google-apps-script-code.js
+  if (action === 'getSupervisionData') {
+    const volunteer = e.parameter.volunteer;
+    const email = e.parameter.email;
+    if (volunteer && typeof getSupervisionData === 'function') {
+      return getSupervisionData(volunteer, email);
+    }
   }
 
   return ContentService.createTextOutput(JSON.stringify({

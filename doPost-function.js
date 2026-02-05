@@ -17,62 +17,98 @@ function doPost(e) {
   try {
     // Parse the incoming JSON data
     const data = JSON.parse(e.postData.contents);
-
-    // Get the spreadsheet
     const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-    // Get the volunteer's sheet (or create if it doesn't exist)
-    let sheet = ss.getSheetByName(data.volunteerName);
+    if (data.type === 'supervision') {
+      // ========== SUPERVISION HANDLER ==========
+      const sheetName = (data.volunteerName || '').trim() + '_Supervision';
+      if (!sheetName || sheetName === '_Supervision') {
+        throw new Error('Volunteer name is required for supervision');
+      }
 
-    if (!sheet) {
-      // Create a new sheet for this volunteer
-      sheet = ss.insertSheet(data.volunteerName);
-      // Add headers
-      sheet.getRange(1, 1, 1, 10).setValues([[
-        'Timestamp',
-        'Date',
-        'Time',
-        'Extra Time From',
-        'Extra Time Till',
-        'Reason for Other',
-        'Duty',
-        'No of Hours',
-        'Duty From',
-        'Remarks'
-      ]]);
-      sheet.getRange(1, 1, 1, 10).setFontWeight('bold');
-    }
+      let sheet = ss.getSheetByName(sheetName);
+      if (!sheet) {
+        sheet = ss.insertSheet(sheetName);
+        sheet.getRange(1, 1, 1, 5).setValues([[
+          'Timestamp',
+          'Supervisor Name',
+          'Time (in Hrs)',
+          'Supervision Date',
+          'Remark'
+        ]]);
+        sheet.getRange(1, 1, 1, 5).setFontWeight('bold');
+      }
 
-    // Append the new row of data
-    sheet.appendRow([
-      new Date(),                    // Timestamp
-      data.date || '',               // Date
-      data.time || '',               // Time
-      data.extraFrom || '',          // Extra Time From
-      data.extraTill || '',          // Extra Time Till
-      data.reason || '',             // Reason for Other
-      data.duty || '',               // Duty
-      data.hours || '',              // No of Hours
-      data.dutyFrom || '',           // Duty From
-      data.remarks || ''             // Remarks
-    ]);
-
-    // Also add to master Attendance_Responses sheet if it exists
-    let masterSheet = ss.getSheetByName('Attendance_Responses');
-    if (masterSheet) {
-      masterSheet.appendRow([
-        new Date(),                    // Timestamp
-        data.volunteerName || '',      // Volunteer Name
-        data.date || '',               // Date
-        data.time || '',               // Time
-        data.extraFrom || '',          // Extra Time From
-        data.extraTill || '',          // Extra Time Till
-        data.reason || '',             // Reason for Other
-        data.duty || '',               // Duty
-        data.hours || '',              // No of Hours
-        data.dutyFrom || '',           // Duty From
-        data.remarks || ''             // Remarks
+      sheet.appendRow([
+        new Date(),
+        data.supervisorName || '',
+        data.timeInHrs || '',
+        data.date || '',
+        data.remark || ''
       ]);
+
+      // Also add to MASTER_SUPERVISION if it exists
+      const masterSheet = ss.getSheetByName('MASTER_SUPERVISION');
+      if (masterSheet) {
+        masterSheet.appendRow([
+          new Date(),
+          data.volunteerName || '',
+          data.supervisorName || '',
+          data.timeInHrs || '',
+          data.date || '',
+          data.remark || ''
+        ]);
+      }
+    } else {
+      // ========== ATTENDANCE HANDLER (default/legacy) ==========
+      let sheet = ss.getSheetByName(data.volunteerName);
+
+      if (!sheet) {
+        sheet = ss.insertSheet(data.volunteerName);
+        sheet.getRange(1, 1, 1, 10).setValues([[
+          'Timestamp',
+          'Date',
+          'Time',
+          'Extra Time From',
+          'Extra Time Till',
+          'Reason for Other',
+          'Duty',
+          'No of Hours',
+          'Duty From',
+          'Remarks'
+        ]]);
+        sheet.getRange(1, 1, 1, 10).setFontWeight('bold');
+      }
+
+      sheet.appendRow([
+        new Date(),
+        data.date || '',
+        data.time || '',
+        data.extraFrom || '',
+        data.extraTill || '',
+        data.reason || '',
+        data.duty || '',
+        data.hours || '',
+        data.dutyFrom || '',
+        data.remarks || ''
+      ]);
+
+      const masterSheet = ss.getSheetByName('Attendance_Responses');
+      if (masterSheet) {
+        masterSheet.appendRow([
+          new Date(),
+          data.volunteerName || '',
+          data.date || '',
+          data.time || '',
+          data.extraFrom || '',
+          data.extraTill || '',
+          data.reason || '',
+          data.duty || '',
+          data.hours || '',
+          data.dutyFrom || '',
+          data.remarks || ''
+        ]);
+      }
     }
 
     return ContentService

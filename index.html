@@ -25,23 +25,24 @@
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(160deg, #dff6f0 0%, #e8eef8 40%, #f5e6f0 70%, #e0f4f1 100%);
             min-height: 100vh;
-            padding: 16px;
+            padding: 24px;
         }
 
         /* Main Layout - 2 Columns */
         .main-container {
             display: grid;
             grid-template-columns: 280px 1fr;
-            gap: 16px;
+            gap: 24px;
             max-width: 1400px;
             margin: 0 auto;
-            height: calc(100vh - 32px);
+            height: calc(100vh - 48px);
         }
 
         /* Form Section - Left */
         .form-section {
             display: flex;
             flex-direction: column;
+            gap: 16px;
         }
 
         /* Data Section - Center (includes pivots) */
@@ -49,14 +50,15 @@
             display: flex;
             flex-direction: column;
             min-width: 0;
-            gap: 16px;
+            gap: 24px;
         }
 
         /* Pivot Section - Now inside data section */
         .pivot-section {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 24px;
+            flex-shrink: 0;
         }
 
         /* Card Styles */
@@ -67,18 +69,22 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            flex-shrink: 0;
         }
 
         .card.form-card {
             height: 100%;
+            min-height: 0;
         }
 
         .card.data-card {
             flex: 0 0 auto;
             height: 55vh;
+            min-height: 280px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            margin-bottom: 0;
         }
 
         .card-header {
@@ -94,7 +100,7 @@
         }
 
         .card-body {
-            padding: 12px;
+            padding: 16px;
             flex: 1;
             overflow: auto;
             min-height: 0;
@@ -127,7 +133,7 @@
         }
 
         .form-body {
-            padding: 12px;
+            padding: 16px;
             flex: 1;
             overflow-y: auto;
         }
@@ -543,20 +549,25 @@
                 grid-template-columns: 1fr;
                 grid-template-rows: auto auto;
                 height: auto;
+                gap: 20px;
             }
             .data-section {
                 min-height: 400px;
+                gap: 20px;
             }
             .pivot-section {
                 grid-template-columns: 1fr;
+                gap: 20px;
             }
         }
 
         @media (max-width: 600px) {
-            body { padding: 8px; }
-            .main-container { gap: 10px; }
+            body { padding: 16px; }
+            .main-container { gap: 16px; }
+            .data-section { gap: 16px; }
             .pivot-section {
                 grid-template-columns: 1fr;
+                gap: 16px;
             }
         }
 
@@ -717,8 +728,8 @@
             background: white;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            padding: 10px 16px;
-            margin-bottom: 16px;
+            padding: 12px 20px;
+            margin-bottom: 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -1010,7 +1021,8 @@
             display: none;
         }
 
-        body.is-volunteer .custom-dropdown {
+        body.is-volunteer #volunteerDropdown,
+        body.is-volunteer #supVolunteerDropdown {
             pointer-events: none;
         }
 
@@ -1035,15 +1047,82 @@
         .app-wrapper {
             max-width: 1400px;
             margin: 0 auto;
-            height: calc(100vh - 32px);
+            height: calc(100vh - 48px);
             display: flex;
             flex-direction: column;
+            gap: 24px;
         }
 
         .app-wrapper .main-container {
             flex: 1;
             min-height: 0;
             height: auto;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar-nav {
+            display: flex;
+            gap: 0;
+            margin-bottom: 12px;
+            background: #f0f5f3;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .sidebar-nav-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .sidebar-nav-btn:hover {
+            color: #3D4852;
+            background: rgba(255,255,255,0.7);
+        }
+
+        .sidebar-nav-btn.active {
+            background: linear-gradient(135deg, #4ECDC4 0%, #9B8EC7 100%);
+            color: white;
+        }
+
+        /* Panel switching */
+        .panel-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            gap: 24px;
+        }
+
+        .panel-content.hidden {
+            display: none;
+        }
+
+        /* Data panel layout - prevents stacking */
+        #attendanceDataPanel,
+        #supervisionDataPanel {
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* Supervision summary card */
+        .supervision-summary-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .supervision-summary-card .pivot-header {
+            background: linear-gradient(135deg, #4ECDC4, #9B8EC7);
         }
     </style>
 </head>
@@ -1137,6 +1216,13 @@
         <div class="main-container">
         <!-- Left: Form Section -->
         <div class="form-section">
+            <nav class="sidebar-nav">
+                <button type="button" class="sidebar-nav-btn active" id="navAttendance" onclick="switchPanel('attendance')">Attendance</button>
+                <button type="button" class="sidebar-nav-btn" id="navSupervision" onclick="switchPanel('supervision')">Supervision</button>
+            </nav>
+
+            <!-- Attendance Panel -->
+            <div id="attendancePanel" class="panel-content">
             <div class="card form-card">
                 <div class="form-header">
                     <svg class="lotus-icon" viewBox="0 0 100 100" fill="none">
@@ -1282,10 +1368,134 @@
                     <button type="submit" class="submit-btn">Submit Attendance</button>
                 </form>
             </div>
+            </div><!-- End attendancePanel -->
+
+            <!-- Supervision Panel -->
+            <div id="supervisionPanel" class="panel-content hidden">
+            <div class="card form-card">
+                <div class="form-header">
+                    <svg class="lotus-icon" viewBox="0 0 100 100" fill="none">
+                        <ellipse cx="50" cy="75" rx="35" ry="8" fill="rgba(255,255,255,0.3)"/>
+                        <path d="M50 70 C50 50, 30 40, 20 55 C30 45, 45 50, 50 70" fill="rgba(255,255,255,0.9)"/>
+                        <path d="M50 70 C50 50, 70 40, 80 55 C70 45, 55 50, 50 70" fill="rgba(255,255,255,0.9)"/>
+                        <path d="M50 65 C50 40, 25 30, 15 45 C30 35, 45 45, 50 65" fill="rgba(255,255,255,0.75)"/>
+                        <path d="M50 65 C50 40, 75 30, 85 45 C70 35, 55 45, 50 65" fill="rgba(255,255,255,0.75)"/>
+                        <circle cx="50" cy="72" r="6" fill="rgba(255,255,255,0.95)"/>
+                    </svg>
+                    <h1>Sanjeevni</h1>
+                    <p class="subtitle">Supervision List</p>
+                </div>
+
+                <form id="supervisionForm" class="form-body">
+                    <table class="form-table">
+                        <tr>
+                            <td>Volunteer Name</td>
+                            <td>
+                                <input type="hidden" id="sup-volunteer-name" name="sup_volunteer_name" required>
+                                <div class="custom-dropdown" id="supVolunteerDropdown">
+                                    <button type="button" class="custom-dropdown-trigger placeholder" id="supVolunteerTrigger">Select...</button>
+                                    <div class="custom-dropdown-panel">
+                                        <div class="custom-dropdown-search">
+                                            <input type="text" id="supVolunteerSearch" placeholder="Search..." autocomplete="off">
+                                        </div>
+                                        <div class="custom-dropdown-list" id="supVolunteerList">
+                                            <div class="custom-dropdown-item" data-value="Akshith">Akshith</div>
+                                            <div class="custom-dropdown-item" data-value="Archana">Archana</div>
+                                            <div class="custom-dropdown-item" data-value="Azhar">Azhar</div>
+                                            <div class="custom-dropdown-item" data-value="Bhavna">Bhavna</div>
+                                            <div class="custom-dropdown-item" data-value="Binu">Binu</div>
+                                            <div class="custom-dropdown-item" data-value="Dharini">Dharini</div>
+                                            <div class="custom-dropdown-item" data-value="Divya">Divya</div>
+                                            <div class="custom-dropdown-item" data-value="Dolly">Dolly</div>
+                                            <div class="custom-dropdown-item" data-value="Fiesal">Fiesal</div>
+                                            <div class="custom-dropdown-item" data-value="Geeta">Geeta</div>
+                                            <div class="custom-dropdown-item" data-value="Gopal">Gopal</div>
+                                            <div class="custom-dropdown-item" data-value="K. Narayan">K. Narayan</div>
+                                            <div class="custom-dropdown-item" data-value="Kalpana">Kalpana</div>
+                                            <div class="custom-dropdown-item" data-value="Kavita">Kavita</div>
+                                            <div class="custom-dropdown-item" data-value="Madhu">Madhu</div>
+                                            <div class="custom-dropdown-item" data-value="Mamta V">Mamta V</div>
+                                            <div class="custom-dropdown-item" data-value="Manas">Manas</div>
+                                            <div class="custom-dropdown-item" data-value="Manish">Manish</div>
+                                            <div class="custom-dropdown-item" data-value="Meera">Meera</div>
+                                            <div class="custom-dropdown-item" data-value="Neelam">Neelam</div>
+                                            <div class="custom-dropdown-item" data-value="Niharika">Niharika</div>
+                                            <div class="custom-dropdown-item" data-value="Parul A">Parul A</div>
+                                            <div class="custom-dropdown-item" data-value="Parul P">Parul P</div>
+                                            <div class="custom-dropdown-item" data-value="Praveen">Praveen</div>
+                                            <div class="custom-dropdown-item" data-value="Prerona">Prerona</div>
+                                            <div class="custom-dropdown-item" data-value="Radhika">Radhika</div>
+                                            <div class="custom-dropdown-item" data-value="Ranjita">Ranjita</div>
+                                            <div class="custom-dropdown-item" data-value="Ritu">Ritu</div>
+                                            <div class="custom-dropdown-item" data-value="Shivani S">Shivani S</div>
+                                            <div class="custom-dropdown-item" data-value="Shuchi">Shuchi</div>
+                                            <div class="custom-dropdown-item" data-value="Simran">Simran</div>
+                                            <div class="custom-dropdown-item" data-value="Smita">Smita</div>
+                                            <div class="custom-dropdown-item" data-value="Sonia">Sonia</div>
+                                            <div class="custom-dropdown-item" data-value="Suminder">Suminder</div>
+                                            <div class="custom-dropdown-item" data-value="Tanishqa">Tanishqa</div>
+                                            <div class="custom-dropdown-item" data-value="Tanuja">Tanuja</div>
+                                            <div class="custom-dropdown-item" data-value="Varun">Varun</div>
+                                            <div class="custom-dropdown-item" data-value="Veena A">Veena A</div>
+                                            <div class="custom-dropdown-item" data-value="Veena M">Veena M</div>
+                                            <div class="custom-dropdown-item" data-value="Vickie">Vickie</div>
+                                            <div class="custom-dropdown-item" data-value="Vidhu">Vidhu</div>
+                                        </div>
+                                        <div class="custom-dropdown-empty" style="display:none;">No match</div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Supervisor Name</td>
+                            <td>
+                                <input type="hidden" id="supervisor-name" name="supervisor_name" required>
+                                <div class="custom-dropdown" id="supervisorDropdown">
+                                    <button type="button" class="custom-dropdown-trigger placeholder" id="supervisorTrigger">Select...</button>
+                                    <div class="custom-dropdown-panel">
+                                        <div class="custom-dropdown-search">
+                                            <input type="text" id="supervisorSearch" placeholder="Search..." autocomplete="off">
+                                        </div>
+                                        <div class="custom-dropdown-list" id="supervisorList">
+                                            <div class="custom-dropdown-item" data-value="Vickie">Vickie</div>
+                                            <div class="custom-dropdown-item" data-value="Geeta">Geeta</div>
+                                            <div class="custom-dropdown-item" data-value="Mamta V">Mamta V</div>
+                                            <div class="custom-dropdown-item" data-value="Manish">Manish</div>
+                                            <div class="custom-dropdown-item" data-value="Smita">Smita</div>
+                                            <div class="custom-dropdown-item" data-value="Madhu">Madhu</div>
+                                            <div class="custom-dropdown-item" data-value="Kalpana">Kalpana</div>
+                                            <div class="custom-dropdown-item" data-value="K. Narayan">K. Narayan</div>
+                                            <div class="custom-dropdown-item" data-value="Veena A">Veena A</div>
+                                            <div class="custom-dropdown-item" data-value="Veena M">Veena M</div>
+                                        </div>
+                                        <div class="custom-dropdown-empty" style="display:none;">No match</div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Time (in Hrs)</td>
+                            <td><input type="number" id="sup-time-hrs" name="sup_time_hrs" step="0.01" min="0" placeholder="e.g. 0.25, 0.5, 1" required></td>
+                        </tr>
+                        <tr>
+                            <td>Date</td>
+                            <td><input type="date" id="sup-date" name="sup_date" required></td>
+                        </tr>
+                        <tr>
+                            <td>Remark</td>
+                            <td><textarea id="sup-remark" name="sup_remark" placeholder="Any remarks..."></textarea></td>
+                        </tr>
+                    </table>
+                    <button type="submit" class="submit-btn">Submit Supervision</button>
+                </form>
+            </div>
+            </div><!-- End supervisionPanel -->
         </div>
 
         <!-- Center: Data Section -->
         <div class="data-section">
+            <!-- Attendance Data Panel -->
+            <div id="attendanceDataPanel" class="panel-content">
             <div class="card data-card">
                 <div class="card-header">
                     Attendance for <span id="headerVolunteerName">_______</span>
@@ -1378,6 +1588,63 @@
                     </table>
                 </div>
             </div>
+            </div><!-- End attendanceDataPanel -->
+
+            <!-- Supervision Data Panel -->
+            <div id="supervisionDataPanel" class="panel-content hidden">
+            <div class="card data-card">
+                <div class="card-header">
+                    Supervision for <span id="supHeaderVolunteerName">_______</span>
+                </div>
+                <div id="supDataPlaceholder" class="data-placeholder">
+                    <div class="data-placeholder-icon">👤</div>
+                    <p>Please select a volunteer from the Dropdown to view supervision data</p>
+                </div>
+                <div id="supervisionData" style="display:none;">
+                    <div class="volunteer-header">
+                        <div class="volunteer-header-left">
+                            <span>Supervision for</span>
+                            <strong id="supVolunteerNameDisplay">Volunteer</strong>
+                        </div>
+                        <span class="badge" id="supRecordCount">0 records</span>
+                    </div>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>S. No</th>
+                                    <th>Supervisor Name</th>
+                                    <th>Time (in Hrs)</th>
+                                    <th>Supervision Date</th>
+                                    <th>Remark</th>
+                                </tr>
+                            </thead>
+                            <tbody id="supervisionTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="pivot-section">
+                <div class="pivot-card supervision-summary-card">
+                    <div class="pivot-header">SUM of Time (in Hrs)</div>
+                    <table class="pivot-table">
+                        <thead>
+                            <tr>
+                                <th>Volunteer</th>
+                                <th>Total Hours</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td id="sup-summary-volunteer">-</td>
+                                <td id="sup-summary-total">0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div><!-- End supervisionDataPanel -->
         </div>
     </div>
     </div> <!-- End app-wrapper -->
@@ -1627,17 +1894,18 @@
                 // Admins can see all volunteers in dropdown - no filtering needed
             } else if (currentUser.role === 'volunteer') {
                 document.body.classList.add('is-volunteer');
-                // For volunteers, filter dropdown to only show their name
+                // For volunteers, filter dropdown to only show their name (attendance + supervision)
                 if (currentUser.volunteerSheetName) {
                     filterDropdownForVolunteer(currentUser.volunteerSheetName);
                     autoSelectVolunteer(currentUser.volunteerSheetName);
+                    autoSelectSupVolunteer(currentUser.volunteerSheetName);
                 }
             }
         }
 
-        // Filter dropdown to only show the volunteer's own name
+        // Filter dropdown to only show the volunteer's own name (both attendance and supervision)
         function filterDropdownForVolunteer(volunteerName) {
-            const items = document.querySelectorAll('#volunteerList .custom-dropdown-item');
+            const items = document.querySelectorAll('#volunteerList .custom-dropdown-item, #supVolunteerList .custom-dropdown-item');
             const normalizedName = volunteerName.toLowerCase().trim();
 
             items.forEach(item => {
@@ -1652,15 +1920,27 @@
 
         // Reset dropdown items visibility (for sign out or admin login)
         function resetDropdownItems() {
-            const items = document.querySelectorAll('#volunteerList .custom-dropdown-item');
+            const items = document.querySelectorAll('#volunteerList .custom-dropdown-item, #supVolunteerList .custom-dropdown-item');
             items.forEach(item => {
                 item.style.display = 'block';
             });
         }
 
-        // Auto-select volunteer in dropdown (case-insensitive)
+        // Auto-select volunteer in dropdown (case-insensitive) - for attendance
         function autoSelectVolunteer(name) {
             const items = document.querySelectorAll('#volunteerList .custom-dropdown-item');
+            const normalizedName = name.toLowerCase().trim();
+
+            items.forEach(item => {
+                if (item.dataset.value.toLowerCase().trim() === normalizedName) {
+                    item.click();
+                }
+            });
+        }
+
+        // Auto-select volunteer in supervision dropdown (case-insensitive)
+        function autoSelectSupVolunteer(name) {
+            const items = document.querySelectorAll('#supVolunteerList .custom-dropdown-item');
             const normalizedName = name.toLowerCase().trim();
 
             items.forEach(item => {
@@ -1697,16 +1977,48 @@
             volunteerTrigger.classList.add('placeholder');
             document.getElementById('volunteer-name').value = '';
 
+            // Reset supervision state
+            document.getElementById('supDataPlaceholder').innerHTML = `<div class="data-placeholder-icon">👤</div><p>Please select a volunteer from the Dropdown to view supervision data</p>`;
+            document.getElementById('supDataPlaceholder').style.display = 'block';
+            document.getElementById('supervisionData').style.display = 'none';
+            document.getElementById('supHeaderVolunteerName').textContent = '_______';
+            if (typeof supVolunteerTrigger !== 'undefined') {
+                supVolunteerTrigger.textContent = 'Select...';
+                supVolunteerTrigger.classList.add('placeholder');
+            }
+            document.getElementById('sup-volunteer-name').value = '';
+            document.getElementById('supervisor-name').value = '';
+            if (typeof supervisorTrigger !== 'undefined') {
+                supervisorTrigger.textContent = 'Select...';
+                supervisorTrigger.classList.add('placeholder');
+            }
+            document.getElementById('sup-summary-volunteer').textContent = '-';
+            document.getElementById('sup-summary-total').textContent = '0';
+
             // Reset dropdown items visibility
             resetDropdownItems();
 
-            // Clear form
+            // Clear forms
             document.getElementById('attendanceForm').reset();
+            document.getElementById('supervisionForm').reset();
 
             // Revoke Google token if possible
             if (typeof google !== 'undefined' && google.accounts) {
                 google.accounts.id.disableAutoSelect();
             }
+        }
+
+        // =====================================================
+        // PANEL NAVIGATION
+        // =====================================================
+        function switchPanel(panel) {
+            const isAttendance = panel === 'attendance';
+            document.getElementById('navAttendance').classList.toggle('active', isAttendance);
+            document.getElementById('navSupervision').classList.toggle('active', !isAttendance);
+            document.getElementById('attendancePanel').classList.toggle('hidden', !isAttendance);
+            document.getElementById('supervisionPanel').classList.toggle('hidden', isAttendance);
+            document.getElementById('attendanceDataPanel').classList.toggle('hidden', !isAttendance);
+            document.getElementById('supervisionDataPanel').classList.toggle('hidden', isAttendance);
         }
 
         // =====================================================
@@ -1889,7 +2201,182 @@
             if (!volunteerDropdown.contains(e.target)) {
                 volunteerDropdown.classList.remove('open');
             }
+            const supVolDropdown = document.getElementById('supVolunteerDropdown');
+            const supDropdown = document.getElementById('supervisorDropdown');
+            if (supVolDropdown && !supVolDropdown.contains(e.target)) {
+                supVolDropdown.classList.remove('open');
+            }
+            if (supDropdown && !supDropdown.contains(e.target)) {
+                supDropdown.classList.remove('open');
+            }
         });
+
+        // Supervision dropdown DOM elements and handlers
+        const supVolunteerDropdown = document.getElementById('supVolunteerDropdown');
+        const supVolunteerTrigger = document.getElementById('supVolunteerTrigger');
+        const supVolunteerList = document.getElementById('supVolunteerList');
+        const supVolunteerInput = document.getElementById('sup-volunteer-name');
+        const supVolunteerSearch = document.getElementById('supVolunteerSearch');
+        const supervisorDropdown = document.getElementById('supervisorDropdown');
+        const supervisorTrigger = document.getElementById('supervisorTrigger');
+        const supervisorList = document.getElementById('supervisorList');
+        const supervisorInput = document.getElementById('supervisor-name');
+        const supervisorSearch = document.getElementById('supervisorSearch');
+
+        if (supVolunteerDropdown && supVolunteerTrigger) {
+            supVolunteerTrigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                supVolunteerDropdown.classList.toggle('open');
+                if (supVolunteerDropdown.classList.contains('open') && supVolunteerSearch) {
+                    supVolunteerTrigger.blur();
+                    supVolunteerSearch.value = '';
+                    const items = supVolunteerList.querySelectorAll('.custom-dropdown-item');
+                    items.forEach(item => item.classList.remove('hidden'));
+                    const empty = supVolunteerDropdown.querySelector('.custom-dropdown-empty');
+                    if (empty) empty.style.display = 'none';
+                    requestAnimationFrame(() => supVolunteerSearch.focus());
+                    setTimeout(() => supVolunteerSearch.focus(), 200);
+                }
+            });
+        }
+        // Use event delegation for sup volunteer search - works when panel was hidden at load
+        document.addEventListener('input', function(e) {
+            if (e.target && e.target.id === 'supVolunteerSearch') {
+                const list = document.getElementById('supVolunteerList');
+                const dropdown = document.getElementById('supVolunteerDropdown');
+                if (!list || !dropdown) return;
+                const term = (e.target.value || '').toLowerCase().trim();
+                const items = list.querySelectorAll('.custom-dropdown-item');
+                let count = 0;
+                items.forEach(item => {
+                    const match = !term || item.textContent.toLowerCase().includes(term);
+                    item.classList.toggle('hidden', !match);
+                    if (match) count++;
+                });
+                const empty = dropdown.querySelector('.custom-dropdown-empty');
+                if (empty) empty.style.display = count === 0 ? 'block' : 'none';
+            }
+        });
+        document.addEventListener('keyup', function(e) {
+            if (e.target && e.target.id === 'supVolunteerSearch') {
+                const list = document.getElementById('supVolunteerList');
+                const dropdown = document.getElementById('supVolunteerDropdown');
+                if (!list || !dropdown) return;
+                const term = (e.target.value || '').toLowerCase().trim();
+                const items = list.querySelectorAll('.custom-dropdown-item');
+                let count = 0;
+                items.forEach(item => {
+                    const match = !term || item.textContent.toLowerCase().includes(term);
+                    item.classList.toggle('hidden', !match);
+                    if (match) count++;
+                });
+                const empty = dropdown.querySelector('.custom-dropdown-empty');
+                if (empty) empty.style.display = count === 0 ? 'block' : 'none';
+            }
+        });
+
+        if (supVolunteerSearch) {
+            supVolunteerSearch.addEventListener('click', e => e.stopPropagation());
+        }
+        if (supVolunteerList) {
+            supVolunteerList.addEventListener('click', function(e) {
+                if (e.target.classList.contains('custom-dropdown-item')) {
+                    const value = e.target.dataset.value;
+                    supVolunteerInput.value = value;
+                    supVolunteerTrigger.textContent = value;
+                    supVolunteerTrigger.classList.remove('placeholder');
+                    supVolunteerList.querySelectorAll('.custom-dropdown-item').forEach(item => item.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                    supVolunteerSearch.value = '';
+                    supVolunteerList.querySelectorAll('.custom-dropdown-item').forEach(item => item.classList.remove('hidden'));
+                    const empty = supVolunteerDropdown?.querySelector('.custom-dropdown-empty');
+                    if (empty) empty.style.display = 'none';
+                    supVolunteerDropdown.classList.remove('open');
+                    document.getElementById('supHeaderVolunteerName').textContent = value;
+                    loadSupervisionData(value);
+                }
+            });
+        }
+
+        if (supervisorDropdown && supervisorTrigger) {
+            supervisorTrigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                supervisorDropdown.classList.toggle('open');
+                if (supervisorDropdown.classList.contains('open') && supervisorSearch) {
+                    supervisorTrigger.blur();
+                    supervisorSearch.value = '';
+                    const items = supervisorList.querySelectorAll('.custom-dropdown-item');
+                    items.forEach(item => item.classList.remove('hidden'));
+                    const empty = supervisorDropdown.querySelector('.custom-dropdown-empty');
+                    if (empty) empty.style.display = 'none';
+                    requestAnimationFrame(() => {
+                        supervisorSearch.focus();
+                    });
+                    setTimeout(() => supervisorSearch.focus(), 200);
+                }
+            });
+        }
+
+        // Use event delegation for supervisor search - works even when panel was hidden at load
+        document.addEventListener('input', function(e) {
+            if (e.target && e.target.id === 'supervisorSearch') {
+                const list = document.getElementById('supervisorList');
+                const dropdown = document.getElementById('supervisorDropdown');
+                if (!list || !dropdown) return;
+                const term = (e.target.value || '').toLowerCase().trim();
+                const items = list.querySelectorAll('.custom-dropdown-item');
+                let count = 0;
+                items.forEach(item => {
+                    const match = !term || item.textContent.toLowerCase().includes(term);
+                    item.classList.toggle('hidden', !match);
+                    if (match) count++;
+                });
+                const empty = dropdown.querySelector('.custom-dropdown-empty');
+                if (empty) empty.style.display = count === 0 ? 'block' : 'none';
+            }
+        });
+        document.addEventListener('keyup', function(e) {
+            if (e.target && e.target.id === 'supervisorSearch') {
+                const list = document.getElementById('supervisorList');
+                const dropdown = document.getElementById('supervisorDropdown');
+                if (!list || !dropdown) return;
+                const term = (e.target.value || '').toLowerCase().trim();
+                const items = list.querySelectorAll('.custom-dropdown-item');
+                let count = 0;
+                items.forEach(item => {
+                    const match = !term || item.textContent.toLowerCase().includes(term);
+                    item.classList.toggle('hidden', !match);
+                    if (match) count++;
+                });
+                const empty = dropdown.querySelector('.custom-dropdown-empty');
+                if (empty) empty.style.display = count === 0 ? 'block' : 'none';
+            }
+        });
+
+        if (supervisorSearch) {
+            supervisorSearch.addEventListener('click', e => e.stopPropagation());
+            supervisorSearch.addEventListener('keydown', function(e) {
+                e.stopPropagation();
+                if (e.key === 'Enter') e.preventDefault();
+            });
+        }
+        if (supervisorList) {
+            supervisorList.addEventListener('click', function(e) {
+                if (e.target.classList.contains('custom-dropdown-item')) {
+                    const value = e.target.dataset.value;
+                    supervisorInput.value = value;
+                    supervisorTrigger.textContent = value;
+                    supervisorTrigger.classList.remove('placeholder');
+                    supervisorList.querySelectorAll('.custom-dropdown-item').forEach(item => item.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                    supervisorSearch.value = '';
+                    supervisorList.querySelectorAll('.custom-dropdown-item').forEach(item => item.classList.remove('hidden'));
+                    const empty = supervisorDropdown.querySelector('.custom-dropdown-empty');
+                    if (empty) empty.style.display = 'none';
+                    supervisorDropdown.classList.remove('open');
+                }
+            });
+        }
 
         // Auto-calculate No. of Hours from Extra Time fields
         const extraTimeFrom = document.getElementById('extra-time-from');
@@ -2072,6 +2559,70 @@
                 placeholder.style.display = 'block';
                 dataSection.style.display = 'none';
                 resetPivots();
+            }
+        }
+
+        // Load supervision data from Google Sheets
+        async function loadSupervisionData(name) {
+            const placeholder = document.getElementById('supDataPlaceholder');
+            const dataSection = document.getElementById('supervisionData');
+            const tableBody = document.getElementById('supervisionTableBody');
+
+            placeholder.innerHTML = `<div class="data-placeholder-icon">⏳</div><p>Loading supervision data for ${name}...</p>`;
+            placeholder.style.display = 'block';
+            dataSection.style.display = 'none';
+
+            try {
+                const userEmail = currentUser ? currentUser.email : '';
+                const response = await fetch(`${SCRIPT_URL}?action=getSupervisionData&volunteer=${encodeURIComponent(name)}&email=${encodeURIComponent(userEmail)}`);
+                const result = await response.json();
+
+                if (result.status === 'error') {
+                    throw new Error(result.message || 'Failed to fetch data');
+                }
+
+                const data = result.data || [];
+
+                if (data.length === 0) {
+                    placeholder.innerHTML = `<div class="data-placeholder-icon">📭</div><p>No supervision records found for ${name}</p>`;
+                    placeholder.style.display = 'block';
+                    dataSection.style.display = 'none';
+                    document.getElementById('sup-summary-volunteer').textContent = name;
+                    document.getElementById('sup-summary-total').textContent = '0';
+                    return;
+                }
+
+                placeholder.style.display = 'none';
+                dataSection.style.display = 'block';
+
+                document.getElementById('supVolunteerNameDisplay').textContent = name;
+                document.getElementById('supRecordCount').textContent = `${data.length} records`;
+
+                tableBody.innerHTML = data.map((row, index) => `
+                    <tr>
+                        <td class="sno">${index + 1}</td>
+                        <td>${row.supervisorName || ''}</td>
+                        <td>${row.timeInHrs || ''}</td>
+                        <td>${row.date || ''}</td>
+                        <td>${row.remark || ''}</td>
+                    </tr>
+                `).join('');
+
+                let totalHrs = 0;
+                data.forEach(row => {
+                    const hrs = parseFloat(row.timeInHrs);
+                    if (!isNaN(hrs)) totalHrs += hrs;
+                });
+                document.getElementById('sup-summary-volunteer').textContent = name;
+                document.getElementById('sup-summary-total').textContent = totalHrs.toFixed(2);
+
+            } catch (error) {
+                console.error('Error fetching supervision data:', error);
+                placeholder.innerHTML = `<div class="data-placeholder-icon">❌</div><p>Error loading data: ${error.message}</p>`;
+                placeholder.style.display = 'block';
+                dataSection.style.display = 'none';
+                document.getElementById('sup-summary-volunteer').textContent = '-';
+                document.getElementById('sup-summary-total').textContent = '0';
             }
         }
 
@@ -2274,6 +2825,7 @@
             btn.textContent = 'Submitting...';
 
             const payload = {
+                type: 'attendance',
                 email: currentUser ? currentUser.email : '',
                 volunteerName: document.getElementById('volunteer-name').value,
                 date: document.getElementById('date').value,
@@ -2318,6 +2870,58 @@
             .finally(() => {
                 btn.disabled = false;
                 btn.textContent = 'Submit Attendance';
+            });
+        });
+
+        // Supervision form submission
+        document.getElementById('supervisionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('.submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+
+            const payload = {
+                type: 'supervision',
+                email: currentUser ? currentUser.email : '',
+                volunteerName: document.getElementById('sup-volunteer-name').value,
+                supervisorName: document.getElementById('supervisor-name').value,
+                timeInHrs: document.getElementById('sup-time-hrs').value,
+                date: document.getElementById('sup-date').value,
+                remark: document.getElementById('sup-remark').value
+            };
+
+            const volunteerName = payload.volunteerName;
+
+            fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                document.getElementById('successModal').querySelector('p').textContent = 'Thank you for submitting the supervision';
+                showSuccessModal();
+                e.target.reset();
+                if (supervisorInput) supervisorInput.value = '';
+                if (supervisorTrigger) {
+                    supervisorTrigger.textContent = 'Select...';
+                    supervisorTrigger.classList.add('placeholder');
+                }
+                if (supervisorList) {
+                    supervisorList.querySelectorAll('.custom-dropdown-item').forEach(item => item.classList.remove('selected'));
+                }
+
+                if (volunteerName) {
+                    setTimeout(() => {
+                        loadSupervisionData(volunteerName);
+                    }, 2000);
+                }
+            })
+            .catch(() => alert("Submission failed."))
+            .finally(() => {
+                btn.disabled = false;
+                btn.textContent = 'Submit Supervision';
+                document.getElementById('successModal').querySelector('p').textContent = 'Thank you for submitting the attendance';
             });
         });
     </script>
