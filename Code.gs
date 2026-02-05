@@ -129,23 +129,38 @@ function doPost(e) {
       let sheet = ss.getSheetByName(sheetName);
       if (!sheet) {
         sheet = ss.insertSheet(sheetName);
+        // Column order matching existing sheets: S.No | Supervisor | Time | Date | Remark | Timestamp
         sheet.appendRow([
-          "Timestamp",
-          "Supervision Date",
+          "S. No",
           "Supervisor Name",
           "Time (in Hrs)",
-          "Remark"
+          "Date",
+          "Remark",
+          "Timestamp"
         ]);
-        sheet.getRange(1, 1, 1, 5).setFontWeight("bold");
+        sheet.getRange(1, 1, 1, 6).setFontWeight("bold");
       }
 
+      // Column order: S.No | Supervisor Name | Time (in Hrs) | Date | Remark | Timestamp
+      // Auto-generate S.No as next row number
+      const lastRow = sheet.getLastRow();
+      const nextSNo = lastRow; // S.No = current last row (since header is row 1)
+      const newRowNum = lastRow + 1;
+
+      // Append the data
       sheet.appendRow([
-        new Date(),
-        payload.date || "",
+        nextSNo, // Will be set as number format below
         payload.supervisorName || "",
         payload.timeInHrs || "",
-        payload.remark || ""
+        payload.date || "",
+        payload.remark || "",
+        new Date()
       ]);
+
+      // Ensure S.No column A is formatted as plain number (not date)
+      sheet.getRange(newRowNum, 1).setNumberFormat("0");
+      // Ensure Time (in Hrs) column C is formatted as number (not time)
+      sheet.getRange(newRowNum, 3).setNumberFormat("0.00");
 
       // Also append to MASTER_SUPERVISION if it exists
       const masterSheet = ss.getSheetByName("MASTER_SUPERVISION");
@@ -466,20 +481,57 @@ function getVolunteerDataRaw(sheetName) {
     const values = sheet.getDataRange().getValues();
     const data = [];
 
+    // Read header row to determine column indices dynamically
+    const headers = values[0] || [];
+    const colIdx = {};
+    headers.forEach(function(header, idx) {
+      var h = String(header).toLowerCase().trim();
+      if (h === "date" || h.includes("attendance date")) {
+        colIdx.date = idx;
+      } else if (h === "time" && h.indexOf("extra") === -1 && h.indexOf("from") === -1 && h.indexOf("till") === -1) {
+        colIdx.time = idx;
+      } else if (h.indexOf("extra") !== -1 && h.indexOf("from") !== -1) {
+        colIdx.extraFrom = idx;
+      } else if (h.indexOf("extra") !== -1 && h.indexOf("till") !== -1) {
+        colIdx.extraTill = idx;
+      } else if (h.indexOf("reason") !== -1) {
+        colIdx.reason = idx;
+      } else if (h === "duty" || (h.indexOf("duty") !== -1 && h.indexOf("from") === -1 && h.indexOf("hour") === -1)) {
+        colIdx.duty = idx;
+      } else if (h.indexOf("hour") !== -1 || h.indexOf("hrs") !== -1) {
+        colIdx.hours = idx;
+      } else if (h.indexOf("duty") !== -1 && h.indexOf("from") !== -1) {
+        colIdx.location = idx;
+      } else if (h.indexOf("remark") !== -1) {
+        colIdx.remarks = idx;
+      }
+    });
+
+    // Fallback to default positions (accounting for Timestamp at index 0)
+    if (colIdx.date === undefined) colIdx.date = 1;
+    if (colIdx.time === undefined) colIdx.time = 2;
+    if (colIdx.extraFrom === undefined) colIdx.extraFrom = 3;
+    if (colIdx.extraTill === undefined) colIdx.extraTill = 4;
+    if (colIdx.reason === undefined) colIdx.reason = 5;
+    if (colIdx.duty === undefined) colIdx.duty = 6;
+    if (colIdx.hours === undefined) colIdx.hours = 7;
+    if (colIdx.location === undefined) colIdx.location = 8;
+    if (colIdx.remarks === undefined) colIdx.remarks = 9;
+
     for (let i = 1; i < values.length; i++) {
       const row = values[i];
-      if (!row[1]) continue;
+      if (!row[colIdx.date] && !row[colIdx.time]) continue;
 
       data.push({
-        date: formatDate(row[1]),
-        time: row[2] || "",
-        extraFrom: row[3] || "",
-        extraTill: row[4] || "",
-        reason: row[5] || "",
-        duty: row[6] || "",
-        hours: row[7] || "",
-        dutyFrom: row[8] || "",
-        remarks: row[9] || ""
+        date: formatDate(row[colIdx.date]),
+        time: formatTime(row[colIdx.time]),
+        extraFrom: formatTime(row[colIdx.extraFrom]),
+        extraTill: formatTime(row[colIdx.extraTill]),
+        reason: row[colIdx.reason] || "",
+        duty: row[colIdx.duty] || "",
+        hours: row[colIdx.hours] || "",
+        location: row[colIdx.location] || "",
+        remarks: row[colIdx.remarks] || ""
       });
     }
 
@@ -500,16 +552,41 @@ function getSupervisionDataRaw(volunteerName) {
     const values = sheet.getDataRange().getValues();
     const data = [];
 
-    // Columns: Timestamp | Supervision Date | Supervisor Name | Time (in Hrs) | Remark
+    // Read header row to determine column indices dynamically
+    const headers = values[0] || [];
+    const colIndex = {};
+    headers.forEach(function(header, idx) {
+      var h = String(header).toLowerCase().trim();
+      if (h.indexOf("supervisor") !== -1 && h.indexOf("date") === -1) {
+        colIndex.supervisor = idx;
+      } else if (h.indexOf("time") !== -1 || h.indexOf("hrs") !== -1 || h.indexOf("hours") !== -1) {
+        colIndex.time = idx;
+      } else if (h.indexOf("date") !== -1 && h.indexOf("supervisor") === -1) {
+        colIndex.date = idx;
+      } else if (h.indexOf("remark") !== -1) {
+        colIndex.remark = idx;
+      }
+    });
+
+    // Fallback to default positions if headers not found
+    // Columns: S.No/Timestamp(0) | Supervisor Name(1) | Time(2) | Date(3) | Remark(4)
+    if (colIndex.supervisor === undefined) colIndex.supervisor = 1;
+    if (colIndex.time === undefined) colIndex.time = 2;
+    if (colIndex.date === undefined) colIndex.date = 3;
+    if (colIndex.remark === undefined) colIndex.remark = 4;
+
     for (let i = 1; i < values.length; i++) {
       const row = values[i];
-      if (!row[1] && !row[2]) continue;
+      // Skip only if supervisor AND time are both empty (use dynamic column indices)
+      const supervisor = row[colIndex.supervisor];
+      const time = row[colIndex.time];
+      if (!supervisor && (time === undefined || time === "" || time === null)) continue;
 
       data.push({
-        date: formatDate(row[1]) || (row[1] ? String(row[1]) : ""),
-        supervisorName: row[2] || "",
-        timeInHrs: row[3] !== undefined && row[3] !== "" ? String(row[3]) : "",
-        remark: row[4] || ""
+        date: formatDate(row[colIndex.date]) || (row[colIndex.date] ? String(row[colIndex.date]) : ""),
+        supervisorName: supervisor || "",
+        timeInHrs: formatHoursValue(time),
+        remark: row[colIndex.remark] || ""
       });
     }
 
@@ -551,6 +628,75 @@ function formatDate(value) {
     );
   }
   return value.toString();
+}
+
+function formatTime(value) {
+  if (!value) return "";
+  if (value instanceof Date) {
+    return Utilities.formatDate(
+      value,
+      Session.getScriptTimeZone(),
+      "HH:mm"
+    );
+  }
+  // Handle ISO string format
+  const str = String(value);
+  if (str.includes("T") && str.includes(":")) {
+    const timePart = str.split("T")[1];
+    if (timePart) {
+      const [hours, minutes] = timePart.split(":");
+      return hours + ":" + minutes;
+    }
+  }
+  return str;
+}
+
+// Format hours value for supervision "Time (in Hrs)" field
+// Value is already in HOURS (frontend converts before saving)
+function formatHoursValue(value) {
+  if (value === undefined || value === null || value === "") return "";
+
+  // If it's a number, return as-is (already in hours)
+  if (typeof value === "number") {
+    return value % 1 === 0 ? String(value) : value.toFixed(2);
+  }
+
+  // If it's a Date object, Google Sheets stored it as a time serial
+  // Need to convert back to decimal hours
+  if (value instanceof Date) {
+    const year = value.getFullYear();
+
+    // Time-only values have year 1899 or 1900 (Excel/Sheets epoch)
+    if (year === 1899 || year === 1900) {
+      // Get time components and convert to fraction of day
+      const hours = value.getHours();
+      const mins = value.getMinutes();
+      const secs = value.getSeconds();
+      // Convert to decimal (fraction of 24 hours = original decimal value)
+      const decimalValue = (hours * 3600 + mins * 60 + secs) / 86400;
+      return decimalValue.toFixed(2);
+    }
+
+    // Full date - return empty
+    return "";
+  }
+
+  // If it's a string, try to parse and format
+  const str = String(value).trim();
+
+  // Skip full date strings
+  if (str.includes("GMT") || str.includes("IST") || str.includes("Standard Time")) {
+    return "";
+  }
+
+  // Try to parse as number and format nicely
+  const num = parseFloat(str);
+  if (!isNaN(num)) {
+    return num % 1 === 0 ? String(num) : num.toFixed(2);
+  }
+
+  // Return as-is if can't parse
+  return str;
 }
 
 function successResponse(payload) {

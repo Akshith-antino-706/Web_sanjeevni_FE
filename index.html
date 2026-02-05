@@ -85,13 +85,15 @@
         .card.form-card {
             height: 100%;
             min-height: 0;
+            background: #F5E6D3;
         }
 
         .card.data-card {
             flex: 0 0 auto;
-            height: 45vh;
+            height: auto;
+            max-height: 60vh;
             min-height: 280px;
-            overflow: hidden;
+            overflow: visible;
             display: flex;
             flex-direction: column;
             margin-bottom: 0;
@@ -351,21 +353,44 @@
         }
 
         /* Volunteer Data Container */
-        #volunteerData {
+        #volunteerData,
+        #supervisionData {
             flex: 1;
             display: flex;
             flex-direction: column;
             min-height: 0;
-            overflow: hidden;
+            overflow: visible;
         }
 
         /* Data Table - Spreadsheet Style */
         .data-table-wrapper {
             flex: 1;
             overflow-x: auto;
-            overflow-y: scroll;
-            min-height: 0;
-            max-height: 100%;
+            overflow-y: auto;
+            min-height: 200px;
+            max-height: 50vh;
+            border: 1px solid #ddd;
+            scrollbar-width: thin;
+            scrollbar-color: #2F4A7D #f1f1f1;
+        }
+
+        .data-table-wrapper::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .data-table-wrapper::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .data-table-wrapper::-webkit-scrollbar-thumb {
+            background: #2F4A7D;
+            border-radius: 4px;
+        }
+
+        .data-table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #1e3a5f;
         }
 
         .data-table {
@@ -685,7 +710,7 @@
         }
 
         .login-card {
-            background: white;
+            background: #F5E6D3;
             border-radius: 16px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
             padding: 40px;
@@ -1222,16 +1247,12 @@
     <!-- Login Overlay -->
     <div class="login-overlay" id="loginOverlay">
         <div class="login-card">
-            <!-- Custom Sanjivini Logo -->
+            <!-- Sanjivini Logo -->
             <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 24px;">
-                <svg width="80" height="70" viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M20 70 L45 35 L10 10" stroke="#2F4A7D" stroke-width="12" stroke-linecap="round" />
-                    <path d="M45 35 L80 10" stroke="#2F4A7D" stroke-width="12" stroke-linecap="round" />
-                    <path d="M45 25 Q45 15 52 15 Q60 15 60 25 Q60 35 52 35 Q45 35 45 25" fill="#243B66" />
-                </svg>
+                <img src="https://static.wixstatic.com/media/e258ec_51c21015d91b4893aca30922d1bc7830~mv2.png/v1/fill/w_566,h_312,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/sanjivini_logo.png"
+                     alt="Sanjivini Logo"
+                     style="width: 200px; height: auto;">
             </div>
-            <h1>Sanjeevni</h1>
-            <p class="subtitle">Society for Mental Health</p>
             <div class="email-login-form">
                 <input type="email" id="loginEmail" placeholder="Enter your email address">
                 <input type="password" id="loginPin" placeholder="Enter your PIN" maxlength="6" inputmode="numeric"
@@ -1320,20 +1341,12 @@
                 <div id="attendancePanel" class="panel-content">
                     <div class="card form-card">
                         <div class="form-header">
-                            <!-- Custom Sanjeevni Logo -->
-                            <div
-                                style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2px;">
-                                <svg width="50" height="40" viewBox="0 0 100 80" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M20 70 L45 35 L10 10" stroke="#2F4A7D" stroke-width="12"
-                                        stroke-linecap="round" />
-                                    <path d="M45 35 L80 10" stroke="#2F4A7D" stroke-width="12" stroke-linecap="round" />
-                                    <path d="M45 25 Q45 15 52 15 Q60 15 60 25 Q60 35 52 35 Q45 35 45 25"
-                                        fill="#243B66" />
-                                </svg>
+                            <!-- Sanjivini Logo -->
+                            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2px;">
+                                <img src="https://static.wixstatic.com/media/e258ec_51c21015d91b4893aca30922d1bc7830~mv2.png/v1/fill/w_566,h_312,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/sanjivini_logo.png"
+                                     alt="Sanjivini Logo"
+                                     style="width: 150px; height: auto;">
                             </div>
-                            <h1>Sanjeevni</h1>
-                            <p class="subtitle">Society for Mental Health</p>
                         </div>
 
                         <form id="attendanceForm" class="form-body">
@@ -1381,8 +1394,7 @@
                                                     <div class="custom-dropdown-item" data-value="Radhika">Radhika</div>
                                                     <div class="custom-dropdown-item" data-value="Ranjita">Ranjita</div>
                                                     <div class="custom-dropdown-item" data-value="Ritu">Ritu</div>
-                                                    <div class="custom-dropdown-item" data-value="Shivani S">Shivani S
-                                                    </div>
+                                                    <div class="custom-dropdown-item" data-value="Shivani">Shivani</div>
                                                     <div class="custom-dropdown-item" data-value="Shuchi">Shuchi</div>
                                                     <div class="custom-dropdown-item" data-value="Simran">Simran</div>
                                                     <div class="custom-dropdown-item" data-value="Smita">Smita</div>
@@ -1484,20 +1496,12 @@
                 <div id="supervisionPanel" class="panel-content hidden">
                     <div class="card form-card">
                         <div class="form-header">
-                            <!-- Custom Sanjeevni Logo -->
-                            <div
-                                style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2px;">
-                                <svg width="50" height="40" viewBox="0 0 100 80" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M20 70 L45 35 L10 10" stroke="#2F4A7D" stroke-width="12"
-                                        stroke-linecap="round" />
-                                    <path d="M45 35 L80 10" stroke="#2F4A7D" stroke-width="12" stroke-linecap="round" />
-                                    <path d="M45 25 Q45 15 52 15 Q60 15 60 25 Q60 35 52 35 Q45 35 45 25"
-                                        fill="#243B66" />
-                                </svg>
+                            <!-- Sanjivini Logo -->
+                            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2px;">
+                                <img src="https://static.wixstatic.com/media/e258ec_51c21015d91b4893aca30922d1bc7830~mv2.png/v1/fill/w_566,h_312,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/sanjivini_logo.png"
+                                     alt="Sanjivini Logo"
+                                     style="width: 150px; height: auto;">
                             </div>
-                            <h1>Sanjeevni</h1>
-                            <p class="subtitle">Society for Mental Health</p>
                         </div>
 
                         <form id="supervisionForm" class="form-body">
@@ -1545,8 +1549,7 @@
                                                     <div class="custom-dropdown-item" data-value="Radhika">Radhika</div>
                                                     <div class="custom-dropdown-item" data-value="Ranjita">Ranjita</div>
                                                     <div class="custom-dropdown-item" data-value="Ritu">Ritu</div>
-                                                    <div class="custom-dropdown-item" data-value="Shivani S">Shivani S
-                                                    </div>
+                                                    <div class="custom-dropdown-item" data-value="Shivani">Shivani</div>
                                                     <div class="custom-dropdown-item" data-value="Shuchi">Shuchi</div>
                                                     <div class="custom-dropdown-item" data-value="Simran">Simran</div>
                                                     <div class="custom-dropdown-item" data-value="Smita">Smita</div>
@@ -1601,9 +1604,19 @@
                                 </tr>
 
                                 <tr>
-                                    <td>Time (in minutes)</td>
-                                    <td><input type="number" id="sup-time-hrs" name="sup_time_hrs" step="1" min="0"
-                                            placeholder="e.g. 30, 60, 90" required></td>
+                                    <td>
+                                        <div style="display: flex; gap: 6px; align-items: center;">
+                                            <span>Time</span>
+                                            <select id="sup-time-unit" style="padding: 4px 8px; border: 1px solid #C97C7C; border-radius: 4px; background: white; font-size: 0.75rem; cursor: pointer;">
+                                                <option value="minutes">Min</option>
+                                                <option value="hours">Hrs</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input type="number" id="sup-time-hrs" name="sup_time_hrs" step="0.5" min="0"
+                                            placeholder="Enter value" required style="width: 100%; padding: 10px 12px; font-size: 0.9rem;">
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Remark</td>
@@ -1841,9 +1854,10 @@
         let googleAuth = null;
 
         // Advanced Performance Management
-        const CACHE_NAME = 'sanjeevni_data_v4';
+        const CACHE_NAME = 'sanjeevni_data_v6';
         const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours (Increased for persistence)
         let dataCache = {};
+        let selectedSupVolunteer = null; // Track which volunteer was explicitly selected for supervision
 
         // Keep-Alive connection to warm up Google Apps Script
         function warmUpBackend() {
@@ -2184,6 +2198,7 @@
             document.getElementById('volunteer-name').value = '';
 
             // Reset supervision state
+            selectedSupVolunteer = null; // Reset supervision volunteer selection
             document.getElementById('supDataPlaceholder').innerHTML = `<div class="data-placeholder-icon">👤</div><p>Please select a volunteer from the Dropdown to view supervision data</p>`;
             document.getElementById('supDataPlaceholder').style.display = 'block';
             document.getElementById('supervisionData').style.display = 'none';
@@ -2517,6 +2532,8 @@
                     if (empty) empty.style.display = 'none';
                     supVolunteerDropdown.classList.remove('open');
                     document.getElementById('supHeaderVolunteerName').textContent = value;
+                    // Track that this volunteer was explicitly selected for supervision
+                    selectedSupVolunteer = value;
                     fetchAllVolunteerData(value);
                 }
             });
@@ -2718,7 +2735,7 @@
         }
 
         // Batched Data Loader with "Stale-While-Revalidate" for Instant Speed
-        async function fetchAllVolunteerData(name, isSilent = false) {
+        async function fetchAllVolunteerData(name, isSilent = false, forceRefresh = false) {
             if (!name) return;
 
             const attPlaceholder = document.getElementById('dataPlaceholder');
@@ -2732,11 +2749,14 @@
 
             let hasCache = false;
 
-            // 1. Instant Render from Cache (Persistent & In-Memory)
-            if (dataCache[name]) {
+            // 1. Instant Render from Cache (Persistent & In-Memory) - Skip if force refresh
+            if (dataCache[name] && !forceRefresh) {
                 const cached = dataCache[name];
                 renderAttendance(name, cached.attendance);
-                renderSupervision(name, cached.supervision);
+                // Only render supervision if this volunteer was explicitly selected for supervision
+                if (selectedSupVolunteer && selectedSupVolunteer.toLowerCase() === name.toLowerCase()) {
+                    renderSupervision(name, cached.supervision);
+                }
                 hasCache = true;
 
                 // If this is a background pre-fetch and we have cache, we can skip network if cache is fresh
@@ -2761,7 +2781,8 @@
                     attPlaceholder.style.display = 'block';
                     attSection.style.display = 'none';
                 }
-                if (isSupActive) {
+                // Only show skeleton for supervision if this volunteer was explicitly selected
+                if (isSupActive && selectedSupVolunteer && selectedSupVolunteer.toLowerCase() === name.toLowerCase()) {
                     supPlaceholder.innerHTML = skeletonHtml;
                     supPlaceholder.style.display = 'block';
                     supSection.style.display = 'none';
@@ -2772,7 +2793,8 @@
                     attPlaceholder.style.display = 'none';
                     attSection.style.display = 'block';
                 }
-                if (isSupActive) {
+                // Only show supervision data section if volunteer was explicitly selected
+                if (isSupActive && selectedSupVolunteer && selectedSupVolunteer.toLowerCase() === name.toLowerCase()) {
                     supPlaceholder.style.display = 'none';
                     supSection.style.display = 'block';
                 }
@@ -2788,9 +2810,12 @@
                 // 4. Update Cache and Reflect UI for both (hidden rendering is fast)
                 persistToCache(name, result.attendance || [], result.supervision || []);
 
-                // Rendering both keeps everything in sync when user toggles tabs
+                // Render attendance always
                 renderAttendance(name, result.attendance || []);
-                renderSupervision(name, result.supervision || []);
+                // Only render supervision if this volunteer was explicitly selected for supervision
+                if (selectedSupVolunteer && selectedSupVolunteer.toLowerCase() === name.toLowerCase()) {
+                    renderSupervision(name, result.supervision || []);
+                }
 
             } catch (error) {
                 console.error('Sanjeevni Sync Error:', error);
@@ -3157,10 +3182,12 @@
                             volunteerTrigger.classList.remove('placeholder');
                             document.getElementById('volunteer-name').value = volunteerName;
                             document.getElementById('headerVolunteerName').textContent = volunteerName;
-                            delete dataCache[volunteerName]; // Force fresh fetch after submission
-                            localStorage.removeItem(CACHE_NAME); // Clear persistent cache too
-                            loadVolunteerData(volunteerName);
-                        }, 2000);
+                            // Clear all caches completely
+                            Object.keys(dataCache).forEach(k => delete dataCache[k]);
+                            localStorage.removeItem(CACHE_NAME);
+                            // Force refresh from server (skip cache)
+                            fetchAllVolunteerData(volunteerName, false, true);
+                        }, 4000); // 4 seconds to allow Google Apps Script to process
                     }
                 })
                 .catch(() => alert("Submission failed."))
@@ -3177,9 +3204,18 @@
             btn.disabled = true;
             btn.textContent = 'Submitting...';
 
-            // Convert minutes to hours
-            const timeInMinutes = parseFloat(document.getElementById('sup-time-hrs').value) || 0;
-            const timeInHours = (timeInMinutes / 60).toFixed(2);
+            // Get time value and unit
+            const timeValue = parseFloat(document.getElementById('sup-time-hrs').value) || 0;
+            const timeUnit = document.getElementById('sup-time-unit').value;
+
+            // Convert to hours based on selected unit
+            let timeInHours;
+            if (timeUnit === 'minutes') {
+                timeInHours = (timeValue / 60).toFixed(2);
+            } else {
+                // Already in hours
+                timeInHours = timeValue % 1 === 0 ? String(timeValue) : timeValue.toFixed(2);
+            }
 
             const payload = {
                 type: 'supervision',
@@ -3214,10 +3250,12 @@
 
                     if (volunteerName) {
                         setTimeout(() => {
-                            delete dataCache[volunteerName]; // Force fresh fetch after submission
-                            localStorage.removeItem(CACHE_NAME); // Clear persistent cache too
-                            loadSupervisionData(volunteerName);
-                        }, 2000);
+                            // Clear all caches completely
+                            Object.keys(dataCache).forEach(k => delete dataCache[k]);
+                            localStorage.removeItem(CACHE_NAME);
+                            // Force refresh from server (skip cache)
+                            fetchAllVolunteerData(volunteerName, false, true);
+                        }, 4000); // 4 seconds to allow Google Apps Script to process
                     }
                 })
                 .catch(() => alert("Submission failed."))
