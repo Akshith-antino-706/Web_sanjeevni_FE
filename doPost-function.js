@@ -111,6 +111,11 @@ function doPost(e) {
       }
     }
 
+    // Clear cache so the next load gets fresh data
+    if (typeof invalidateVolunteerCache === 'function' && data.volunteerName) {
+      invalidateVolunteerCache(data.volunteerName);
+    }
+
     return ContentService
       .createTextOutput(JSON.stringify({ status: 'success', message: 'Data saved successfully' }))
       .setMimeType(ContentService.MimeType.JSON);

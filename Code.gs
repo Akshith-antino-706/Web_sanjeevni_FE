@@ -434,20 +434,63 @@ function doGet(e) {
     return getSupervisionData(normalizeVolunteerName(targetVolunteer));
   }
 
+  // ========== FETCH ALL DATA (Attendance + Supervision) - Optimized Single Request ==========
+  if (action === "getAllData") {
+    const tokenInfo = validateGoogleToken(e.parameter.token);
+    const email = tokenInfo ? tokenInfo.email : e.parameter.email;
+
+    if (!email) {
+      return errorResponse("Authentication required");
+    }
+
+    const requester = getUserByEmail(email);
+    if (!requester) {
+      return errorResponse("Access denied");
+    }
+
+    let targetVolunteer = requester.volunteerSheetName;
+
+    if (requester.role === "admin" && e.parameter.volunteer) {
+      targetVolunteer = e.parameter.volunteer;
+    }
+
+    if (requester.role === "volunteer" && e.parameter.volunteer) {
+      const requested = normalizeVolunteerName(e.parameter.volunteer);
+      const assigned = normalizeVolunteerName(requester.volunteerSheetName);
+      if (requested.toLowerCase() !== assigned.toLowerCase()) {
+        return errorResponse("Access denied. You can only view your own data.");
+      }
+      targetVolunteer = e.parameter.volunteer;
+    }
+
+    const normalized = normalizeVolunteerName(targetVolunteer);
+    
+    // Fetch both attendance and supervision data
+    const attendanceData = getVolunteerDataRaw(normalized);
+    const supervisionData = getSupervisionDataRaw(normalized);
+
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        status: "success",
+        attendance: attendanceData,
+        supervision: supervisionData
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+
   return errorResponse("Invalid action");
 }
 
 /************************************************
  * CORE FETCH LOGIC
  ************************************************/
-function getVolunteerData(sheetName) {
+// Raw data fetchers (return arrays, not JSON responses)
+function getVolunteerDataRaw(sheetName) {
   try {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = ss.getSheetByName(sheetName);
 
-    if (!sheet) {
-      return successResponse({ data: [] });
-    }
+    if (!sheet) return [];
 
     const values = sheet.getDataRange().getValues();
     const data = [];
@@ -469,22 +512,19 @@ function getVolunteerData(sheetName) {
       });
     }
 
-    return successResponse({ data });
-
+    return data;
   } catch (err) {
-    return errorResponse(err.toString());
+    return [];
   }
 }
 
-function getSupervisionData(volunteerName) {
+function getSupervisionDataRaw(volunteerName) {
   try {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheetName = (volunteerName || "").trim() + "_Supervision";
     const sheet = ss.getSheetByName(sheetName);
 
-    if (!sheet) {
-      return successResponse({ data: [] });
-    }
+    if (!sheet) return [];
 
     const values = sheet.getDataRange().getValues();
     const data = [];
@@ -502,8 +542,26 @@ function getSupervisionData(volunteerName) {
       });
     }
 
-    return successResponse({ data });
+    return data;
+  } catch (err) {
+    return [];
+  }
+}
 
+// JSON response wrappers (for individual getData/getSupervisionData actions)
+function getVolunteerData(sheetName) {
+  try {
+    const data = getVolunteerDataRaw(sheetName);
+    return successResponse({ data });
+  } catch (err) {
+    return errorResponse(err.toString());
+  }
+}
+
+function getSupervisionData(volunteerName) {
+  try {
+    const data = getSupervisionDataRaw(volunteerName);
+    return successResponse({ data });
   } catch (err) {
     return errorResponse(err.toString());
   }
