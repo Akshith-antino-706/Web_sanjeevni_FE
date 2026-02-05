@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sanjeevni - Volunteer Attendance</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <!-- Google Sign-In -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
@@ -16,16 +18,22 @@
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             height: 100%;
             overflow-x: hidden;
+            overflow-y: scroll;
+            /* Prevent layout shift between tabs with different heights */
         }
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(160deg, #dff6f0 0%, #e8eef8 40%, #f5e6f0 70%, #e0f4f1 100%);
+            background: #D9C3A3;
+            /* Beige / Sand Background */
             min-height: 100vh;
-            padding: 24px;
+            padding: 40px;
+            color: #3A2F2F;
+            /* Soft Black / Brownish text */
         }
 
         /* Main Layout - 2 Columns */
@@ -34,6 +42,8 @@
             grid-template-columns: 280px 1fr;
             gap: 24px;
             max-width: 1400px;
+            width: 100%;
+            /* Force grid to fill max-width or viewport */
             margin: 0 auto;
             height: calc(100vh - 48px);
         }
@@ -65,7 +75,7 @@
         .card {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -79,7 +89,7 @@
 
         .card.data-card {
             flex: 0 0 auto;
-            height: 55vh;
+            height: 45vh;
             min-height: 280px;
             overflow: hidden;
             display: flex;
@@ -88,7 +98,8 @@
         }
 
         .card-header {
-            background: linear-gradient(135deg, #4ECDC4 0%, #9B8EC7 100%);
+            background: #2F4A7D;
+            /* Navy Blue */
             color: white;
             padding: 10px 14px;
             font-weight: 600;
@@ -108,9 +119,9 @@
 
         /* Form Styles */
         .form-header {
-            background: linear-gradient(135deg, #4ECDC4 0%, #9B8EC7 100%);
-            color: white;
-            padding: 14px;
+            background: transparent;
+            color: #042F2E;
+            padding: 20px 14px 10px;
             text-align: center;
         }
 
@@ -121,15 +132,19 @@
         }
 
         .form-header h1 {
-            font-size: 1rem;
+            font-size: 1.2rem;
             font-weight: 700;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             margin-bottom: 2px;
+            color: #2F4A7D;
+            /* Navy Blue */
         }
 
         .form-header .subtitle {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             opacity: 0.9;
+            color: #3A2F2F;
+            /* Soft Black */
         }
 
         .form-body {
@@ -144,7 +159,8 @@
         }
 
         .form-table tr {
-            border-bottom: 1px solid #e8f5f1;
+            border-bottom: 1px solid #EAE0D1;
+            /* Muted Beige-Gray */
         }
 
         .form-table td {
@@ -153,11 +169,13 @@
         }
 
         .form-table td:first-child {
-            width: 80px;
+            width: 110px;
+            min-width: 110px;
             font-weight: 500;
             font-size: 0.7rem;
-            color: #3D4852;
-            background: #f8fbfa;
+            color: #2B2B2B;
+            /* Dark Charcoal */
+            background: rgba(255, 255, 255, 0.3);
             padding-left: 8px;
         }
 
@@ -166,20 +184,26 @@
         .form-table textarea {
             width: 100%;
             padding: 6px 8px;
-            border: 1px solid #e0eeeb;
+            border: 1px solid #C4B5A0;
+            /* Muted Beige Border */
             border-radius: 6px;
             font-size: 0.75rem;
             font-family: 'Poppins', sans-serif;
-            color: #3D4852;
+            color: #3A2F2F;
             background: white;
+        }
+
+        .form-table input[type="date"] {
+            cursor: pointer;
         }
 
         .form-table input:focus,
         .form-table select:focus,
         .form-table textarea:focus {
             outline: none;
-            border-color: #4ECDC4;
-            box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.1);
+            border-color: #C97C7C;
+            /* Muted Rose */
+            box-shadow: 0 0 0 2px rgba(201, 124, 124, 0.2);
         }
 
         .form-table select {
@@ -199,11 +223,11 @@
         .custom-dropdown-trigger {
             width: 100%;
             padding: 6px 24px 6px 8px;
-            border: 1px solid #e0eeeb;
+            border: 1px solid #C4B5A0;
             border-radius: 6px;
             font-size: 0.75rem;
             font-family: 'Poppins', sans-serif;
-            color: #3D4852;
+            color: #3A2F2F;
             background: white;
             cursor: pointer;
             text-align: left;
@@ -216,7 +240,7 @@
             top: 50%;
             transform: translateY(-50%);
             font-size: 8px;
-            color: #4ECDC4;
+            color: #C97C7C;
         }
 
         .custom-dropdown.open .custom-dropdown-trigger::after {
@@ -233,12 +257,12 @@
             left: 0;
             right: 0;
             background: white;
-            border: 1px solid #4ECDC4;
+            border: 1px solid #C97C7C;
             border-top: none;
             border-radius: 0 0 6px 6px;
             z-index: 100;
             display: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .custom-dropdown.open .custom-dropdown-panel {
@@ -246,19 +270,21 @@
         }
 
         .custom-dropdown.open .custom-dropdown-trigger {
-            border-color: #4ECDC4;
+            border-color: #C97C7C;
             border-radius: 6px 6px 0 0;
         }
 
         .custom-dropdown-search {
             padding: 6px;
-            border-bottom: 1px solid #e8f5f1;
+            border-bottom: 1px solid #EAE0D1;
+            /* Muted Beige-Gray */
         }
 
         .custom-dropdown-search input {
             width: 100%;
             padding: 6px 8px;
-            border: 1px solid #e0eeeb;
+            border: 1px solid #EAE0D1;
+            /* Muted Beige-Gray */
             border-radius: 4px;
             font-size: 0.7rem;
         }
@@ -275,16 +301,18 @@
         }
 
         .custom-dropdown-item:hover {
-            background: #E8F5F1;
+            background: #FAF3E8;
+            /* Lighter Sand */
         }
 
         .custom-dropdown-item.selected {
-            background: #4ECDC4;
-            color: white;
+            background: #E8B4B4;
+            /* Light Blush */
+            color: #2D3E50;
         }
 
         .custom-dropdown-item.hidden {
-            display: none;
+            display: none !important;
         }
 
         .custom-dropdown-empty {
@@ -297,7 +325,8 @@
         /* Submit Button */
         .submit-btn {
             width: 100%;
-            background: linear-gradient(135deg, #4ECDC4 0%, #9B8EC7 100%);
+            background: #C97C7C;
+            /* Muted Rose */
             color: white;
             border: none;
             padding: 10px 16px;
@@ -310,7 +339,8 @@
         }
 
         .submit-btn:hover {
-            opacity: 0.95;
+            opacity: 1;
+            background: #B56A6A;
             transform: translateY(-1px);
         }
 
@@ -345,12 +375,12 @@
         }
 
         .data-table th {
-            background: #f0f5f3;
+            background: #2F4A7D;
             padding: 8px 6px;
             text-align: left;
             font-weight: 600;
-            color: #3D4852;
-            border: 1px solid #d0e0dc;
+            color: white;
+            border: 1px solid #243B66;
             font-size: 0.65rem;
             white-space: nowrap;
             position: sticky;
@@ -360,13 +390,16 @@
 
         .data-table td {
             padding: 6px;
-            border: 1px solid #e8f0ed;
-            color: #3D4852;
+            border: 1px solid #D9C3A3;
+            /* Muted Beige-Gray */
+            color: #3A2F2F;
+            /* Soft Black */
             background: white;
         }
 
         .data-table tr:hover td {
-            background: #f8fcfb;
+            background: #FAF3E8;
+            /* Lighter Sand */
         }
 
         .data-table .sno {
@@ -391,6 +424,52 @@
             font-size: 36px;
             margin-bottom: 8px;
             opacity: 0.5;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(0.95);
+                opacity: 0.5;
+            }
+        }
+
+        /* Skeleton Loading */
+        .skeleton {
+            background: linear-gradient(90deg, #EAE0D1 25%, #f2ebdf 50%, #EAE0D1 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 4px;
+            height: 20px;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        @keyframes skeleton-loading {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .skeleton-row {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            border-bottom: 1px solid #D9C3A3;
         }
 
         .volunteer-header {
@@ -411,11 +490,11 @@
 
         .volunteer-header h3 {
             font-size: 0.85rem;
-            color: #3D4852;
+            color: #2F4A7D;
         }
 
         .volunteer-header .badge {
-            background: linear-gradient(135deg, #4ECDC4, #9B8EC7);
+            background: #C97C7C;
             color: white;
             padding: 2px 8px;
             border-radius: 10px;
@@ -426,12 +505,13 @@
         .pivot-card {
             background: white;
             border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             overflow: hidden;
         }
 
         .pivot-header {
-            background: linear-gradient(135deg, #4ECDC4, #9B8EC7);
+            background: #243B66;
+            /* Deep Blue Accent */
             color: white;
             padding: 8px 12px;
             font-weight: 600;
@@ -445,12 +525,13 @@
         }
 
         .pivot-table th {
-            background: #f0f5f3;
+            background: #EAE0D1;
+            /* Lighter Beige for internal headers */
             padding: 6px 8px;
             text-align: center;
             font-weight: 600;
-            color: #3D4852;
-            border: 1px solid #d0e0dc;
+            color: #2B2B2B;
+            border: 1px solid #D9C3A3;
             font-size: 0.65rem;
         }
 
@@ -460,9 +541,9 @@
 
         .pivot-table td {
             padding: 6px 8px;
-            border: 1px solid #e8f0ed;
+            border: 1px solid #EAE0D1;
             text-align: center;
-            color: #3D4852;
+            color: #3A2F2F;
         }
 
         .pivot-table td:first-child {
@@ -477,13 +558,13 @@
         }
 
         .pivot-table tr.total-row td {
-            border-top: 2px solid #4ECDC4;
+            border-top: 2px solid #2F4A7D;
         }
 
         /* Extra Hours Pivot */
         .extra-hours-table td:last-child {
             font-weight: 600;
-            color: #4ECDC4;
+            color: #C97C7C;
         }
 
         /* Success Modal */
@@ -500,7 +581,9 @@
             align-items: center;
         }
 
-        .success-modal.show { display: flex; }
+        .success-modal.show {
+            display: flex;
+        }
 
         .success-content {
             background: white;
@@ -511,19 +594,19 @@
         }
 
         .success-content h2 {
-            color: #4ECDC4;
+            color: #2F4A7D;
             font-size: 1.3rem;
             margin-bottom: 8px;
         }
 
         .success-content p {
-            color: #3D4852;
+            color: #3A2F2F;
             margin-bottom: 16px;
             font-size: 0.9rem;
         }
 
         .success-content button {
-            background: linear-gradient(135deg, #4ECDC4, #9B8EC7);
+            background: #C97C7C;
             color: white;
             border: none;
             padding: 8px 24px;
@@ -551,10 +634,12 @@
                 height: auto;
                 gap: 20px;
             }
+
             .data-section {
                 min-height: 400px;
                 gap: 20px;
             }
+
             .pivot-section {
                 grid-template-columns: 1fr;
                 gap: 20px;
@@ -562,9 +647,18 @@
         }
 
         @media (max-width: 600px) {
-            body { padding: 16px; }
-            .main-container { gap: 16px; }
-            .data-section { gap: 16px; }
+            body {
+                padding: 16px;
+            }
+
+            .main-container {
+                gap: 16px;
+            }
+
+            .data-section {
+                gap: 16px;
+            }
+
             .pivot-section {
                 grid-template-columns: 1fr;
                 gap: 16px;
@@ -578,7 +672,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(160deg, #dff6f0 0%, #e8eef8 40%, #f5e6f0 70%, #e0f4f1 100%);
+            background: #D9C3A3;
             z-index: 2000;
             display: flex;
             justify-content: center;
@@ -592,7 +686,7 @@
         .login-card {
             background: white;
             border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
             padding: 40px;
             text-align: center;
             max-width: 400px;
@@ -607,7 +701,8 @@
 
         .login-card h1 {
             font-size: 1.8rem;
-            background: linear-gradient(135deg, #4ECDC4, #9B8EC7);
+            background: #2F4A7D;
+            /* Navy Blue */
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -633,12 +728,11 @@
             font-size: 0.95rem;
             font-weight: 500;
             color: #3D4852;
-            transition: all 0.2s;
         }
 
         .login-card .google-signin-btn:hover {
-            border-color: #4ECDC4;
-            box-shadow: 0 2px 8px rgba(78, 205, 196, 0.2);
+            border-color: #0FB9B1;
+            box-shadow: 0 2px 8px rgba(15, 185, 177, 0.2);
         }
 
         .login-card .google-signin-btn svg {
@@ -677,8 +771,13 @@
             margin-right: 12px;
         }
 
-        .login-divider::after {
-            margin-left: 12px;
+        .email-login-form input {
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
         }
 
         .email-login-form {
@@ -687,22 +786,12 @@
             gap: 12px;
         }
 
-        .email-login-form input {
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 0.9rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
         .email-login-form input:focus {
-            border-color: #4ECDC4;
+            border-color: #0FB9B1;
         }
 
         .email-login-btn {
-            background: linear-gradient(135deg, #4ECDC4, #9B8EC7);
+            background: #2F4A7D;
             color: white;
             border: none;
             padding: 12px 24px;
@@ -711,7 +800,6 @@
             font-size: 0.95rem;
             font-weight: 500;
             cursor: pointer;
-            transition: opacity 0.2s;
         }
 
         .email-login-btn:hover {
@@ -727,7 +815,7 @@
         .user-header {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             padding: 12px 20px;
             margin-bottom: 24px;
             display: flex;
@@ -749,7 +837,7 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #4ECDC4, #9B8EC7);
+            background: #0FB9B1;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -766,7 +854,8 @@
         .user-name {
             font-weight: 600;
             font-size: 0.9rem;
-            color: #3D4852;
+            color: #2F4A7D;
+            /* Navy Blue */
         }
 
         .user-role {
@@ -776,7 +865,8 @@
         }
 
         .user-role.admin {
-            color: #9B8EC7;
+            color: #C97C7C;
+            /* Rose Accent */
             font-weight: 500;
         }
 
@@ -787,7 +877,7 @@
         }
 
         .admin-panel-btn {
-            background: linear-gradient(135deg, #9B8EC7, #4ECDC4);
+            background: #2F4A7D;
             color: white;
             border: none;
             padding: 8px 16px;
@@ -799,7 +889,8 @@
         }
 
         .admin-panel-btn:hover {
-            opacity: 0.9;
+            background: #243B66;
+            opacity: 1;
         }
 
         .admin-panel-btn.hidden {
@@ -852,7 +943,7 @@
         }
 
         .admin-modal-header {
-            background: linear-gradient(135deg, #9B8EC7, #4ECDC4);
+            background: #2F4A7D;
             color: white;
             padding: 16px 20px;
             display: flex;
@@ -866,7 +957,7 @@
         }
 
         .admin-modal-close {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
             width: 32px;
@@ -888,10 +979,10 @@
 
         .admin-section h3 {
             font-size: 0.9rem;
-            color: #3D4852;
+            color: #2F4A7D;
             margin-bottom: 12px;
             padding-bottom: 8px;
-            border-bottom: 2px solid #e8f5f1;
+            border-bottom: 2px solid #EAE0D1;
         }
 
         .user-list {
@@ -903,12 +994,13 @@
         .user-list-header {
             display: grid;
             grid-template-columns: 2fr 2fr 1fr 80px;
-            background: #f8fbfa;
+            background: #EAE0D1;
+            /* Lighter Beige */
             padding: 10px 12px;
             font-weight: 600;
             font-size: 0.75rem;
-            color: #3D4852;
-            border-bottom: 1px solid #e0e0e0;
+            color: #2B2B2B;
+            border-bottom: 1px solid #D9C3A3;
         }
 
         .user-list-row {
@@ -937,13 +1029,14 @@
         }
 
         .user-list-row .role-badge.admin {
-            background: #f0ebf8;
-            color: #9B8EC7;
+            background: #E8B4B4;
+            /* Light Blush */
+            color: #2F4A7D;
         }
 
         .user-list-row .role-badge.volunteer {
-            background: #e8f5f1;
-            color: #4ECDC4;
+            background: #D9C3A3;
+            color: #3A2F2F;
         }
 
         .user-list-row .delete-user-btn {
@@ -988,7 +1081,7 @@
         }
 
         .add-user-form .add-user-btn {
-            background: linear-gradient(135deg, #4ECDC4, #9B8EC7);
+            background: #C97C7C;
             color: white;
             border: none;
             padding: 8px 16px;
@@ -1012,6 +1105,7 @@
             display: block;
         }
 
+        /* Admin access to everything */
         body.is-admin .admin-panel-btn {
             display: inline-block;
         }
@@ -1028,10 +1122,10 @@
 
         .volunteer-name-display {
             padding: 6px 8px;
-            background: #f0f5f3;
+            background: #EAE0D1;
             border-radius: 6px;
             font-size: 0.75rem;
-            color: #3D4852;
+            color: #2F4A7D;
             font-weight: 500;
         }
 
@@ -1046,27 +1140,12 @@
         /* App container wrapper for layout with user header */
         .app-wrapper {
             max-width: 1400px;
+            width: 100%;
             margin: 0 auto;
-            height: calc(100vh - 48px);
+            height: calc(100vh - 80px);
             display: flex;
             flex-direction: column;
             gap: 24px;
-        }
-
-        .app-wrapper .main-container {
-            flex: 1;
-            min-height: 0;
-            height: auto;
-        }
-
-        /* Sidebar Navigation */
-        .sidebar-nav {
-            display: flex;
-            gap: 0;
-            margin-bottom: 12px;
-            background: #f0f5f3;
-            border-radius: 8px;
-            padding: 4px;
         }
 
         .sidebar-nav-btn {
@@ -1080,16 +1159,28 @@
             color: #666;
             cursor: pointer;
             border-radius: 6px;
-            transition: all 0.2s;
         }
 
         .sidebar-nav-btn:hover {
             color: #3D4852;
-            background: rgba(255,255,255,0.7);
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Sidebar Navigation */
+        .sidebar-nav {
+            display: flex;
+            gap: 0;
+            margin-top: 12px;
+            margin-bottom: 12px;
+            background: #EAE0D1;
+            /* Lighter Beige Background */
+            border-radius: 8px;
+            padding: 4px;
         }
 
         .sidebar-nav-btn.active {
-            background: linear-gradient(135deg, #4ECDC4 0%, #9B8EC7 100%);
+            background: #C97C7C;
+            /* Muted Rose */
             color: white;
         }
 
@@ -1100,6 +1191,8 @@
             flex: 1;
             min-height: 0;
             gap: 24px;
+            height: 100%;
+            /* Ensure it fills the parent height */
         }
 
         .panel-content.hidden {
@@ -1113,36 +1206,34 @@
             overflow-x: hidden;
         }
 
-        /* Supervision summary card */
+        /* Supervision summary card - removed teal override */
         .supervision-summary-card {
             background: white;
             border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             overflow: hidden;
-        }
-
-        .supervision-summary-card .pivot-header {
-            background: linear-gradient(135deg, #4ECDC4, #9B8EC7);
         }
     </style>
 </head>
+
 <body>
     <!-- Login Overlay -->
     <div class="login-overlay" id="loginOverlay">
         <div class="login-card">
-            <svg class="lotus-icon" viewBox="0 0 100 100" fill="none">
-                <ellipse cx="50" cy="75" rx="35" ry="8" fill="rgba(78,205,196,0.3)"/>
-                <path d="M50 70 C50 50, 30 40, 20 55 C30 45, 45 50, 50 70" fill="#4ECDC4"/>
-                <path d="M50 70 C50 50, 70 40, 80 55 C70 45, 55 50, 50 70" fill="#4ECDC4"/>
-                <path d="M50 65 C50 40, 25 30, 15 45 C30 35, 45 45, 50 65" fill="#9B8EC7"/>
-                <path d="M50 65 C50 40, 75 30, 85 45 C70 35, 55 45, 50 65" fill="#9B8EC7"/>
-                <circle cx="50" cy="72" r="6" fill="#FFE66D"/>
-            </svg>
+            <!-- Custom Sanjivini Logo -->
+            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 24px;">
+                <svg width="80" height="70" viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 70 L45 35 L10 10" stroke="#2F4A7D" stroke-width="12" stroke-linecap="round" />
+                    <path d="M45 35 L80 10" stroke="#2F4A7D" stroke-width="12" stroke-linecap="round" />
+                    <path d="M45 25 Q45 15 52 15 Q60 15 60 25 Q60 35 52 35 Q45 35 45 25" fill="#243B66" />
+                </svg>
+            </div>
             <h1>Sanjeevni</h1>
-            <p class="subtitle">Volunteer Attendance System</p>
+            <p class="subtitle">Society for Mental Health</p>
             <div class="email-login-form">
                 <input type="email" id="loginEmail" placeholder="Enter your email address">
-                <input type="password" id="loginPin" placeholder="Enter your PIN" maxlength="6" inputmode="numeric" pattern="[0-9]*">
+                <input type="password" id="loginPin" placeholder="Enter your PIN" maxlength="6" inputmode="numeric"
+                    pattern="[0-9]*">
                 <button class="email-login-btn" id="emailLoginBtn" onclick="loginWithEmail()">Sign In</button>
             </div>
             <p class="login-error" id="loginError">Access denied. Please contact administrator.</p>
@@ -1208,445 +1299,522 @@
                 </div>
             </div>
             <div class="user-actions">
-                <button class="admin-panel-btn hidden" id="adminPanelBtn" onclick="openAdminPanel()">Admin Panel</button>
+                <button class="admin-panel-btn hidden" id="adminPanelBtn" onclick="openAdminPanel()">Admin
+                    Panel</button>
                 <button class="signout-btn" onclick="signOut()">Sign Out</button>
             </div>
         </div>
 
         <div class="main-container">
-        <!-- Left: Form Section -->
-        <div class="form-section">
-            <nav class="sidebar-nav">
-                <button type="button" class="sidebar-nav-btn active" id="navAttendance" onclick="switchPanel('attendance')">Attendance</button>
-                <button type="button" class="sidebar-nav-btn" id="navSupervision" onclick="switchPanel('supervision')">Supervision</button>
-            </nav>
+            <!-- Left: Form Section -->
+            <div class="form-section">
+                <nav class="sidebar-nav">
+                    <button type="button" class="sidebar-nav-btn active" id="navAttendance"
+                        onclick="switchPanel('attendance')">Attendance</button>
+                    <button type="button" class="sidebar-nav-btn" id="navSupervision"
+                        onclick="switchPanel('supervision')">Supervision</button>
+                </nav>
 
-            <!-- Attendance Panel -->
-            <div id="attendancePanel" class="panel-content">
-            <div class="card form-card">
-                <div class="form-header">
-                    <svg class="lotus-icon" viewBox="0 0 100 100" fill="none">
-                        <ellipse cx="50" cy="75" rx="35" ry="8" fill="rgba(255,255,255,0.3)"/>
-                        <path d="M50 70 C50 50, 30 40, 20 55 C30 45, 45 50, 50 70" fill="rgba(255,255,255,0.9)"/>
-                        <path d="M50 70 C50 50, 70 40, 80 55 C70 45, 55 50, 50 70" fill="rgba(255,255,255,0.9)"/>
-                        <path d="M50 65 C50 40, 25 30, 15 45 C30 35, 45 45, 50 65" fill="rgba(255,255,255,0.75)"/>
-                        <path d="M50 65 C50 40, 75 30, 85 45 C70 35, 55 45, 50 65" fill="rgba(255,255,255,0.75)"/>
-                        <circle cx="50" cy="72" r="6" fill="rgba(255,255,255,0.95)"/>
-                    </svg>
-                    <h1>Sanjeevni</h1>
-                    <p class="subtitle">Volunteer Attendance</p>
-                </div>
-
-                <form id="attendanceForm" class="form-body">
-                    <table class="form-table">
-                        <tr>
-                            <td>Volunteer Name</td>
-                            <td>
-                                <input type="hidden" id="volunteer-name" name="volunteer_name" required>
-                                <div class="custom-dropdown" id="volunteerDropdown">
-                                    <button type="button" class="custom-dropdown-trigger placeholder" id="volunteerTrigger">Select...</button>
-                                    <div class="custom-dropdown-panel">
-                                        <div class="custom-dropdown-search">
-                                            <input type="text" id="volunteerSearch" placeholder="Search..." autocomplete="off">
-                                        </div>
-                                        <div class="custom-dropdown-list" id="volunteerList">
-                                            <div class="custom-dropdown-item" data-value="Akshith">Akshith</div>
-                                            <div class="custom-dropdown-item" data-value="Archana">Archana</div>
-                                            <div class="custom-dropdown-item" data-value="Azhar">Azhar</div>
-                                            <div class="custom-dropdown-item" data-value="Bhavna">Bhavna</div>
-                                            <div class="custom-dropdown-item" data-value="Binu">Binu</div>
-                                            <div class="custom-dropdown-item" data-value="Dharini">Dharini</div>
-                                            <div class="custom-dropdown-item" data-value="Divya">Divya</div>
-                                            <div class="custom-dropdown-item" data-value="Dolly">Dolly</div>
-                                            <div class="custom-dropdown-item" data-value="Fiesal">Fiesal</div>
-                                            <div class="custom-dropdown-item" data-value="Geeta">Geeta</div>
-                                            <div class="custom-dropdown-item" data-value="Gopal">Gopal</div>
-                                            <div class="custom-dropdown-item" data-value="K. Narayan">K. Narayan</div>
-                                            <div class="custom-dropdown-item" data-value="Kalpana">Kalpana</div>
-                                            <div class="custom-dropdown-item" data-value="Kavita">Kavita</div>
-                                            <div class="custom-dropdown-item" data-value="Madhu">Madhu</div>
-                                            <div class="custom-dropdown-item" data-value="Mamta V">Mamta V</div>
-                                            <div class="custom-dropdown-item" data-value="Manas">Manas</div>
-                                            <div class="custom-dropdown-item" data-value="Manish">Manish</div>
-                                            <div class="custom-dropdown-item" data-value="Meera">Meera</div>
-                                            <div class="custom-dropdown-item" data-value="Neelam">Neelam</div>
-                                            <div class="custom-dropdown-item" data-value="Niharika">Niharika</div>
-                                            <div class="custom-dropdown-item" data-value="Parul A">Parul A</div>
-                                            <div class="custom-dropdown-item" data-value="Parul P">Parul P</div>
-                                            <div class="custom-dropdown-item" data-value="Praveen">Praveen</div>
-                                            <div class="custom-dropdown-item" data-value="Prerona">Prerona</div>
-                                            <div class="custom-dropdown-item" data-value="Radhika">Radhika</div>
-                                            <div class="custom-dropdown-item" data-value="Ranjita">Ranjita</div>
-                                            <div class="custom-dropdown-item" data-value="Ritu">Ritu</div>
-                                            <div class="custom-dropdown-item" data-value="Shivani S">Shivani S</div>
-                                            <div class="custom-dropdown-item" data-value="Shuchi">Shuchi</div>
-                                            <div class="custom-dropdown-item" data-value="Simran">Simran</div>
-                                            <div class="custom-dropdown-item" data-value="Smita">Smita</div>
-                                            <div class="custom-dropdown-item" data-value="Sonia">Sonia</div>
-                                            <div class="custom-dropdown-item" data-value="Suminder">Suminder</div>
-                                            <div class="custom-dropdown-item" data-value="Tanishqa">Tanishqa</div>
-                                            <div class="custom-dropdown-item" data-value="Tanuja">Tanuja</div>
-                                            <div class="custom-dropdown-item" data-value="Varun">Varun</div>
-                                            <div class="custom-dropdown-item" data-value="Veena A">Veena A</div>
-                                            <div class="custom-dropdown-item" data-value="Veena M">Veena M</div>
-                                            <div class="custom-dropdown-item" data-value="Vickie">Vickie</div>
-                                            <div class="custom-dropdown-item" data-value="Vidhu">Vidhu</div>
-                                        </div>
-                                        <div class="custom-dropdown-empty" style="display:none;">No match</div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Date</td>
-                            <td><input type="date" id="date" name="date" required></td>
-                        </tr>
-                        <tr>
-                            <td>Time</td>
-                            <td>
-                                <select id="time" name="time" required>
-                                    <option value="" disabled selected>Select</option>
-                                    <option value="2pm-5:30pm">2pm-5:30pm</option>
-                                    <option value="10am-2pm">10am-2pm</option>
-                                    <option value="Full Day">Full Day</option>
-                                    <option value="extra time">extra time</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Extra Time (From)</td>
-                            <td><input type="time" id="extra-time-from" name="extra_time_from"></td>
-                        </tr>
-                        <tr>
-                            <td>Extra Time (till)</td>
-                            <td><input type="time" id="extra-time-till" name="extra_time_till"></td>
-                        </tr>
-                        <tr>
-                            <td>Duty</td>
-                            <td>
-                                <select id="duty" name="duty" required>
-                                    <option value="" disabled selected>Select</option>
-                                    <option value="CI">CI</option>
-                                    <option value="Supervisor meeting">Supervisor meeting</option>
-                                    <option value="Supervision Given">Supervision Given</option>
-                                    <option value="Supervision Taken">Supervision Taken</option>
-                                    <option value="EC meeting">EC meeting</option>
-                                    <option value="Trainings">Trainings</option>
-                                    <option value="COP">COP</option>
-                                    <option value="Tie Ups">Tie Ups</option>
-                                    <option value="Sub-committee meeting">Sub-committee meeting</option>
-                                    <option value="Workshop">Workshop</option>
-                                    <option value="Orientation">Orientation</option>
-                                    <option value="Volunteer Meeting">Volunteer Meeting</option>
-                                    <option value="Others">Others</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Reason (for Others)</td>
-                            <td><input type="text" id="reason-other-duty" name="reason_other_duty" placeholder="If applicable"></td>
-                        </tr>
-                        <tr>
-                            <td>No. of Hours</td>
-                            <td><input type="text" id="no-of-hours" name="no_of_hours" placeholder="Auto-calculated" readonly style="background-color: #f0f0f0; cursor: not-allowed;"></td>
-                        </tr>
-                        <tr>
-                            <td>Duty From</td>
-                            <td>
-                                <select id="duty-from" name="duty_from" required>
-                                    <option value="" disabled selected>Select</option>
-                                    <option value="Centre">Centre</option>
-                                    <option value="Home">Home</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Remarks</td>
-                            <td><textarea id="remarks" name="remarks" placeholder="Any remarks..."></textarea></td>
-                        </tr>
-                    </table>
-                    <button type="submit" class="submit-btn">Submit Attendance</button>
-                </form>
-            </div>
-            </div><!-- End attendancePanel -->
-
-            <!-- Supervision Panel -->
-            <div id="supervisionPanel" class="panel-content hidden">
-            <div class="card form-card">
-                <div class="form-header">
-                    <svg class="lotus-icon" viewBox="0 0 100 100" fill="none">
-                        <ellipse cx="50" cy="75" rx="35" ry="8" fill="rgba(255,255,255,0.3)"/>
-                        <path d="M50 70 C50 50, 30 40, 20 55 C30 45, 45 50, 50 70" fill="rgba(255,255,255,0.9)"/>
-                        <path d="M50 70 C50 50, 70 40, 80 55 C70 45, 55 50, 50 70" fill="rgba(255,255,255,0.9)"/>
-                        <path d="M50 65 C50 40, 25 30, 15 45 C30 35, 45 45, 50 65" fill="rgba(255,255,255,0.75)"/>
-                        <path d="M50 65 C50 40, 75 30, 85 45 C70 35, 55 45, 50 65" fill="rgba(255,255,255,0.75)"/>
-                        <circle cx="50" cy="72" r="6" fill="rgba(255,255,255,0.95)"/>
-                    </svg>
-                    <h1>Sanjeevni</h1>
-                    <p class="subtitle">Supervision List</p>
-                </div>
-
-                <form id="supervisionForm" class="form-body">
-                    <table class="form-table">
-                        <tr>
-                            <td>Volunteer Name</td>
-                            <td>
-                                <input type="hidden" id="sup-volunteer-name" name="sup_volunteer_name" required>
-                                <div class="custom-dropdown" id="supVolunteerDropdown">
-                                    <button type="button" class="custom-dropdown-trigger placeholder" id="supVolunteerTrigger">Select...</button>
-                                    <div class="custom-dropdown-panel">
-                                        <div class="custom-dropdown-search">
-                                            <input type="text" id="supVolunteerSearch" placeholder="Search..." autocomplete="off">
-                                        </div>
-                                        <div class="custom-dropdown-list" id="supVolunteerList">
-                                            <div class="custom-dropdown-item" data-value="Akshith">Akshith</div>
-                                            <div class="custom-dropdown-item" data-value="Archana">Archana</div>
-                                            <div class="custom-dropdown-item" data-value="Azhar">Azhar</div>
-                                            <div class="custom-dropdown-item" data-value="Bhavna">Bhavna</div>
-                                            <div class="custom-dropdown-item" data-value="Binu">Binu</div>
-                                            <div class="custom-dropdown-item" data-value="Dharini">Dharini</div>
-                                            <div class="custom-dropdown-item" data-value="Divya">Divya</div>
-                                            <div class="custom-dropdown-item" data-value="Dolly">Dolly</div>
-                                            <div class="custom-dropdown-item" data-value="Fiesal">Fiesal</div>
-                                            <div class="custom-dropdown-item" data-value="Geeta">Geeta</div>
-                                            <div class="custom-dropdown-item" data-value="Gopal">Gopal</div>
-                                            <div class="custom-dropdown-item" data-value="K. Narayan">K. Narayan</div>
-                                            <div class="custom-dropdown-item" data-value="Kalpana">Kalpana</div>
-                                            <div class="custom-dropdown-item" data-value="Kavita">Kavita</div>
-                                            <div class="custom-dropdown-item" data-value="Madhu">Madhu</div>
-                                            <div class="custom-dropdown-item" data-value="Mamta V">Mamta V</div>
-                                            <div class="custom-dropdown-item" data-value="Manas">Manas</div>
-                                            <div class="custom-dropdown-item" data-value="Manish">Manish</div>
-                                            <div class="custom-dropdown-item" data-value="Meera">Meera</div>
-                                            <div class="custom-dropdown-item" data-value="Neelam">Neelam</div>
-                                            <div class="custom-dropdown-item" data-value="Niharika">Niharika</div>
-                                            <div class="custom-dropdown-item" data-value="Parul A">Parul A</div>
-                                            <div class="custom-dropdown-item" data-value="Parul P">Parul P</div>
-                                            <div class="custom-dropdown-item" data-value="Praveen">Praveen</div>
-                                            <div class="custom-dropdown-item" data-value="Prerona">Prerona</div>
-                                            <div class="custom-dropdown-item" data-value="Radhika">Radhika</div>
-                                            <div class="custom-dropdown-item" data-value="Ranjita">Ranjita</div>
-                                            <div class="custom-dropdown-item" data-value="Ritu">Ritu</div>
-                                            <div class="custom-dropdown-item" data-value="Shivani S">Shivani S</div>
-                                            <div class="custom-dropdown-item" data-value="Shuchi">Shuchi</div>
-                                            <div class="custom-dropdown-item" data-value="Simran">Simran</div>
-                                            <div class="custom-dropdown-item" data-value="Smita">Smita</div>
-                                            <div class="custom-dropdown-item" data-value="Sonia">Sonia</div>
-                                            <div class="custom-dropdown-item" data-value="Suminder">Suminder</div>
-                                            <div class="custom-dropdown-item" data-value="Tanishqa">Tanishqa</div>
-                                            <div class="custom-dropdown-item" data-value="Tanuja">Tanuja</div>
-                                            <div class="custom-dropdown-item" data-value="Varun">Varun</div>
-                                            <div class="custom-dropdown-item" data-value="Veena A">Veena A</div>
-                                            <div class="custom-dropdown-item" data-value="Veena M">Veena M</div>
-                                            <div class="custom-dropdown-item" data-value="Vickie">Vickie</div>
-                                            <div class="custom-dropdown-item" data-value="Vidhu">Vidhu</div>
-                                        </div>
-                                        <div class="custom-dropdown-empty" style="display:none;">No match</div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Supervisor Name</td>
-                            <td>
-                                <input type="hidden" id="supervisor-name" name="supervisor_name" required>
-                                <div class="custom-dropdown" id="supervisorDropdown">
-                                    <button type="button" class="custom-dropdown-trigger placeholder" id="supervisorTrigger">Select...</button>
-                                    <div class="custom-dropdown-panel">
-                                        <div class="custom-dropdown-search">
-                                            <input type="text" id="supervisorSearch" placeholder="Search..." autocomplete="off">
-                                        </div>
-                                        <div class="custom-dropdown-list" id="supervisorList">
-                                            <div class="custom-dropdown-item" data-value="Vickie">Vickie</div>
-                                            <div class="custom-dropdown-item" data-value="Geeta">Geeta</div>
-                                            <div class="custom-dropdown-item" data-value="Mamta V">Mamta V</div>
-                                            <div class="custom-dropdown-item" data-value="Manish">Manish</div>
-                                            <div class="custom-dropdown-item" data-value="Smita">Smita</div>
-                                            <div class="custom-dropdown-item" data-value="Madhu">Madhu</div>
-                                            <div class="custom-dropdown-item" data-value="Kalpana">Kalpana</div>
-                                            <div class="custom-dropdown-item" data-value="K. Narayan">K. Narayan</div>
-                                            <div class="custom-dropdown-item" data-value="Veena A">Veena A</div>
-                                            <div class="custom-dropdown-item" data-value="Veena M">Veena M</div>
-                                        </div>
-                                        <div class="custom-dropdown-empty" style="display:none;">No match</div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Time (in Hrs)</td>
-                            <td><input type="number" id="sup-time-hrs" name="sup_time_hrs" step="0.01" min="0" placeholder="e.g. 0.25, 0.5, 1" required></td>
-                        </tr>
-                        <tr>
-                            <td>Date</td>
-                            <td><input type="date" id="sup-date" name="sup_date" required></td>
-                        </tr>
-                        <tr>
-                            <td>Remark</td>
-                            <td><textarea id="sup-remark" name="sup_remark" placeholder="Any remarks..."></textarea></td>
-                        </tr>
-                    </table>
-                    <button type="submit" class="submit-btn">Submit Supervision</button>
-                </form>
-            </div>
-            </div><!-- End supervisionPanel -->
-        </div>
-
-        <!-- Center: Data Section -->
-        <div class="data-section">
-            <!-- Attendance Data Panel -->
-            <div id="attendanceDataPanel" class="panel-content">
-            <div class="card data-card">
-                <div class="card-header">
-                    Attendance for <span id="headerVolunteerName">_______</span>
-                </div>
-                <div id="dataPlaceholder" class="data-placeholder">
-                    <div class="data-placeholder-icon">👤</div>
-                    <p>Please select your name from the Dropdown to autofill your data</p>
-                </div>
-                <div id="volunteerData" style="display:none;">
-                    <div class="volunteer-header">
-                        <div class="volunteer-header-left">
-                            <span>Attendance for</span>
-                            <strong id="volunteerNameDisplay">Volunteer</strong>
+                <!-- Attendance Panel -->
+                <div id="attendancePanel" class="panel-content">
+                    <div class="card form-card">
+                        <div class="form-header">
+                            <!-- Custom Sanjeevni Logo -->
+                            <div
+                                style="display: flex; flex-direction: column; align-items: center; margin-bottom: 8px;">
+                                <svg width="60" height="50" viewBox="0 0 100 80" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 70 L45 35 L10 10" stroke="#2F4A7D" stroke-width="12"
+                                        stroke-linecap="round" />
+                                    <path d="M45 35 L80 10" stroke="#2F4A7D" stroke-width="12" stroke-linecap="round" />
+                                    <path d="M45 25 Q45 15 52 15 Q60 15 60 25 Q60 35 52 35 Q45 35 45 25"
+                                        fill="#243B66" />
+                                </svg>
+                            </div>
+                            <h1>Sanjeevni</h1>
+                            <p class="subtitle">Society for Mental Health</p>
                         </div>
-                        <span class="badge" id="recordCount">0 records</span>
-                    </div>
-                    <div class="data-table-wrapper">
-                        <table class="data-table">
-                            <thead>
+
+                        <form id="attendanceForm" class="form-body">
+                            <table class="form-table">
                                 <tr>
-                                    <th>S. No</th>
-                                    <th>Date</th>
-                                    <th>Time</th>
-                                    <th>Extra Time (From)</th>
-                                    <th>Extra Time (till)</th>
-                                    <th>Reason for extra time</th>
-                                    <th>Duty</th>
-                                    <th>No.Of Hours</th>
-                                    <th>Duty from Centre/Home</th>
-                                    <th>Remarks</th>
+                                    <td>Volunteer Name</td>
+                                    <td>
+                                        <input type="hidden" id="volunteer-name" name="volunteer_name" required>
+                                        <div class="custom-dropdown" id="volunteerDropdown">
+                                            <button type="button" class="custom-dropdown-trigger placeholder"
+                                                id="volunteerTrigger">Select...</button>
+                                            <div class="custom-dropdown-panel">
+                                                <div class="custom-dropdown-search">
+                                                    <input type="text" id="volunteerSearch" placeholder="Search..."
+                                                        autocomplete="off">
+                                                </div>
+                                                <div class="custom-dropdown-list" id="volunteerList">
+                                                    <div class="custom-dropdown-item" data-value="Akshith">Akshith</div>
+                                                    <div class="custom-dropdown-item" data-value="Archana">Archana</div>
+                                                    <div class="custom-dropdown-item" data-value="Azhar">Azhar</div>
+                                                    <div class="custom-dropdown-item" data-value="Bhavna">Bhavna</div>
+                                                    <div class="custom-dropdown-item" data-value="Binu">Binu</div>
+                                                    <div class="custom-dropdown-item" data-value="Dharini">Dharini</div>
+                                                    <div class="custom-dropdown-item" data-value="Divya">Divya</div>
+                                                    <div class="custom-dropdown-item" data-value="Dolly">Dolly</div>
+                                                    <div class="custom-dropdown-item" data-value="Fiesal">Fiesal</div>
+                                                    <div class="custom-dropdown-item" data-value="Geeta">Geeta</div>
+                                                    <div class="custom-dropdown-item" data-value="Gopal">Gopal</div>
+                                                    <div class="custom-dropdown-item" data-value="K. Narayan">K. Narayan
+                                                    </div>
+                                                    <div class="custom-dropdown-item" data-value="Kalpana">Kalpana</div>
+                                                    <div class="custom-dropdown-item" data-value="Kavita">Kavita</div>
+                                                    <div class="custom-dropdown-item" data-value="Madhu">Madhu</div>
+                                                    <div class="custom-dropdown-item" data-value="Mamta V">Mamta V</div>
+                                                    <div class="custom-dropdown-item" data-value="Manas">Manas</div>
+                                                    <div class="custom-dropdown-item" data-value="Manish">Manish</div>
+                                                    <div class="custom-dropdown-item" data-value="Meera">Meera</div>
+                                                    <div class="custom-dropdown-item" data-value="Neelam">Neelam</div>
+                                                    <div class="custom-dropdown-item" data-value="Niharika">Niharika
+                                                    </div>
+                                                    <div class="custom-dropdown-item" data-value="Parul A">Parul A</div>
+                                                    <div class="custom-dropdown-item" data-value="Parul P">Parul P</div>
+                                                    <div class="custom-dropdown-item" data-value="Praveen">Praveen</div>
+                                                    <div class="custom-dropdown-item" data-value="Prerona">Prerona</div>
+                                                    <div class="custom-dropdown-item" data-value="Radhika">Radhika</div>
+                                                    <div class="custom-dropdown-item" data-value="Ranjita">Ranjita</div>
+                                                    <div class="custom-dropdown-item" data-value="Ritu">Ritu</div>
+                                                    <div class="custom-dropdown-item" data-value="Shivani S">Shivani S
+                                                    </div>
+                                                    <div class="custom-dropdown-item" data-value="Shuchi">Shuchi</div>
+                                                    <div class="custom-dropdown-item" data-value="Simran">Simran</div>
+                                                    <div class="custom-dropdown-item" data-value="Smita">Smita</div>
+                                                    <div class="custom-dropdown-item" data-value="Sonia">Sonia</div>
+                                                    <div class="custom-dropdown-item" data-value="Suminder">Suminder
+                                                    </div>
+                                                    <div class="custom-dropdown-item" data-value="Tanishqa">Tanishqa
+                                                    </div>
+                                                    <div class="custom-dropdown-item" data-value="Tanuja">Tanuja</div>
+                                                    <div class="custom-dropdown-item" data-value="Varun">Varun</div>
+                                                    <div class="custom-dropdown-item" data-value="Veena A">Veena A</div>
+                                                    <div class="custom-dropdown-item" data-value="Veena M">Veena M</div>
+                                                    <div class="custom-dropdown-item" data-value="Vickie">Vickie</div>
+                                                    <div class="custom-dropdown-item" data-value="Vidhu">Vidhu</div>
+                                                </div>
+                                                <div class="custom-dropdown-empty" style="display:none;">No match</div>
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody id="dataTableBody">
-                            </tbody>
-                        </table>
+                                <tr>
+                                    <td>Date</td>
+                                    <td><input type="date" id="date" name="date" required></td>
+                                </tr>
+                                <tr>
+                                    <td>Time</td>
+                                    <td>
+                                        <select id="time" name="time" required>
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="2pm-5:30pm">2pm-5:30pm</option>
+                                            <option value="10am-2pm">10am-2pm</option>
+                                            <option value="Full Day">Full Day</option>
+                                            <option value="extra time">extra time</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Extra Time (From)</td>
+                                    <td><input type="time" id="extra-time-from" name="extra_time_from"></td>
+                                </tr>
+                                <tr>
+                                    <td>Extra Time (till)</td>
+                                    <td><input type="time" id="extra-time-till" name="extra_time_till"></td>
+                                </tr>
+                                <tr>
+                                    <td>Duty</td>
+                                    <td>
+                                        <select id="duty" name="duty" required>
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="CI">CI</option>
+                                            <option value="Supervisor meeting">Supervisor meeting</option>
+                                            <option value="Supervision Given">Supervision Given</option>
+                                            <option value="Supervision Taken">Supervision Taken</option>
+                                            <option value="EC meeting">EC meeting</option>
+                                            <option value="Trainings">Trainings</option>
+                                            <option value="COP">COP</option>
+                                            <option value="Tie Ups">Tie Ups</option>
+                                            <option value="Sub-committee meeting">Sub-committee meeting</option>
+                                            <option value="Workshop">Workshop</option>
+                                            <option value="Orientation">Orientation</option>
+                                            <option value="Volunteer Meeting">Volunteer Meeting</option>
+                                            <option value="Others">Others</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Reason (for Others)</td>
+                                    <td><input type="text" id="reason-other-duty" name="reason_other_duty"
+                                            placeholder="If applicable"></td>
+                                </tr>
+                                <tr>
+                                    <td>No. of Hours</td>
+                                    <td><input type="text" id="no-of-hours" name="no_of_hours"
+                                            placeholder="Auto-calculated" readonly
+                                            style="background-color: #f0f0f0; cursor: not-allowed;"></td>
+                                </tr>
+                                <tr>
+                                    <td>Duty From</td>
+                                    <td>
+                                        <select id="duty-from" name="duty_from" required>
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="Centre">Centre</option>
+                                            <option value="Home">Home</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Remarks</td>
+                                    <td><textarea id="remarks" name="remarks" placeholder="Any remarks..."></textarea>
+                                    </td>
+                                </tr>
+                            </table>
+                            <button type="submit" class="submit-btn">Submit Attendance</button>
+                        </form>
                     </div>
-                </div>
-            </div>
+                </div><!-- End attendancePanel -->
 
-            <!-- Pivot Section - Under Attendance -->
-            <div class="pivot-section">
-                <!-- COUNTA of Duty Pivot -->
-                <div class="pivot-card">
-                    <div class="pivot-header">COUNTA of Duty</div>
-                    <table class="pivot-table">
-                        <thead>
-                            <tr>
-                                <th>Duty</th>
-                                <th>Duty from Centre/Home</th>
-                                <th></th>
-                                <th></th>
-                            </tr>
-                            <tr>
-                                <th></th>
-                                <th>Centre</th>
-                                <th>Home</th>
-                                <th>Grand Total</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dutyPivotBody">
-                            <tr><td>CI</td><td id="ci-centre">0</td><td id="ci-home">0</td><td id="ci-total">0</td></tr>
-                            <tr><td>Supervisor meeting</td><td id="sm-centre">0</td><td id="sm-home">0</td><td id="sm-total">0</td></tr>
-                            <tr><td>EC meeting</td><td id="ec-centre">0</td><td id="ec-home">0</td><td id="ec-total">0</td></tr>
-                            <tr class="total-row">
-                                <td>Grand Total</td>
-                                <td id="grand-centre">0</td>
-                                <td id="grand-home">0</td>
-                                <td id="grand-total">0</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Total Extra Hours Pivot -->
-                <div class="pivot-card">
-                    <div class="pivot-header">Total Extra Hours</div>
-                    <table class="pivot-table extra-hours-table">
-                        <thead>
-                            <tr>
-                                <th>Volunteer</th>
-                                <th>Total Extra Hours</th>
-                            </tr>
-                        </thead>
-                        <tbody id="extraHoursPivotBody">
-                            <tr>
-                                <td id="eh-volunteer">-</td>
-                                <td id="eh-total">0:00:00</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            </div><!-- End attendanceDataPanel -->
-
-            <!-- Supervision Data Panel -->
-            <div id="supervisionDataPanel" class="panel-content hidden">
-            <div class="card data-card">
-                <div class="card-header">
-                    Supervision for <span id="supHeaderVolunteerName">_______</span>
-                </div>
-                <div id="supDataPlaceholder" class="data-placeholder">
-                    <div class="data-placeholder-icon">👤</div>
-                    <p>Please select a volunteer from the Dropdown to view supervision data</p>
-                </div>
-                <div id="supervisionData" style="display:none;">
-                    <div class="volunteer-header">
-                        <div class="volunteer-header-left">
-                            <span>Supervision for</span>
-                            <strong id="supVolunteerNameDisplay">Volunteer</strong>
+                <!-- Supervision Panel -->
+                <div id="supervisionPanel" class="panel-content hidden">
+                    <div class="card form-card">
+                        <div class="form-header">
+                            <!-- Custom Sanjeevni Logo -->
+                            <div
+                                style="display: flex; flex-direction: column; align-items: center; margin-bottom: 8px;">
+                                <svg width="60" height="50" viewBox="0 0 100 80" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 70 L45 35 L10 10" stroke="#2F4A7D" stroke-width="12"
+                                        stroke-linecap="round" />
+                                    <path d="M45 35 L80 10" stroke="#2F4A7D" stroke-width="12" stroke-linecap="round" />
+                                    <path d="M45 25 Q45 15 52 15 Q60 15 60 25 Q60 35 52 35 Q45 35 45 25"
+                                        fill="#243B66" />
+                                </svg>
+                            </div>
+                            <h1>Sanjeevni</h1>
+                            <p class="subtitle">Society for Mental Health</p>
                         </div>
-                        <span class="badge" id="supRecordCount">0 records</span>
-                    </div>
-                    <div class="data-table-wrapper">
-                        <table class="data-table">
-                            <thead>
+
+                        <form id="supervisionForm" class="form-body">
+                            <table class="form-table">
                                 <tr>
-                                    <th>S. No</th>
-                                    <th>Supervisor Name</th>
-                                    <th>Time (in Hrs)</th>
-                                    <th>Supervision Date</th>
-                                    <th>Remark</th>
+                                    <td>Volunteer Name</td>
+                                    <td>
+                                        <input type="hidden" id="sup-volunteer-name" name="sup_volunteer_name" required>
+                                        <div class="custom-dropdown" id="supVolunteerDropdown">
+                                            <button type="button" class="custom-dropdown-trigger placeholder"
+                                                id="supVolunteerTrigger">Select...</button>
+                                            <div class="custom-dropdown-panel">
+                                                <div class="custom-dropdown-search">
+                                                    <input type="text" id="supVolunteerSearch" placeholder="Search..."
+                                                        autocomplete="off">
+                                                </div>
+                                                <div class="custom-dropdown-list" id="supVolunteerList">
+                                                    <div class="custom-dropdown-item" data-value="Akshith">Akshith</div>
+                                                    <div class="custom-dropdown-item" data-value="Archana">Archana</div>
+                                                    <div class="custom-dropdown-item" data-value="Azhar">Azhar</div>
+                                                    <div class="custom-dropdown-item" data-value="Bhavna">Bhavna</div>
+                                                    <div class="custom-dropdown-item" data-value="Binu">Binu</div>
+                                                    <div class="custom-dropdown-item" data-value="Dharini">Dharini</div>
+                                                    <div class="custom-dropdown-item" data-value="Divya">Divya</div>
+                                                    <div class="custom-dropdown-item" data-value="Dolly">Dolly</div>
+                                                    <div class="custom-dropdown-item" data-value="Fiesal">Fiesal</div>
+                                                    <div class="custom-dropdown-item" data-value="Geeta">Geeta</div>
+                                                    <div class="custom-dropdown-item" data-value="Gopal">Gopal</div>
+                                                    <div class="custom-dropdown-item" data-value="K. Narayan">K. Narayan
+                                                    </div>
+                                                    <div class="custom-dropdown-item" data-value="Kalpana">Kalpana</div>
+                                                    <div class="custom-dropdown-item" data-value="Kavita">Kavita</div>
+                                                    <div class="custom-dropdown-item" data-value="Madhu">Madhu</div>
+                                                    <div class="custom-dropdown-item" data-value="Mamta V">Mamta V</div>
+                                                    <div class="custom-dropdown-item" data-value="Manas">Manas</div>
+                                                    <div class="custom-dropdown-item" data-value="Manish">Manish</div>
+                                                    <div class="custom-dropdown-item" data-value="Meera">Meera</div>
+                                                    <div class="custom-dropdown-item" data-value="Neelam">Neelam</div>
+                                                    <div class="custom-dropdown-item" data-value="Niharika">Niharika
+                                                    </div>
+                                                    <div class="custom-dropdown-item" data-value="Parul A">Parul A</div>
+                                                    <div class="custom-dropdown-item" data-value="Parul P">Parul P</div>
+                                                    <div class="custom-dropdown-item" data-value="Praveen">Praveen</div>
+                                                    <div class="custom-dropdown-item" data-value="Prerona">Prerona</div>
+                                                    <div class="custom-dropdown-item" data-value="Radhika">Radhika</div>
+                                                    <div class="custom-dropdown-item" data-value="Ranjita">Ranjita</div>
+                                                    <div class="custom-dropdown-item" data-value="Ritu">Ritu</div>
+                                                    <div class="custom-dropdown-item" data-value="Shivani S">Shivani S
+                                                    </div>
+                                                    <div class="custom-dropdown-item" data-value="Shuchi">Shuchi</div>
+                                                    <div class="custom-dropdown-item" data-value="Simran">Simran</div>
+                                                    <div class="custom-dropdown-item" data-value="Smita">Smita</div>
+                                                    <div class="custom-dropdown-item" data-value="Sonia">Sonia</div>
+                                                    <div class="custom-dropdown-item" data-value="Suminder">Suminder
+                                                    </div>
+                                                    <div class="custom-dropdown-item" data-value="Tanishqa">Tanishqa
+                                                    </div>
+                                                    <div class="custom-dropdown-item" data-value="Tanuja">Tanuja</div>
+                                                    <div class="custom-dropdown-item" data-value="Varun">Varun</div>
+                                                    <div class="custom-dropdown-item" data-value="Veena A">Veena A</div>
+                                                    <div class="custom-dropdown-item" data-value="Veena M">Veena M</div>
+                                                    <div class="custom-dropdown-item" data-value="Vickie">Vickie</div>
+                                                    <div class="custom-dropdown-item" data-value="Vidhu">Vidhu</div>
+                                                </div>
+                                                <div class="custom-dropdown-empty" style="display:none;">No match</div>
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody id="supervisionTableBody">
-                            </tbody>
-                        </table>
+                                <tr>
+                                    <td>Date</td>
+                                    <td><input type="date" id="sup-date" name="sup_date" required></td>
+                                </tr>
+                                <tr>
+                                    <td>Time Slot</td>
+                                    <td>
+                                        <select id="sup-time-slot" name="sup_time_slot">
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="2pm-5:30pm">2pm-5:30pm</option>
+                                            <option value="10am-2pm">10am-2pm</option>
+                                            <option value="Full Day">Full Day</option>
+                                            <option value="extra time">extra time</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Supervisor</td>
+                                    <td>
+                                        <input type="hidden" id="supervisor-name" name="supervisor_name" required>
+                                        <div class="custom-dropdown" id="supervisorDropdown">
+                                            <button type="button" class="custom-dropdown-trigger placeholder"
+                                                id="supervisorTrigger">Select...</button>
+                                            <div class="custom-dropdown-panel">
+                                                <div class="custom-dropdown-search">
+                                                    <input type="text" id="supervisorSearch" placeholder="Search..."
+                                                        autocomplete="off">
+                                                </div>
+                                                <div class="custom-dropdown-list" id="supervisorList">
+                                                    <div class="custom-dropdown-item" data-value="Vickie">Vickie</div>
+                                                    <div class="custom-dropdown-item" data-value="Geeta">Geeta</div>
+                                                    <div class="custom-dropdown-item" data-value="Mamta V">Mamta V</div>
+                                                    <div class="custom-dropdown-item" data-value="Manish">Manish</div>
+                                                    <div class="custom-dropdown-item" data-value="Smita">Smita</div>
+                                                    <div class="custom-dropdown-item" data-value="Madhu">Madhu</div>
+                                                </div>
+                                                <div class="custom-dropdown-empty" style="display:none;">No match</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>No. of Hours</td>
+                                    <td><input type="number" id="sup-time-hrs" name="sup_time_hrs" step="0.01" min="0"
+                                            placeholder="e.g. 0.25, 0.5, 1" required></td>
+                                </tr>
+                            </table>
+                            <button type="submit" class="submit-btn">Submit Supervision</button>
+                        </form>
                     </div>
-                </div>
+                </div><!-- End supervisionPanel -->
             </div>
-            <div class="pivot-section">
-                <div class="pivot-card supervision-summary-card">
-                    <div class="pivot-header">SUM of Time (in Hrs)</div>
-                    <table class="pivot-table">
-                        <thead>
-                            <tr>
-                                <th>Volunteer</th>
-                                <th>Total Hours</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td id="sup-summary-volunteer">-</td>
-                                <td id="sup-summary-total">0</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+
+            <!-- Center: Data Section -->
+            <div class="data-section">
+                <!-- Attendance Data Panel -->
+                <div id="attendanceDataPanel" class="panel-content">
+                    <div class="card data-card">
+                        <div class="card-header">
+                            Attendance for <span id="headerVolunteerName">_______</span>
+                        </div>
+                        <div id="dataPlaceholder" class="data-placeholder">
+                            <div class="data-placeholder-icon">👤</div>
+                            <p>Please select your name from the Dropdown to autofill your data</p>
+                        </div>
+                        <div id="volunteerData" style="display:none;">
+                            <div class="volunteer-header">
+                                <div class="volunteer-header-left">
+                                    <span>Attendance for</span>
+                                    <strong id="volunteerNameDisplay">Volunteer</strong>
+                                </div>
+                                <span class="badge" id="recordCount">0 records</span>
+                            </div>
+                            <div class="data-table-wrapper">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>S. No</th>
+                                            <th>Date</th>
+                                            <th>Time</th>
+                                            <th>Extra Time (From)</th>
+                                            <th>Extra Time (till)</th>
+                                            <th>Reason for extra time</th>
+                                            <th>Duty</th>
+                                            <th>No.Of Hours</th>
+                                            <th>Duty from Centre/Home</th>
+                                            <th>Remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dataTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pivot Section - Under Attendance -->
+                    <div class="pivot-section">
+                        <!-- COUNTA of Duty Pivot -->
+                        <div class="pivot-card">
+                            <div class="pivot-header">COUNTA of Duty</div>
+                            <table class="pivot-table">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2">Duty</th>
+                                        <th colspan="3">Duty from Centre/Home</th>
+                                    </tr>
+                                    <tr>
+                                        <th>Centre</th>
+                                        <th>Home</th>
+                                        <th>Grand Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dutyPivotBody">
+                                    <tr>
+                                        <td>CI</td>
+                                        <td id="ci-centre">0</td>
+                                        <td id="ci-home">0</td>
+                                        <td id="ci-total">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Supervisor meeting</td>
+                                        <td id="sm-centre">0</td>
+                                        <td id="sm-home">0</td>
+                                        <td id="sm-total">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>EC meeting</td>
+                                        <td id="ec-centre">0</td>
+                                        <td id="ec-home">0</td>
+                                        <td id="ec-total">0</td>
+                                    </tr>
+                                    <tr class="total-row">
+                                        <td>Grand Total</td>
+                                        <td id="grand-centre">0</td>
+                                        <td id="grand-home">0</td>
+                                        <td id="grand-total">0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Total Extra Hours Pivot -->
+                        <div class="pivot-card">
+                            <div class="pivot-header">Total Extra Hours</div>
+                            <table class="pivot-table extra-hours-table">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2">Volunteer</th>
+                                        <th colspan="1">Summary</th>
+                                    </tr>
+                                    <tr>
+                                        <th>Total Extra Hours</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="extraHoursPivotBody">
+                                    <tr>
+                                        <td id="eh-volunteer">-</td>
+                                        <td id="eh-total">0:00:00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div><!-- End attendanceDataPanel -->
+
+                <!-- Supervision Data Panel -->
+                <div id="supervisionDataPanel" class="panel-content hidden">
+                    <div class="card data-card">
+                        <div class="card-header">
+                            Supervision for <span id="supHeaderVolunteerName">_______</span>
+                        </div>
+                        <div id="supDataPlaceholder" class="data-placeholder">
+                            <div class="data-placeholder-icon">👤</div>
+                            <p>Please select a volunteer from the Dropdown to view supervision data</p>
+                        </div>
+                        <div id="supervisionData" style="display:none;">
+                            <div class="volunteer-header">
+                                <div class="volunteer-header-left">
+                                    <span>Supervision for</span>
+                                    <strong id="supVolunteerNameDisplay">Volunteer</strong>
+                                </div>
+                                <span class="badge" id="supRecordCount">0 records</span>
+                            </div>
+                            <div class="data-table-wrapper">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>S. No</th>
+                                            <th>Date</th>
+                                            <th>Time Slot</th>
+                                            <th>Supervisor</th>
+                                            <th>Time (in Hrs)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="supervisionTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pivot-section">
+                        <!-- COUNTA of Supervisions Pivot -->
+                        <div class="pivot-card">
+                            <div class="pivot-header">COUNTA of Supervisions</div>
+                            <table class="pivot-table">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2">Supervisor</th>
+                                        <th colspan="1">Summary</th>
+                                    </tr>
+                                    <tr>
+                                        <th>Count of Supervisions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="supCountPivotBody">
+                                    <tr>
+                                        <td colspan="2" style="text-align:center;color:#999;">No data</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Total Hours Pivot -->
+                        <div class="pivot-card supervision-summary-card">
+                            <div class="pivot-header">Total Supervision Hours</div>
+                            <table class="pivot-table">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2">Volunteer</th>
+                                        <th colspan="1">Summary</th>
+                                    </tr>
+                                    <tr>
+                                        <th>Total Supervision Hours</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td id="sup-summary-volunteer">-</td>
+                                        <td id="sup-summary-total">0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div><!-- End supervisionDataPanel -->
             </div>
-            </div><!-- End supervisionDataPanel -->
         </div>
-    </div>
     </div> <!-- End app-wrapper -->
 
     <!-- Success Modal -->
@@ -1674,6 +1842,41 @@
         // =====================================================
         let currentUser = null;
         let googleAuth = null;
+
+        // Advanced Performance Management
+        const CACHE_NAME = 'sanjeevni_data_v4';
+        const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours (Increased for persistence)
+        let dataCache = {};
+
+        // Keep-Alive connection to warm up Google Apps Script
+        function warmUpBackend() {
+            fetch(`${SCRIPT_URL}?action=ping`).catch(() => { });
+        }
+
+        initDataCache();
+        warmUpBackend();
+
+        function initDataCache() {
+            try {
+                const saved = localStorage.getItem(CACHE_NAME);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    const now = Date.now();
+                    // Clean up stale entries
+                    Object.keys(parsed).forEach(k => {
+                        if (now - parsed[k].timestamp > CACHE_TTL) delete parsed[k];
+                    });
+                    dataCache = parsed;
+                }
+            } catch (e) { dataCache = {}; }
+        }
+
+        function persistToCache(name, attendance, supervision) {
+            dataCache[name] = { attendance, supervision, timestamp: Date.now() };
+            try {
+                localStorage.setItem(CACHE_NAME, JSON.stringify(dataCache));
+            } catch (e) { console.warn('Cache storage failed', e); }
+        }
 
         // Check for existing session on page load
         function checkExistingSession() {
@@ -1891,15 +2094,22 @@
                 roleEl.classList.add('admin');
                 document.body.classList.add('is-admin');
                 document.getElementById('adminPanelBtn').classList.remove('hidden');
-                // Admins can see all volunteers in dropdown - no filtering needed
+                // Set default view
+                switchPanel('attendance');
             } else if (currentUser.role === 'volunteer') {
                 document.body.classList.add('is-volunteer');
                 // For volunteers, filter dropdown to only show their name (attendance + supervision)
                 if (currentUser.volunteerSheetName) {
                     filterDropdownForVolunteer(currentUser.volunteerSheetName);
-                    autoSelectVolunteer(currentUser.volunteerSheetName);
-                    autoSelectSupVolunteer(currentUser.volunteerSheetName);
                 }
+            }
+
+            // Common logic: if the user (admin or volunteer) has a volunteerSheetRecord, auto-select and pre-fetch
+            if (currentUser.volunteerSheetName) {
+                autoSelectVolunteer(currentUser.volunteerSheetName);
+                autoSelectSupVolunteer(currentUser.volunteerSheetName);
+                // Pre-fetch data in background
+                fetchAllVolunteerData(currentUser.volunteerSheetName, true);
             }
         }
 
@@ -2053,9 +2263,9 @@
                             <span><span class="role-badge ${user.role}">${user.role}</span></span>
                             <span>
                                 ${user.email !== currentUser.email ?
-                                    `<button class="delete-user-btn" onclick="deleteUser('${user.email}')">Delete</button>` :
-                                    '<span style="color:#999;font-size:0.7rem;">You</span>'
-                                }
+                            `<button class="delete-user-btn" onclick="deleteUser('${user.email}')">Delete</button>` :
+                            '<span style="color:#999;font-size:0.7rem;">You</span>'
+                        }
                             </span>
                         </div>
                     `).join('');
@@ -2121,7 +2331,8 @@
         }
 
         // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
+            initDataCache();
             initializeGoogleSignIn();
             checkExistingSession();
 
@@ -2130,7 +2341,7 @@
             const loginPinInput = document.getElementById('loginPin');
 
             if (loginEmailInput) {
-                loginEmailInput.addEventListener('keypress', function(e) {
+                loginEmailInput.addEventListener('keypress', function (e) {
                     if (e.key === 'Enter') {
                         loginPinInput.focus(); // Move to PIN field
                     }
@@ -2138,7 +2349,7 @@
             }
 
             if (loginPinInput) {
-                loginPinInput.addEventListener('keypress', function(e) {
+                loginPinInput.addEventListener('keypress', function (e) {
                     if (e.key === 'Enter') {
                         loginWithEmail();
                     }
@@ -2156,27 +2367,44 @@
         const emptyMessage = volunteerDropdown.querySelector('.custom-dropdown-empty');
 
         // Dropdown functionality
-        volunteerTrigger.addEventListener('click', () => {
+        // Dropdown functionality - Volunteer
+        volunteerTrigger.addEventListener('click', (e) => {
+            e.preventDefault();
             volunteerDropdown.classList.toggle('open');
             if (volunteerDropdown.classList.contains('open')) {
+                // Reset search on open
+                volunteerSearch.value = '';
+                const items = document.querySelectorAll('#volunteerList .custom-dropdown-item');
+                items.forEach(item => item.classList.remove('hidden'));
+                const empty = document.querySelector('#volunteerDropdown .custom-dropdown-empty');
+                if (empty) empty.style.display = 'none';
+
                 setTimeout(() => volunteerSearch.focus(), 100);
             }
         });
 
-        volunteerSearch.addEventListener('input', function() {
-            const term = this.value.toLowerCase();
-            let count = 0;
-            volunteerItems.forEach(item => {
-                const match = item.textContent.toLowerCase().includes(term);
-                item.classList.toggle('hidden', !match);
-                if (match) count++;
-            });
-            emptyMessage.style.display = count === 0 ? 'block' : 'none';
+        // Robust search handler for Volunteer Dropdown
+        document.addEventListener('input', function (e) {
+            if (e.target && e.target.id === 'volunteerSearch') {
+                const term = e.target.value.toLowerCase().trim();
+                const items = document.querySelectorAll('#volunteerList .custom-dropdown-item');
+                let count = 0;
+
+                items.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    const match = !term || text.includes(term);
+                    item.classList.toggle('hidden', !match);
+                    if (match) count++;
+                });
+
+                const empty = document.querySelector('#volunteerDropdown .custom-dropdown-empty');
+                if (empty) empty.style.display = count === 0 ? 'block' : 'none';
+            }
         });
 
         volunteerSearch.addEventListener('click', e => e.stopPropagation());
 
-        volunteerList.addEventListener('click', function(e) {
+        volunteerList.addEventListener('click', function (e) {
             if (e.target.classList.contains('custom-dropdown-item')) {
                 const value = e.target.dataset.value;
                 volunteerInput.value = value;
@@ -2193,7 +2421,7 @@
 
                 // Update header and load data
                 document.getElementById('headerVolunteerName').textContent = value;
-                loadVolunteerData(value);
+                fetchAllVolunteerData(value);
             }
         });
 
@@ -2240,7 +2468,7 @@
             });
         }
         // Use event delegation for sup volunteer search - works when panel was hidden at load
-        document.addEventListener('input', function(e) {
+        document.addEventListener('input', function (e) {
             if (e.target && e.target.id === 'supVolunteerSearch') {
                 const list = document.getElementById('supVolunteerList');
                 const dropdown = document.getElementById('supVolunteerDropdown');
@@ -2257,7 +2485,7 @@
                 if (empty) empty.style.display = count === 0 ? 'block' : 'none';
             }
         });
-        document.addEventListener('keyup', function(e) {
+        document.addEventListener('keyup', function (e) {
             if (e.target && e.target.id === 'supVolunteerSearch') {
                 const list = document.getElementById('supVolunteerList');
                 const dropdown = document.getElementById('supVolunteerDropdown');
@@ -2279,7 +2507,7 @@
             supVolunteerSearch.addEventListener('click', e => e.stopPropagation());
         }
         if (supVolunteerList) {
-            supVolunteerList.addEventListener('click', function(e) {
+            supVolunteerList.addEventListener('click', function (e) {
                 if (e.target.classList.contains('custom-dropdown-item')) {
                     const value = e.target.dataset.value;
                     supVolunteerInput.value = value;
@@ -2293,7 +2521,7 @@
                     if (empty) empty.style.display = 'none';
                     supVolunteerDropdown.classList.remove('open');
                     document.getElementById('supHeaderVolunteerName').textContent = value;
-                    loadSupervisionData(value);
+                    fetchAllVolunteerData(value);
                 }
             });
         }
@@ -2318,7 +2546,7 @@
         }
 
         // Use event delegation for supervisor search - works even when panel was hidden at load
-        document.addEventListener('input', function(e) {
+        document.addEventListener('input', function (e) {
             if (e.target && e.target.id === 'supervisorSearch') {
                 const list = document.getElementById('supervisorList');
                 const dropdown = document.getElementById('supervisorDropdown');
@@ -2335,7 +2563,7 @@
                 if (empty) empty.style.display = count === 0 ? 'block' : 'none';
             }
         });
-        document.addEventListener('keyup', function(e) {
+        document.addEventListener('keyup', function (e) {
             if (e.target && e.target.id === 'supervisorSearch') {
                 const list = document.getElementById('supervisorList');
                 const dropdown = document.getElementById('supervisorDropdown');
@@ -2355,13 +2583,13 @@
 
         if (supervisorSearch) {
             supervisorSearch.addEventListener('click', e => e.stopPropagation());
-            supervisorSearch.addEventListener('keydown', function(e) {
+            supervisorSearch.addEventListener('keydown', function (e) {
                 e.stopPropagation();
                 if (e.key === 'Enter') e.preventDefault();
             });
         }
         if (supervisorList) {
-            supervisorList.addEventListener('click', function(e) {
+            supervisorList.addEventListener('click', function (e) {
                 if (e.target.classList.contains('custom-dropdown-item')) {
                     const value = e.target.dataset.value;
                     supervisorInput.value = value;
@@ -2493,138 +2721,209 @@
             return str;
         }
 
-        // Load volunteer data from Google Sheets
-        async function loadVolunteerData(name) {
+        // Batched Data Loader with "Stale-While-Revalidate" for Instant Speed
+        async function fetchAllVolunteerData(name, isSilent = false) {
+            if (!name) return;
+
+            const attPlaceholder = document.getElementById('dataPlaceholder');
+            const supPlaceholder = document.getElementById('supDataPlaceholder');
+            const attSection = document.getElementById('volunteerData');
+            const supSection = document.getElementById('supervisionData');
+
+            // Detect which panel the user is actively viewing
+            const isAttActive = !document.getElementById('attendanceDataPanel').classList.contains('hidden');
+            const isSupActive = !document.getElementById('supervisionDataPanel').classList.contains('hidden');
+
+            let hasCache = false;
+
+            // 1. Instant Render from Cache (Persistent & In-Memory)
+            if (dataCache[name]) {
+                const cached = dataCache[name];
+                renderAttendance(name, cached.attendance);
+                renderSupervision(name, cached.supervision);
+                hasCache = true;
+
+                // If this is a background pre-fetch and we have cache, we can skip network if cache is fresh
+                const age = Date.now() - (cached.timestamp || 0);
+                if (isSilent && age < 300000) return; // 5 min freshness for background sync
+            }
+
+            // 2. Optimized UX: Show skeleton only in the ACTIVE panel if no cache exists
+            if (!hasCache && !isSilent) {
+                const skeletonHtml = `
+                    <div style="padding: 20px;">
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom: 20px;">
+                            <div class="skeleton" style="width: 40%; height: 24px; margin-bottom:0;"></div>
+                            <span style="font-size:0.75rem; color:#666; animation: pulse 1.5s infinite;">Fetching fresh data...</span>
+                        </div>
+                        ${Array(5).fill('<div class="skeleton-row"><div class="skeleton" style="width: 10%;"></div><div class="skeleton" style="width: 20%;"></div><div class="skeleton" style="width: 50%;"></div><div class="skeleton" style="width: 10%;"></div></div>').join('')}
+                    </div>
+                `;
+
+                if (isAttActive) {
+                    attPlaceholder.innerHTML = skeletonHtml;
+                    attPlaceholder.style.display = 'block';
+                    attSection.style.display = 'none';
+                }
+                if (isSupActive) {
+                    supPlaceholder.innerHTML = skeletonHtml;
+                    supPlaceholder.style.display = 'block';
+                    supSection.style.display = 'none';
+                }
+            } else if (hasCache) {
+                // If we have cache, ensure the proper sections are visible regardless of background sync
+                if (isAttActive) {
+                    attPlaceholder.style.display = 'none';
+                    attSection.style.display = 'block';
+                }
+                if (isSupActive) {
+                    supPlaceholder.style.display = 'none';
+                    supSection.style.display = 'block';
+                }
+            }
+
+            try {
+                const userEmail = currentUser ? currentUser.email : '';
+                const response = await fetch(`${SCRIPT_URL}?action=getAllData&volunteer=${encodeURIComponent(name)}&email=${encodeURIComponent(userEmail)}&_t=${Date.now()}`);
+                const result = await response.json();
+
+                if (result.status === 'error') throw new Error(result.message);
+
+                // 4. Update Cache and Reflect UI for both (hidden rendering is fast)
+                persistToCache(name, result.attendance || [], result.supervision || []);
+
+                // Rendering both keeps everything in sync when user toggles tabs
+                renderAttendance(name, result.attendance || []);
+                renderSupervision(name, result.supervision || []);
+
+            } catch (error) {
+                console.error('Sanjeevni Sync Error:', error);
+                const errorHtml = `
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px; text-align:center;">
+                        <div class="data-placeholder-icon" style="color:#C97C7C;">📡</div>
+                        <h3 style="margin:10px 0; color:#333;">Connection Interrupted</h3>
+                        <p style="font-size:0.8rem; color:#666; max-width:250px; margin-bottom:15px;">
+                            ${error.message.includes('Unexpected token') ? 'Cloud returned an invalid response. Please check script deployment.' : 'We couldn\'t reach the Sanjeevni Cloud. Check your internet or VPN.'}
+                        </p>
+                        <button onclick="fetchAllVolunteerData('${name}')" 
+                                style="background:#2F4A7D; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.75rem;">
+                            Try Reconnect
+                        </button>
+                        <div style="margin-top:20px; font-size:10px; color:#999; border-top:1px solid #eee; pt:10px;">
+                            Error Details: ${error.message}
+                        </div>
+                    </div>
+                `;
+
+                // Only show error UI in the active panel to avoid cluttering the background tab
+                if (isAttActive) {
+                    attPlaceholder.innerHTML = errorHtml;
+                    attPlaceholder.style.display = 'block';
+                    attSection.style.display = 'none';
+                }
+                if (isSupActive) {
+                    supPlaceholder.innerHTML = errorHtml;
+                    supPlaceholder.style.display = 'block';
+                    supSection.style.display = 'none';
+                }
+            }
+        }
+
+        // Dedicated renderer for Attendance
+        function renderAttendance(name, data) {
             const placeholder = document.getElementById('dataPlaceholder');
             const dataSection = document.getElementById('volunteerData');
             const tableBody = document.getElementById('dataTableBody');
 
-            // Show loading state
-            placeholder.innerHTML = `<div class="data-placeholder-icon">⏳</div><p>Loading attendance data for ${name}...</p>`;
-            placeholder.style.display = 'block';
-            dataSection.style.display = 'none';
-
-            try {
-                // Fetch data from Google Sheets via Apps Script
-                // Include user email for authentication
-                const userEmail = currentUser ? currentUser.email : '';
-                const response = await fetch(`${SCRIPT_URL}?action=getData&volunteer=${encodeURIComponent(name)}&email=${encodeURIComponent(userEmail)}`);
-                const result = await response.json();
-
-                if (result.status === 'error') {
-                    throw new Error(result.message || 'Failed to fetch data');
-                }
-
-                const data = result.data || [];
-
-                if (data.length === 0) {
-                    placeholder.innerHTML = `<div class="data-placeholder-icon">📭</div><p>No attendance records found for ${name}</p>`;
-                    placeholder.style.display = 'block';
-                    dataSection.style.display = 'none';
-                    resetPivots();
-                    return;
-                }
-
-                placeholder.style.display = 'none';
-                dataSection.style.display = 'block';
-
-                document.getElementById('volunteerNameDisplay').textContent = name;
-                document.getElementById('recordCount').textContent = `${data.length} records`;
-
-                tableBody.innerHTML = data.map((row, index) => `
-                    <tr>
-                        <td class="sno">${index + 1}</td>
-                        <td>${row.date || ''}</td>
-                        <td>${row.time || ''}</td>
-                        <td>${formatTime(row.extraFrom)}</td>
-                        <td>${formatTime(row.extraTill)}</td>
-                        <td>${row.reason || ''}</td>
-                        <td>${row.duty || ''}</td>
-                        <td>${calculateHoursDiff(row.extraFrom, row.extraTill)}</td>
-                        <td>${row.dutyFrom || ''}</td>
-                        <td>${row.remarks || ''}</td>
-                    </tr>
-                `).join('');
-
-                updatePivots(data, name);
-
-                // Pre-fill form with last entry
-                if (data.length > 0) {
-                    prefillFormWithLastEntry(data[data.length - 1]);
-                }
-
-            } catch (error) {
-                console.error('Error fetching volunteer data:', error);
-                placeholder.innerHTML = `<div class="data-placeholder-icon">❌</div><p>Error loading data: ${error.message}</p><p style="font-size:0.7rem;color:#999;">Check browser console for details</p>`;
+            if (data.length === 0) {
+                placeholder.innerHTML = `<div class="data-placeholder-icon">📭</div><p>No records found for ${name}</p>`;
                 placeholder.style.display = 'block';
                 dataSection.style.display = 'none';
                 resetPivots();
+                return;
             }
+
+            placeholder.style.display = 'none';
+            dataSection.style.display = 'block';
+            document.getElementById('volunteerNameDisplay').textContent = name;
+            document.getElementById('headerVolunteerName').textContent = name;
+            document.getElementById('recordCount').textContent = `${data.length} records`;
+
+            tableBody.innerHTML = data.map((row, index) => `
+                <tr>
+                    <td class="sno">${index + 1}</td>
+                    <td>${row.date || ''}</td>
+                    <td>${row.time || ''}</td>
+                    <td>${formatTime(row.extraFrom)}</td>
+                    <td>${formatTime(row.extraTill)}</td>
+                    <td>${row.reason || ''}</td>
+                    <td>${row.duty || ''}</td>
+                    <td>${calculateHoursDiff(row.extraFrom, row.extraTill)}</td>
+                    <td>${row.location || row.dutyFrom || ''}</td>
+                    <td>${row.remarks || ''}</td>
+                </tr>
+            `).join('');
+
+            updatePivots(data, name);
+            if (data.length > 0) prefillFormWithLastEntry(data[data.length - 1]);
         }
 
-        // Load supervision data from Google Sheets
-        async function loadSupervisionData(name) {
+        // Dedicated renderer for Supervision
+        function renderSupervision(name, data) {
             const placeholder = document.getElementById('supDataPlaceholder');
             const dataSection = document.getElementById('supervisionData');
             const tableBody = document.getElementById('supervisionTableBody');
 
-            placeholder.innerHTML = `<div class="data-placeholder-icon">⏳</div><p>Loading supervision data for ${name}...</p>`;
-            placeholder.style.display = 'block';
-            dataSection.style.display = 'none';
-
-            try {
-                const userEmail = currentUser ? currentUser.email : '';
-                const response = await fetch(`${SCRIPT_URL}?action=getSupervisionData&volunteer=${encodeURIComponent(name)}&email=${encodeURIComponent(userEmail)}`);
-                const result = await response.json();
-
-                if (result.status === 'error') {
-                    throw new Error(result.message || 'Failed to fetch data');
-                }
-
-                const data = result.data || [];
-
-                if (data.length === 0) {
-                    placeholder.innerHTML = `<div class="data-placeholder-icon">📭</div><p>No supervision records found for ${name}</p>`;
-                    placeholder.style.display = 'block';
-                    dataSection.style.display = 'none';
-                    document.getElementById('sup-summary-volunteer').textContent = name;
-                    document.getElementById('sup-summary-total').textContent = '0';
-                    return;
-                }
-
-                placeholder.style.display = 'none';
-                dataSection.style.display = 'block';
-
-                document.getElementById('supVolunteerNameDisplay').textContent = name;
-                document.getElementById('supRecordCount').textContent = `${data.length} records`;
-
-                tableBody.innerHTML = data.map((row, index) => `
-                    <tr>
-                        <td class="sno">${index + 1}</td>
-                        <td>${row.supervisorName || ''}</td>
-                        <td>${row.timeInHrs || ''}</td>
-                        <td>${row.date || ''}</td>
-                        <td>${row.remark || ''}</td>
-                    </tr>
-                `).join('');
-
-                let totalHrs = 0;
-                data.forEach(row => {
-                    const hrs = parseFloat(row.timeInHrs);
-                    if (!isNaN(hrs)) totalHrs += hrs;
-                });
-                document.getElementById('sup-summary-volunteer').textContent = name;
-                document.getElementById('sup-summary-total').textContent = totalHrs.toFixed(2);
-
-            } catch (error) {
-                console.error('Error fetching supervision data:', error);
-                placeholder.innerHTML = `<div class="data-placeholder-icon">❌</div><p>Error loading data: ${error.message}</p>`;
+            if (data.length === 0) {
+                placeholder.innerHTML = `<div class="data-placeholder-icon">📭</div><p>No supervision records for ${name}</p>`;
                 placeholder.style.display = 'block';
                 dataSection.style.display = 'none';
-                document.getElementById('sup-summary-volunteer').textContent = '-';
+                document.getElementById('sup-summary-volunteer').textContent = name;
                 document.getElementById('sup-summary-total').textContent = '0';
+                document.getElementById('supCountPivotBody').innerHTML = '<tr><td colspan="2" style="text-align:center;color:#999;">No data</td></tr>';
+                return;
             }
+
+            placeholder.style.display = 'none';
+            dataSection.style.display = 'block';
+            document.getElementById('supVolunteerNameDisplay').textContent = name;
+            document.getElementById('supHeaderVolunteerName').textContent = name;
+            document.getElementById('supRecordCount').textContent = `${data.length} records`;
+
+            tableBody.innerHTML = data.map((row, index) => `
+                <tr>
+                    <td class="sno">${index + 1}</td>
+                    <td>${row.date || ''}</td>
+                    <td>${row.timeSlot || ''}</td>
+                    <td>${row.supervisorName || ''}</td>
+                    <td>${row.timeInHrs || ''}</td>
+                </tr>
+            `).join('');
+
+            let totalHrs = 0;
+            let totalCount = 0;
+            const supervisorCounts = {};
+            data.forEach(row => {
+                const hrs = parseFloat(row.timeInHrs);
+                if (!isNaN(hrs)) totalHrs += hrs;
+                if (row.supervisorName) {
+                    supervisorCounts[row.supervisorName] = (supervisorCounts[row.supervisorName] || 0) + 1;
+                    totalCount++;
+                }
+            });
+
+            document.getElementById('supCountPivotBody').innerHTML = Object.keys(supervisorCounts).length > 0 ?
+                Object.entries(supervisorCounts).map(([sup, count]) => `<tr><td>${sup}</td><td>${count}</td></tr>`).join('') +
+                `<tr class="total-row"><td>Grand Total</td><td>${totalCount}</td></tr>` :
+                '<tr><td colspan="2" style="text-align:center;color:#999;">No data</td></tr>';
+
+            document.getElementById('sup-summary-volunteer').textContent = name;
+            document.getElementById('sup-summary-total').textContent = totalHrs.toFixed(2);
         }
+
+        // Keep legacy function names as proxies or remove them if not used
+        async function loadVolunteerData(name) { fetchAllVolunteerData(name); }
+        async function loadSupervisionData(name) { fetchAllVolunteerData(name); }
 
         // Pre-fill form with last entry data
         function prefillFormWithLastEntry(lastEntry) {
@@ -2789,13 +3088,13 @@
                 ctx.rotate(this.rotation * Math.PI / 180);
                 ctx.globalAlpha = this.opacity;
                 ctx.fillStyle = this.color;
-                ctx.fillRect(-this.size/2, -this.size/4, this.size, this.size/2);
+                ctx.fillRect(-this.size / 2, -this.size / 4, this.size, this.size / 2);
                 ctx.restore();
             }
         }
 
         function startConfetti() {
-            confettiPieces = Array.from({length: 100}, () => new Confetti());
+            confettiPieces = Array.from({ length: 100 }, () => new Confetti());
             animateConfetti();
         }
 
@@ -2818,7 +3117,7 @@
         }
 
         // Form submission
-        document.getElementById('attendanceForm').addEventListener('submit', function(e) {
+        document.getElementById('attendanceForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const btn = document.querySelector('.submit-btn');
             btn.disabled = true;
@@ -2847,34 +3146,36 @@
                 headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify(payload)
             })
-            .then(() => {
-                showSuccessModal();
-                e.target.reset();
-                volunteerTrigger.textContent = 'Select...';
-                volunteerTrigger.classList.add('placeholder');
-                volunteerItems.forEach(item => item.classList.remove('selected'));
-                document.getElementById('headerVolunteerName').textContent = '_______';
+                .then(() => {
+                    showSuccessModal();
+                    e.target.reset();
+                    volunteerTrigger.textContent = 'Select...';
+                    volunteerTrigger.classList.add('placeholder');
+                    volunteerItems.forEach(item => item.classList.remove('selected'));
+                    document.getElementById('headerVolunteerName').textContent = '_______';
 
-                // Refresh the data table after a short delay to allow sheet to update
-                if (volunteerName) {
-                    setTimeout(() => {
-                        volunteerTrigger.textContent = volunteerName;
-                        volunteerTrigger.classList.remove('placeholder');
-                        document.getElementById('volunteer-name').value = volunteerName;
-                        document.getElementById('headerVolunteerName').textContent = volunteerName;
-                        loadVolunteerData(volunteerName);
-                    }, 2000);
-                }
-            })
-            .catch(() => alert("Submission failed."))
-            .finally(() => {
-                btn.disabled = false;
-                btn.textContent = 'Submit Attendance';
-            });
+                    // Refresh the data table after a short delay to allow sheet to update
+                    if (volunteerName) {
+                        setTimeout(() => {
+                            volunteerTrigger.textContent = volunteerName;
+                            volunteerTrigger.classList.remove('placeholder');
+                            document.getElementById('volunteer-name').value = volunteerName;
+                            document.getElementById('headerVolunteerName').textContent = volunteerName;
+                            delete dataCache[volunteerName]; // Force fresh fetch after submission
+                            localStorage.removeItem(CACHE_NAME); // Clear persistent cache too
+                            loadVolunteerData(volunteerName);
+                        }, 2000);
+                    }
+                })
+                .catch(() => alert("Submission failed."))
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = 'Submit Attendance';
+                });
         });
 
         // Supervision form submission
-        document.getElementById('supervisionForm').addEventListener('submit', function(e) {
+        document.getElementById('supervisionForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const btn = this.querySelector('.submit-btn');
             btn.disabled = true;
@@ -2885,9 +3186,9 @@
                 email: currentUser ? currentUser.email : '',
                 volunteerName: document.getElementById('sup-volunteer-name').value,
                 supervisorName: document.getElementById('supervisor-name').value,
+                timeSlot: document.getElementById('sup-time-slot').value,
                 timeInHrs: document.getElementById('sup-time-hrs').value,
-                date: document.getElementById('sup-date').value,
-                remark: document.getElementById('sup-remark').value
+                date: document.getElementById('sup-date').value
             };
 
             const volunteerName = payload.volunteerName;
@@ -2898,32 +3199,50 @@
                 headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify(payload)
             })
-            .then(() => {
-                document.getElementById('successModal').querySelector('p').textContent = 'Thank you for submitting the supervision';
-                showSuccessModal();
-                e.target.reset();
-                if (supervisorInput) supervisorInput.value = '';
-                if (supervisorTrigger) {
-                    supervisorTrigger.textContent = 'Select...';
-                    supervisorTrigger.classList.add('placeholder');
-                }
-                if (supervisorList) {
-                    supervisorList.querySelectorAll('.custom-dropdown-item').forEach(item => item.classList.remove('selected'));
-                }
+                .then(() => {
+                    document.getElementById('successModal').querySelector('p').textContent = 'Thank you for submitting the supervision';
+                    showSuccessModal();
+                    e.target.reset();
+                    if (supervisorInput) supervisorInput.value = '';
+                    if (supervisorTrigger) {
+                        supervisorTrigger.textContent = 'Select...';
+                        supervisorTrigger.classList.add('placeholder');
+                    }
+                    if (supervisorList) {
+                        supervisorList.querySelectorAll('.custom-dropdown-item').forEach(item => item.classList.remove('selected'));
+                    }
 
-                if (volunteerName) {
-                    setTimeout(() => {
-                        loadSupervisionData(volunteerName);
-                    }, 2000);
-                }
-            })
-            .catch(() => alert("Submission failed."))
-            .finally(() => {
-                btn.disabled = false;
-                btn.textContent = 'Submit Supervision';
-                document.getElementById('successModal').querySelector('p').textContent = 'Thank you for submitting the attendance';
+                    if (volunteerName) {
+                        setTimeout(() => {
+                            delete dataCache[volunteerName]; // Force fresh fetch after submission
+                            localStorage.removeItem(CACHE_NAME); // Clear persistent cache too
+                            loadSupervisionData(volunteerName);
+                        }, 2000);
+                    }
+                })
+                .catch(() => alert("Submission failed."))
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = 'Submit Supervision';
+                    document.getElementById('successModal').querySelector('p').textContent = 'Thank you for submitting the attendance';
+                });
+        });
+
+
+        // Auto-open calendar on click for date inputs
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateInputs = document.querySelectorAll('input[type="date"]');
+            dateInputs.forEach(input => {
+                input.addEventListener('click', function (e) {
+                    try {
+                        this.showPicker();
+                    } catch (err) {
+                        console.log('showPicker not supported', err);
+                    }
+                });
             });
         });
     </script>
 </body>
+
 </html>

@@ -1,12 +1,5 @@
 /**
  * Google Apps Script code to handle GET requests for fetching volunteer data
- *
- * ADD THIS TO YOUR EXISTING GOOGLE APPS SCRIPT PROJECT:
- * 1. Go to https://script.google.com
- * 2. Open your existing project (the one with the POST handler)
- * 3. Add this doGet function
- * 4. Save and Deploy as Web App (make sure to select "Anyone" for access)
- * 5. Copy the new deployment URL if it changed
  */
 
 // Handle GET requests to fetch volunteer data
@@ -15,12 +8,18 @@ function doGet(e) {
   const volunteerName = e.parameter.volunteer;
   const email = e.parameter.email;
 
-  if (action === 'getData' && volunteerName) {
-    return getVolunteerData(volunteerName, email);
+  if (action === 'getAllData' && volunteerName) {
+    return getAllVolunteerData(volunteerName, email);
   }
 
-  if (action === 'getSupervisionData' && volunteerName) {
-    return getSupervisionData(volunteerName, email);
+  if (action === 'getUsers') {
+    if (typeof getUsers === 'function') {
+      return getUsers(e);
+    }
+  }
+
+  if (action === 'ping') {
+    return ContentService.createTextOutput(JSON.stringify({ status: 'ok' })).setMimeType(ContentService.MimeType.JSON);
   }
 
   return ContentService
@@ -28,160 +27,110 @@ function doGet(e) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-// Fetch volunteer data from their sheet
-// email param optional - for RBAC when merged with apps-script-rbac.js (validate volunteerSheetName for volunteers)
-function getVolunteerData(volunteerName, email) {
+// Fetch both attendance and supervision data in one call for speed
+// Optimized with CacheService to reduce spreadsheet access time
+function getAllVolunteerData(volunteerName, email) {
+  const cache = CacheService.getScriptCache();
+  const cacheKey = 'data_v3_' + encodeURIComponent(volunteerName);
+
   try {
+    // 1. Try to get data from Cache first (lightning fast)
+    const cached = cache.get(cacheKey);
+    if (cached) {
+      console.log('Serving from GAS Cache: ' + volunteerName);
+      return ContentService.createTextOutput(cached).setMimeType(ContentService.MimeType.JSON);
+    }
+
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 
-    // Try to get the sheet with the volunteer's name
-    let sheet = spreadsheet.getSheetByName(volunteerName);
+    const allSheets = spreadsheet.getSheets();
+    const targetName = (volunteerName || '').toLowerCase().trim();
 
-    if (!sheet) {
-      return ContentService
-        .createTextOutput(JSON.stringify({
-          status: 'success',
-          data: [],
-          message: 'No sheet found for volunteer'
-        }))
-        .setMimeType(ContentService.MimeType.JSON);
+    // Find Attendance Sheet (Case-Insensitive)
+    let attendanceSheet = allSheets.find(s => s.getName().toLowerCase().trim() === targetName);
+
+    let attendanceData = [];
+    if (attendanceSheet) {
+      const values = attendanceSheet.getDataRange().getValues();
+      for (let i = 1; i < values.length; i++) {
+        const row = values[i];
+        if (!row[0] && !row[1] && !row[2]) continue;
+        attendanceData.push({
+          date: formatDate(row[0]),
+          time: row[1] || '',
+          extraFrom: row[2] || '',
+          extraTill: row[3] || '',
+          reason: row[4] || '',
+          duty: row[5] || '',
+          hours: row[6] || '',
+          location: row[7] || '',
+          remarks: row[8] || ''
+        });
+      }
     }
 
-    // Get all data from the sheet
-    const dataRange = sheet.getDataRange();
-    const values = dataRange.getValues();
+    // Find Supervision Sheet (Case-Insensitive)
+    const supTargetName = targetName + '_supervision';
+    let supSheet = allSheets.find(s => s.getName().toLowerCase().trim() === supTargetName);
 
-    // Skip header row and map data to objects
-    // Adjust these column indices based on your actual sheet structure
-    const headers = values[0]; // First row is headers
-    const data = [];
-
-    for (let i = 1; i < values.length; i++) {
-      const row = values[i];
-
-      // Skip empty rows
-      if (!row[0] && !row[1] && !row[2]) continue;
-
-      // Map row data to object
-      // Adjust these based on your column order in the sheet
-      data.push({
-        date: formatDate(row[0]),       // Column A: Date
-        time: row[1] || '',              // Column B: Time
-        extraFrom: row[2] || '',         // Column C: Extra Time (From)
-        extraTill: row[3] || '',         // Column D: Extra Time (Till)
-        reason: row[4] || '',            // Column E: Reason
-        duty: row[5] || '',              // Column F: Duty
-        hours: row[6] || '',             // Column G: No. of Hours
-        location: row[7] || '',          // Column H: Duty From (Centre/Home)
-        remarks: row[8] || ''            // Column I: Remarks
-      });
+    let supervisionData = [];
+    if (supSheet) {
+      const supValues = supSheet.getDataRange().getValues();
+      for (let i = 1; i < supValues.length; i++) {
+        const row = supValues[i];
+        if (!row[0] && !row[1] && !row[2]) continue;
+        supervisionData.push({
+          supervisorName: row[1] || '',
+          timeInHrs: row[2] !== undefined && row[2] !== '' ? String(row[2]) : '',
+          date: formatDate(row[3]) || (row[3] ? String(row[3]) : ''),
+          remark: row[4] || ''
+        });
+      }
     }
 
-    return ContentService
-      .createTextOutput(JSON.stringify({
-        status: 'success',
-        data: data
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
+    const result = {
+      status: 'success',
+      attendance: attendanceData,
+      supervision: supervisionData,
+      fetchTime: new Date().toISOString()
+    };
+
+    const jsonResult = JSON.stringify(result);
+
+    // 2. Put in Cache for 10 minutes (600 seconds)
+    // This makes subsequent loads for this name instant
+    try {
+      cache.put(cacheKey, jsonResult, 600);
+    } catch (e) {
+      console.warn('Cache put failed (likely too large): ' + e.message);
+    }
+
+    return ContentService.createTextOutput(jsonResult).setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
     return ContentService
-      .createTextOutput(JSON.stringify({
-        status: 'error',
-        message: error.toString()
-      }))
+      .createTextOutput(JSON.stringify({ status: 'error', message: error.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
-// Fetch supervision data from volunteer's name_Supervision sheet
-// Sheet columns: Timestamp | Supervisor Name | Time (in Hrs) | Supervision Date | Remark
-// email param optional - for RBAC when merged with apps-script-rbac.js
-function getSupervisionData(volunteerName, email) {
-  try {
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    const sheetName = (volunteerName || '').trim() + '_Supervision';
-
-    const sheet = spreadsheet.getSheetByName(sheetName);
-
-    if (!sheet) {
-      return ContentService
-        .createTextOutput(JSON.stringify({
-          status: 'success',
-          data: [],
-          message: 'No supervision sheet found'
-        }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-
-    const dataRange = sheet.getDataRange();
-    const values = dataRange.getValues();
-
-    const data = [];
-    for (let i = 1; i < values.length; i++) {
-      const row = values[i];
-      if (!row[0] && !row[1] && !row[2]) continue;
-
-      data.push({
-        supervisorName: row[1] || '',
-        timeInHrs: row[2] !== undefined && row[2] !== '' ? String(row[2]) : '',
-        date: formatDate(row[3]) || (row[3] ? String(row[3]) : ''),
-        remark: row[4] || ''
-      });
-    }
-
-    return ContentService
-      .createTextOutput(JSON.stringify({
-        status: 'success',
-        data: data
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
-
-  } catch (error) {
-    return ContentService
-      .createTextOutput(JSON.stringify({
-        status: 'error',
-        message: error.toString()
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
+/**
+ * HELPER: Invalidate cache for a volunteer
+ * Call this from doPost when new data is added
+ */
+function invalidateVolunteerCache(volunteerName) {
+  const cache = CacheService.getScriptCache();
+  cache.remove('data_v3_' + encodeURIComponent(volunteerName));
 }
 
 // Helper function to format dates
 function formatDate(value) {
   if (!value) return '';
-
   if (value instanceof Date) {
     const day = value.getDate();
     const month = value.getMonth() + 1;
     const year = value.getFullYear();
     return `${day}/${month}/${year}`;
   }
-
   return value.toString();
 }
-
-/**
- * IMPORTANT: After adding this code:
- *
- * 1. Click "Deploy" > "Manage deployments"
- * 2. Click the pencil icon to edit your deployment
- * 3. Select "New version" in the Version dropdown
- * 4. Make sure "Execute as" is set to "Me"
- * 5. Make sure "Who has access" is set to "Anyone"
- * 6. Click "Deploy"
- *
- * NOTE: If your sheet columns are in a different order, adjust the column
- * indices in the getVolunteerData function (row[0], row[1], etc.)
- *
- * Your sheet structure should be:
- * Column A: Date
- * Column B: Time
- * Column C: Extra Time (From)
- * Column D: Extra Time (Till)
- * Column E: Reason for extra time
- * Column F: Duty
- * Column G: No. of Hours
- * Column H: Duty from Centre/Home
- * Column I: Remarks
- */
