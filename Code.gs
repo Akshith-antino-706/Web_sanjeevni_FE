@@ -115,23 +115,9 @@ function doPost(e) {
     const user = getUserByEmail(userEmail);
     if (!user) return errorResponse("Access denied");
 
-    // ========== SUPERVISION HANDLER ==========
+    // ========== SUPERVISION HANDLER (No RBAC - Anyone can submit for any volunteer) ==========
     if (payload.type === "supervision") {
-      let volunteerName = normalizeVolunteerName(payload.volunteerName || "");
-
-      // Volunteers can only submit supervision for themselves
-      if (user.role === "volunteer") {
-        const assigned = normalizeVolunteerName(user.volunteerSheetName || "");
-        if (!volunteerName || volunteerName.toLowerCase() !== assigned.toLowerCase()) {
-          return errorResponse("Volunteers can only submit supervision for themselves");
-        }
-        volunteerName = assigned;
-      }
-
-      // Admins can submit for any volunteer
-      if (user.role === "admin" && payload.volunteerName) {
-        volunteerName = normalizeVolunteerName(payload.volunteerName);
-      }
+      const volunteerName = normalizeVolunteerName(payload.volunteerName || "");
 
       if (!volunteerName) {
         return errorResponse("Volunteer name required for supervision");
@@ -402,7 +388,7 @@ function doGet(e) {
     return getVolunteerData(normalizeVolunteerName(targetSheet));
   }
 
-  // ========== FETCH SUPERVISION DATA ==========
+  // ========== FETCH SUPERVISION DATA (No RBAC - Anyone can view any volunteer's data) ==========
   if (action === "getSupervisionData") {
     const tokenInfo = validateGoogleToken(e.parameter.token);
     const email = tokenInfo ? tokenInfo.email : e.parameter.email;
@@ -416,25 +402,14 @@ function doGet(e) {
       return errorResponse("Access denied");
     }
 
-    let targetVolunteer = requester.volunteerSheetName;
-
-    if (requester.role === "admin" && e.parameter.volunteer) {
-      targetVolunteer = e.parameter.volunteer;
-    }
-
-    if (requester.role === "volunteer" && e.parameter.volunteer) {
-      const requested = normalizeVolunteerName(e.parameter.volunteer);
-      const assigned = normalizeVolunteerName(requester.volunteerSheetName);
-      if (requested.toLowerCase() !== assigned.toLowerCase()) {
-        return errorResponse("Access denied. You can only view your own supervision data.");
-      }
-      targetVolunteer = e.parameter.volunteer;
-    }
+    // Any authenticated user can fetch supervision data for any volunteer
+    const targetVolunteer = e.parameter.volunteer || requester.volunteerSheetName;
 
     return getSupervisionData(normalizeVolunteerName(targetVolunteer));
   }
 
   // ========== FETCH ALL DATA (Attendance + Supervision) - Optimized Single Request ==========
+  // Note: Attendance follows RBAC, Supervision does not
   if (action === "getAllData") {
     const tokenInfo = validateGoogleToken(e.parameter.token);
     const email = tokenInfo ? tokenInfo.email : e.parameter.email;
@@ -448,26 +423,22 @@ function doGet(e) {
       return errorResponse("Access denied");
     }
 
-    let targetVolunteer = requester.volunteerSheetName;
-
+    // Attendance: RBAC-controlled (volunteers always get their own attendance only)
+    let attendanceVolunteer = requester.volunteerSheetName;
     if (requester.role === "admin" && e.parameter.volunteer) {
-      targetVolunteer = e.parameter.volunteer;
+      attendanceVolunteer = e.parameter.volunteer;
     }
+    // Note: Volunteers always see only their own attendance, even if they request another volunteer
 
-    if (requester.role === "volunteer" && e.parameter.volunteer) {
-      const requested = normalizeVolunteerName(e.parameter.volunteer);
-      const assigned = normalizeVolunteerName(requester.volunteerSheetName);
-      if (requested.toLowerCase() !== assigned.toLowerCase()) {
-        return errorResponse("Access denied. You can only view your own data.");
-      }
-      targetVolunteer = e.parameter.volunteer;
-    }
+    // Supervision: No RBAC - any authenticated user can fetch any volunteer's data
+    const supervisionVolunteer = e.parameter.volunteer || requester.volunteerSheetName;
 
-    const normalized = normalizeVolunteerName(targetVolunteer);
+    const normalizedAttendance = normalizeVolunteerName(attendanceVolunteer);
+    const normalizedSupervision = normalizeVolunteerName(supervisionVolunteer);
     
     // Fetch both attendance and supervision data
-    const attendanceData = getVolunteerDataRaw(normalized);
-    const supervisionData = getSupervisionDataRaw(normalized);
+    const attendanceData = getVolunteerDataRaw(normalizedAttendance);
+    const supervisionData = getSupervisionDataRaw(normalizedSupervision);
 
     return ContentService.createTextOutput(
       JSON.stringify({
