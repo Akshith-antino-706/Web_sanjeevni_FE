@@ -1394,8 +1394,7 @@
                                                     <div class="custom-dropdown-item" data-value="Radhika">Radhika</div>
                                                     <div class="custom-dropdown-item" data-value="Ranjita">Ranjita</div>
                                                     <div class="custom-dropdown-item" data-value="Ritu">Ritu</div>
-                                                    <div class="custom-dropdown-item" data-value="Shivani S">Shivani S
-                                                    </div>
+                                                    <div class="custom-dropdown-item" data-value="Shivani">Shivani</div>
                                                     <div class="custom-dropdown-item" data-value="Shuchi">Shuchi</div>
                                                     <div class="custom-dropdown-item" data-value="Simran">Simran</div>
                                                     <div class="custom-dropdown-item" data-value="Smita">Smita</div>
@@ -1550,8 +1549,7 @@
                                                     <div class="custom-dropdown-item" data-value="Radhika">Radhika</div>
                                                     <div class="custom-dropdown-item" data-value="Ranjita">Ranjita</div>
                                                     <div class="custom-dropdown-item" data-value="Ritu">Ritu</div>
-                                                    <div class="custom-dropdown-item" data-value="Shivani S">Shivani S
-                                                    </div>
+                                                    <div class="custom-dropdown-item" data-value="Shivani">Shivani</div>
                                                     <div class="custom-dropdown-item" data-value="Shuchi">Shuchi</div>
                                                     <div class="custom-dropdown-item" data-value="Simran">Simran</div>
                                                     <div class="custom-dropdown-item" data-value="Smita">Smita</div>
@@ -1606,9 +1604,19 @@
                                 </tr>
 
                                 <tr>
-                                    <td>Time (in minutes)</td>
-                                    <td><input type="number" id="sup-time-hrs" name="sup_time_hrs" step="1" min="0"
-                                            placeholder="e.g. 30, 60, 90" required></td>
+                                    <td>
+                                        <div style="display: flex; gap: 6px; align-items: center;">
+                                            <span>Time</span>
+                                            <select id="sup-time-unit" style="padding: 4px 8px; border: 1px solid #C97C7C; border-radius: 4px; background: white; font-size: 0.75rem; cursor: pointer;">
+                                                <option value="minutes">Min</option>
+                                                <option value="hours">Hrs</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input type="number" id="sup-time-hrs" name="sup_time_hrs" step="0.5" min="0"
+                                            placeholder="Enter value" required style="width: 100%; padding: 10px 12px; font-size: 0.9rem;">
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Remark</td>
@@ -3196,9 +3204,18 @@
             btn.disabled = true;
             btn.textContent = 'Submitting...';
 
-            // Convert minutes to hours
-            const timeInMinutes = parseFloat(document.getElementById('sup-time-hrs').value) || 0;
-            const timeInHours = (timeInMinutes / 60).toFixed(2);
+            // Get time value and unit
+            const timeValue = parseFloat(document.getElementById('sup-time-hrs').value) || 0;
+            const timeUnit = document.getElementById('sup-time-unit').value;
+
+            // Convert to hours based on selected unit
+            let timeInHours;
+            if (timeUnit === 'minutes') {
+                timeInHours = (timeValue / 60).toFixed(2);
+            } else {
+                // Already in hours
+                timeInHours = timeValue % 1 === 0 ? String(timeValue) : timeValue.toFixed(2);
+            }
 
             const payload = {
                 type: 'supervision',

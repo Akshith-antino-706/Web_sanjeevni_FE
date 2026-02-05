@@ -159,6 +159,8 @@ function doPost(e) {
 
       // Ensure S.No column A is formatted as plain number (not date)
       sheet.getRange(newRowNum, 1).setNumberFormat("0");
+      // Ensure Time (in Hrs) column C is formatted as number (not time)
+      sheet.getRange(newRowNum, 3).setNumberFormat("0.00");
 
       // Also append to MASTER_SUPERVISION if it exists
       const masterSheet = ss.getSheetByName("MASTER_SUPERVISION");
@@ -583,7 +585,7 @@ function getSupervisionDataRaw(volunteerName) {
       data.push({
         date: formatDate(row[colIndex.date]) || (row[colIndex.date] ? String(row[colIndex.date]) : ""),
         supervisorName: supervisor || "",
-        timeInHrs: time !== undefined && time !== "" ? String(time) : "",
+        timeInHrs: formatHoursValue(time),
         remark: row[colIndex.remark] || ""
       });
     }
@@ -646,6 +648,54 @@ function formatTime(value) {
       return hours + ":" + minutes;
     }
   }
+  return str;
+}
+
+// Format hours value for supervision "Time (in Hrs)" field
+// Value is already in HOURS (frontend converts before saving)
+function formatHoursValue(value) {
+  if (value === undefined || value === null || value === "") return "";
+
+  // If it's a number, return as-is (already in hours)
+  if (typeof value === "number") {
+    return value % 1 === 0 ? String(value) : value.toFixed(2);
+  }
+
+  // If it's a Date object, Google Sheets stored it as a time serial
+  // Need to convert back to decimal hours
+  if (value instanceof Date) {
+    const year = value.getFullYear();
+
+    // Time-only values have year 1899 or 1900 (Excel/Sheets epoch)
+    if (year === 1899 || year === 1900) {
+      // Get time components and convert to fraction of day
+      const hours = value.getHours();
+      const mins = value.getMinutes();
+      const secs = value.getSeconds();
+      // Convert to decimal (fraction of 24 hours = original decimal value)
+      const decimalValue = (hours * 3600 + mins * 60 + secs) / 86400;
+      return decimalValue.toFixed(2);
+    }
+
+    // Full date - return empty
+    return "";
+  }
+
+  // If it's a string, try to parse and format
+  const str = String(value).trim();
+
+  // Skip full date strings
+  if (str.includes("GMT") || str.includes("IST") || str.includes("Standard Time")) {
+    return "";
+  }
+
+  // Try to parse as number and format nicely
+  const num = parseFloat(str);
+  if (!isNaN(num)) {
+    return num % 1 === 0 ? String(num) : num.toFixed(2);
+  }
+
+  // Return as-is if can't parse
   return str;
 }
 
