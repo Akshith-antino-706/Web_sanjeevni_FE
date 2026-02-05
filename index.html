@@ -121,7 +121,7 @@
         .form-header {
             background: transparent;
             color: #042F2E;
-            padding: 20px 14px 10px;
+            padding: 8px 14px 6px;
             text-align: center;
         }
 
@@ -132,10 +132,11 @@
         }
 
         .form-header h1 {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
             letter-spacing: 0.5px;
-            margin-bottom: 2px;
+            margin-bottom: 0px;
+            margin-top: 0px;
             color: #2F4A7D;
             /* Navy Blue */
         }
@@ -148,7 +149,7 @@
         }
 
         .form-body {
-            padding: 16px;
+            padding: 12px 16px;
             flex: 1;
             overflow-y: auto;
         }
@@ -821,6 +822,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 20px;
         }
 
         .user-header.hidden {
@@ -1115,10 +1117,11 @@
             display: none;
         }
 
-        body.is-volunteer #volunteerDropdown,
-        body.is-volunteer #supVolunteerDropdown {
+        body.is-volunteer #volunteerDropdown {
             pointer-events: none;
         }
+        
+        /* Supervision volunteer dropdown is not restricted for volunteers */
 
         .volunteer-name-display {
             padding: 6px 8px;
@@ -1150,15 +1153,16 @@
 
         .sidebar-nav-btn {
             flex: 1;
-            padding: 8px 12px;
+            padding: 8px 24px;
             border: none;
             background: transparent;
             font-family: 'Poppins', sans-serif;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: 500;
             color: #666;
             cursor: pointer;
             border-radius: 6px;
+            min-width: 120px;
         }
 
         .sidebar-nav-btn:hover {
@@ -1170,8 +1174,6 @@
         .sidebar-nav {
             display: flex;
             gap: 0;
-            margin-top: 12px;
-            margin-bottom: 12px;
             background: #EAE0D1;
             /* Lighter Beige Background */
             border-radius: 8px;
@@ -1190,7 +1192,7 @@
             flex-direction: column;
             flex: 1;
             min-height: 0;
-            gap: 24px;
+            gap: 12px;
             height: 100%;
             /* Ensure it fills the parent height */
         }
@@ -1298,6 +1300,12 @@
                     <span class="user-role" id="userRole">volunteer</span>
                 </div>
             </div>
+            <nav class="sidebar-nav">
+                <button type="button" class="sidebar-nav-btn active" id="navAttendance"
+                    onclick="switchPanel('attendance')">Attendance</button>
+                <button type="button" class="sidebar-nav-btn" id="navSupervision"
+                    onclick="switchPanel('supervision')">Supervision</button>
+            </nav>
             <div class="user-actions">
                 <button class="admin-panel-btn hidden" id="adminPanelBtn" onclick="openAdminPanel()">Admin
                     Panel</button>
@@ -1308,21 +1316,14 @@
         <div class="main-container">
             <!-- Left: Form Section -->
             <div class="form-section">
-                <nav class="sidebar-nav">
-                    <button type="button" class="sidebar-nav-btn active" id="navAttendance"
-                        onclick="switchPanel('attendance')">Attendance</button>
-                    <button type="button" class="sidebar-nav-btn" id="navSupervision"
-                        onclick="switchPanel('supervision')">Supervision</button>
-                </nav>
-
                 <!-- Attendance Panel -->
                 <div id="attendancePanel" class="panel-content">
                     <div class="card form-card">
                         <div class="form-header">
                             <!-- Custom Sanjeevni Logo -->
                             <div
-                                style="display: flex; flex-direction: column; align-items: center; margin-bottom: 8px;">
-                                <svg width="60" height="50" viewBox="0 0 100 80" fill="none"
+                                style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2px;">
+                                <svg width="50" height="40" viewBox="0 0 100 80" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path d="M20 70 L45 35 L10 10" stroke="#2F4A7D" stroke-width="12"
                                         stroke-linecap="round" />
@@ -1411,9 +1412,9 @@
                                     <td>
                                         <select id="time" name="time" required>
                                             <option value="" disabled selected>Select</option>
-                                            <option value="2pm-5:30pm">2pm-5:30pm</option>
                                             <option value="10am-2pm">10am-2pm</option>
-                                            <option value="Full Day">Full Day</option>
+                                            <option value="2pm-5:30pm">2pm-5:30pm</option>
+                                            <option value="5:30pm-7:30pm">5:30pm-7:30pm</option>
                                             <option value="extra time">extra time</option>
                                         </select>
                                     </td>
@@ -1485,8 +1486,8 @@
                         <div class="form-header">
                             <!-- Custom Sanjeevni Logo -->
                             <div
-                                style="display: flex; flex-direction: column; align-items: center; margin-bottom: 8px;">
-                                <svg width="60" height="50" viewBox="0 0 100 80" fill="none"
+                                style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2px;">
+                                <svg width="50" height="40" viewBox="0 0 100 80" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path d="M20 70 L45 35 L10 10" stroke="#2F4A7D" stroke-width="12"
                                         stroke-linecap="round" />
@@ -1571,18 +1572,6 @@
                                     <td><input type="date" id="sup-date" name="sup_date" required></td>
                                 </tr>
                                 <tr>
-                                    <td>Time Slot</td>
-                                    <td>
-                                        <select id="sup-time-slot" name="sup_time_slot">
-                                            <option value="" disabled selected>Select</option>
-                                            <option value="2pm-5:30pm">2pm-5:30pm</option>
-                                            <option value="10am-2pm">10am-2pm</option>
-                                            <option value="Full Day">Full Day</option>
-                                            <option value="extra time">extra time</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
                                     <td>Supervisor</td>
                                     <td>
                                         <input type="hidden" id="supervisor-name" name="supervisor_name" required>
@@ -1595,12 +1584,15 @@
                                                         autocomplete="off">
                                                 </div>
                                                 <div class="custom-dropdown-list" id="supervisorList">
+                                                    <div class="custom-dropdown-item" data-value="Feisal">Feisal</div>
+                                                    <div class="custom-dropdown-item" data-value="Kavita">Kavita</div>
+                                                    <div class="custom-dropdown-item" data-value="Kalpana">Kalpana</div>
+                                                    <div class="custom-dropdown-item" data-value="Mamta">Mamta</div>
+                                                    <div class="custom-dropdown-item" data-value="Neelam">Neelam</div>
+                                                    <div class="custom-dropdown-item" data-value="Niharika">Niharika</div>
+                                                    <div class="custom-dropdown-item" data-value="Praveen">Praveen</div>
+                                                    <div class="custom-dropdown-item" data-value="Ranjita">Ranjita</div>
                                                     <div class="custom-dropdown-item" data-value="Vickie">Vickie</div>
-                                                    <div class="custom-dropdown-item" data-value="Geeta">Geeta</div>
-                                                    <div class="custom-dropdown-item" data-value="Mamta V">Mamta V</div>
-                                                    <div class="custom-dropdown-item" data-value="Manish">Manish</div>
-                                                    <div class="custom-dropdown-item" data-value="Smita">Smita</div>
-                                                    <div class="custom-dropdown-item" data-value="Madhu">Madhu</div>
                                                 </div>
                                                 <div class="custom-dropdown-empty" style="display:none;">No match</div>
                                             </div>
@@ -1609,9 +1601,14 @@
                                 </tr>
 
                                 <tr>
-                                    <td>No. of Hours</td>
-                                    <td><input type="number" id="sup-time-hrs" name="sup_time_hrs" step="0.01" min="0"
-                                            placeholder="e.g. 0.25, 0.5, 1" required></td>
+                                    <td>Time (in minutes)</td>
+                                    <td><input type="number" id="sup-time-hrs" name="sup_time_hrs" step="1" min="0"
+                                            placeholder="e.g. 30, 60, 90" required></td>
+                                </tr>
+                                <tr>
+                                    <td>Remark</td>
+                                    <td><input type="text" id="sup-remark" name="sup_remark"
+                                            placeholder="Optional remarks"></td>
                                 </tr>
                             </table>
                             <button type="submit" class="submit-btn">Submit Supervision</button>
@@ -1757,9 +1754,9 @@
                                         <tr>
                                             <th>S. No</th>
                                             <th>Date</th>
-                                            <th>Time Slot</th>
                                             <th>Supervisor</th>
                                             <th>Time (in Hrs)</th>
+                                            <th>Remark</th>
                                         </tr>
                                     </thead>
                                     <tbody id="supervisionTableBody">
@@ -2098,24 +2095,23 @@
                 switchPanel('attendance');
             } else if (currentUser.role === 'volunteer') {
                 document.body.classList.add('is-volunteer');
-                // For volunteers, filter dropdown to only show their name (attendance + supervision)
+                // For volunteers, filter attendance dropdown only (supervision has no RBAC)
                 if (currentUser.volunteerSheetName) {
                     filterDropdownForVolunteer(currentUser.volunteerSheetName);
                 }
             }
 
-            // Common logic: if the user (admin or volunteer) has a volunteerSheetRecord, auto-select and pre-fetch
+            // Common logic: auto-select and pre-fetch for attendance
             if (currentUser.volunteerSheetName) {
                 autoSelectVolunteer(currentUser.volunteerSheetName);
-                autoSelectSupVolunteer(currentUser.volunteerSheetName);
-                // Pre-fetch data in background
+                // Pre-fetch their attendance data in background
                 fetchAllVolunteerData(currentUser.volunteerSheetName, true);
             }
         }
 
-        // Filter dropdown to only show the volunteer's own name (both attendance and supervision)
+        // Filter dropdown to only show the volunteer's own name (attendance only, not supervision)
         function filterDropdownForVolunteer(volunteerName) {
-            const items = document.querySelectorAll('#volunteerList .custom-dropdown-item, #supVolunteerList .custom-dropdown-item');
+            const items = document.querySelectorAll('#volunteerList .custom-dropdown-item');
             const normalizedName = volunteerName.toLowerCase().trim();
 
             items.forEach(item => {
@@ -2894,9 +2890,9 @@
                 <tr>
                     <td class="sno">${index + 1}</td>
                     <td>${row.date || ''}</td>
-                    <td>${row.timeSlot || ''}</td>
                     <td>${row.supervisorName || ''}</td>
                     <td>${row.timeInHrs || ''}</td>
+                    <td>${row.remark || ''}</td>
                 </tr>
             `).join('');
 
@@ -3181,14 +3177,18 @@
             btn.disabled = true;
             btn.textContent = 'Submitting...';
 
+            // Convert minutes to hours
+            const timeInMinutes = parseFloat(document.getElementById('sup-time-hrs').value) || 0;
+            const timeInHours = (timeInMinutes / 60).toFixed(2);
+
             const payload = {
                 type: 'supervision',
                 email: currentUser ? currentUser.email : '',
                 volunteerName: document.getElementById('sup-volunteer-name').value,
                 supervisorName: document.getElementById('supervisor-name').value,
-                timeSlot: document.getElementById('sup-time-slot').value,
-                timeInHrs: document.getElementById('sup-time-hrs').value,
-                date: document.getElementById('sup-date').value
+                timeInHrs: timeInHours,
+                date: document.getElementById('sup-date').value,
+                remark: document.getElementById('sup-remark').value
             };
 
             const volunteerName = payload.volunteerName;
