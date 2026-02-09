@@ -11,6 +11,9 @@
         rel="stylesheet">
     <!-- Google Sign-In -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Flatpickr Date Picker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
         * {
             margin: 0;
@@ -607,8 +610,59 @@
             align-items: center;
         }
 
-        .success-modal.show {
+        .success-modal.show,
+        .warning-modal.show {
             display: flex;
+        }
+
+        .warning-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .warning-content {
+            background: white;
+            padding: 24px 32px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            max-width: 320px;
+        }
+
+        .warning-content .warning-icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        .warning-content h2 {
+            color: #e67e22;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .warning-content p {
+            color: #3A2F2F;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+        }
+
+        .warning-content button {
+            background: #e67e22;
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 20px;
+            cursor: pointer;
         }
 
         .success-content {
@@ -1572,7 +1626,7 @@
                                 </tr>
                                 <tr>
                                     <td>Date</td>
-                                    <td><input type="date" id="sup-date" name="sup_date" required></td>
+                                    <td><input type="text" id="sup-date" name="sup_date" placeholder="Select date"></td>
                                 </tr>
                                 <tr>
                                     <td>Supervisor</td>
@@ -1835,6 +1889,17 @@
             <button onclick="closeModal()">Close</button>
         </div>
     </div>
+
+    <!-- Warning Modal -->
+    <div class="warning-modal" id="warningModal">
+        <div class="warning-content">
+            <div class="warning-icon">⚠️</div>
+            <h2>Required Field</h2>
+            <p id="warningMessage">Please select a Supervisor</p>
+            <button onclick="closeWarningModal()">OK</button>
+        </div>
+    </div>
+
     <canvas id="confetti-canvas"></canvas>
 
     <script>
@@ -2366,6 +2431,13 @@
                     }
                 });
             }
+
+            // Initialize Flatpickr for supervision date field
+            flatpickr("#sup-date", {
+                dateFormat: "Y-m-d",
+                allowInput: true,
+                disableMobile: true
+            });
         });
 
         // DOM Elements
@@ -3009,7 +3081,15 @@
 
             data.forEach(row => {
                 if (row.duty && dutyCounts[row.duty]) {
-                    const loc = row.dutyFrom === 'Centre' ? 'Centre' : 'Home';
+                    // Use row.location (from backend) and make case-insensitive
+                    const dutyFromValue = (row.location || row.dutyFrom || '').toString().trim().toLowerCase();
+                    // Debug log
+                    console.log('Row location:', row.location, 'dutyFromValue:', dutyFromValue);
+                    // Check explicitly - if contains 'home' count as Home, else count as Centre
+                    let loc = 'Centre'; // Default to Centre
+                    if (dutyFromValue.includes('home')) {
+                        loc = 'Home';
+                    }
                     dutyCounts[row.duty][loc]++;
                 }
 
@@ -3137,6 +3217,15 @@
             ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
         }
 
+        function showWarningModal(message) {
+            document.getElementById('warningMessage').textContent = message;
+            document.getElementById('warningModal').classList.add('show');
+        }
+
+        function closeWarningModal() {
+            document.getElementById('warningModal').classList.remove('show');
+        }
+
         // Form submission
         document.getElementById('attendanceForm').addEventListener('submit', function (e) {
             e.preventDefault();
@@ -3200,6 +3289,20 @@
         // Supervision form submission
         document.getElementById('supervisionForm').addEventListener('submit', function (e) {
             e.preventDefault();
+
+            // Validate required fields
+            const supervisorName = document.getElementById('supervisor-name').value;
+            if (!supervisorName || supervisorName.trim() === '') {
+                showWarningModal('Please select a Supervisor');
+                return;
+            }
+
+            const dateValue = document.getElementById('sup-date').value;
+            if (!dateValue || dateValue.trim() === '') {
+                showWarningModal('Please select a Date');
+                return;
+            }
+
             const btn = this.querySelector('.submit-btn');
             btn.disabled = true;
             btn.textContent = 'Submitting...';
