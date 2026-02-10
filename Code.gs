@@ -115,12 +115,20 @@ function doPost(e) {
     const user = getUserByEmail(userEmail);
     if (!user) return errorResponse("Access denied");
 
-    // ========== SUPERVISION HANDLER (No RBAC - Anyone can submit for any volunteer) ==========
+    // ========== SUPERVISION HANDLER (RBAC - Volunteers can only submit for themselves) ==========
     if (payload.type === "supervision") {
       const volunteerName = normalizeVolunteerName(payload.volunteerName || "");
 
       if (!volunteerName) {
         return errorResponse("Volunteer name required for supervision");
+      }
+
+      // RBAC: Volunteers can only submit supervision records for themselves (as the supervisee)
+      if (user.role === "volunteer") {
+        const myName = normalizeVolunteerName(user.volunteerSheetName || "").toLowerCase();
+        if (volunteerName.toLowerCase() !== myName) {
+          return errorResponse("Access denied. You can only submit supervision for yourself.");
+        }
       }
 
       const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
@@ -202,7 +210,17 @@ function doPost(e) {
       ]);
     }
 
-    sheet.appendRow([
+    const newRow = sheet.getLastRow() + 1;
+
+    // Pre-format time-related columns as plain text BEFORE writing values
+    // This prevents Google Sheets from auto-converting "10:00 AM" to Time objects (causing timezone shifts)
+    sheet.getRange(newRow, 3).setNumberFormat("@");  // Time
+    sheet.getRange(newRow, 4).setNumberFormat("@");  // Extra Time From
+    sheet.getRange(newRow, 5).setNumberFormat("@");  // Extra Time Till
+    sheet.getRange(newRow, 8).setNumberFormat("@");  // No of Hours
+
+    // Use setValues (not appendRow) so values go into pre-formatted cells
+    sheet.getRange(newRow, 1, 1, 10).setValues([[
       new Date(),
       payload.date || "",
       payload.time || "",
@@ -213,7 +231,7 @@ function doPost(e) {
       payload.hours || "",
       payload.dutyFrom || "",
       payload.remarks || ""
-    ]);
+    ]]);
 
     updateLastLogin(userEmail);
     return successResponse({});
@@ -403,7 +421,7 @@ function doGet(e) {
     return getVolunteerData(normalizeVolunteerName(targetSheet));
   }
 
-  // ========== FETCH SUPERVISION DATA (No RBAC - Anyone can view any volunteer's data) ==========
+  // ========== FETCH SUPERVISION DATA (RBAC - Volunteers see only their own supervision records) ==========
   if (action === "getSupervisionData") {
     const tokenInfo = validateGoogleToken(e.parameter.token);
     const email = tokenInfo ? tokenInfo.email : e.parameter.email;
@@ -417,14 +435,22 @@ function doGet(e) {
       return errorResponse("Access denied");
     }
 
-    // Any authenticated user can fetch supervision data for any volunteer
     const targetVolunteer = e.parameter.volunteer || requester.volunteerSheetName;
 
-    return getSupervisionData(normalizeVolunteerName(targetVolunteer));
+    // RBAC: Volunteers can only view their own supervision records
+    if (requester.role === "volunteer") {
+      const myName = normalizeVolunteerName(requester.volunteerSheetName).toLowerCase();
+      const requestedName = normalizeVolunteerName(targetVolunteer).toLowerCase();
+      if (requestedName !== myName) {
+        return errorResponse("Access denied. You can only view your own supervision data.");
+      }
+    }
+
+    const rawData = getSupervisionDataRaw(normalizeVolunteerName(targetVolunteer));
+    return successResponse({ data: rawData });
   }
 
   // ========== FETCH ALL DATA (Attendance + Supervision) - Optimized Single Request ==========
-  // Note: Attendance follows RBAC, Supervision does not
   if (action === "getAllData") {
     const tokenInfo = validateGoogleToken(e.parameter.token);
     const email = tokenInfo ? tokenInfo.email : e.parameter.email;
@@ -443,14 +469,17 @@ function doGet(e) {
     if (requester.role === "admin" && e.parameter.volunteer) {
       attendanceVolunteer = e.parameter.volunteer;
     }
-    // Note: Volunteers always see only their own attendance, even if they request another volunteer
 
-    // Supervision: No RBAC - any authenticated user can fetch any volunteer's data
-    const supervisionVolunteer = e.parameter.volunteer || requester.volunteerSheetName;
+    // Supervision: RBAC - Volunteers can only view their own supervision records
+    let supervisionVolunteer = e.parameter.volunteer || requester.volunteerSheetName;
+    if (requester.role === "volunteer") {
+      // Force to own data regardless of what was requested
+      supervisionVolunteer = requester.volunteerSheetName;
+    }
 
     const normalizedAttendance = normalizeVolunteerName(attendanceVolunteer);
     const normalizedSupervision = normalizeVolunteerName(supervisionVolunteer);
-    
+
     // Fetch both attendance and supervision data
     const attendanceData = getVolunteerDataRaw(normalizedAttendance);
     const supervisionData = getSupervisionDataRaw(normalizedSupervision);
@@ -478,7 +507,10 @@ function getVolunteerDataRaw(sheetName) {
 
     if (!sheet) return [];
 
-    const values = sheet.getDataRange().getValues();
+    const range = sheet.getDataRange();
+    const values = range.getValues();
+    // getDisplayValues returns exact text as shown in the cell (avoids Date/timezone conversion issues)
+    const displayValues = range.getDisplayValues();
     const data = [];
 
     // Read header row to determine column indices dynamically
@@ -520,16 +552,19 @@ function getVolunteerDataRaw(sheetName) {
 
     for (let i = 1; i < values.length; i++) {
       const row = values[i];
+      const dispRow = displayValues[i];
       if (!row[colIdx.date] && !row[colIdx.time]) continue;
 
+      // Use displayValues for time columns to avoid Google Sheets Date/timezone conversion issues
+      // Use raw values + formatDate for dates (handles Date objects properly)
       data.push({
         date: formatDate(row[colIdx.date]),
-        time: formatTime(row[colIdx.time]),
-        extraFrom: formatTime(row[colIdx.extraFrom]),
-        extraTill: formatTime(row[colIdx.extraTill]),
+        time: formatTime(dispRow[colIdx.time] || row[colIdx.time]),
+        extraFrom: formatTime(dispRow[colIdx.extraFrom] || row[colIdx.extraFrom]),
+        extraTill: formatTime(dispRow[colIdx.extraTill] || row[colIdx.extraTill]),
         reason: row[colIdx.reason] || "",
         duty: row[colIdx.duty] || "",
-        hours: row[colIdx.hours] || "",
+        hours: dispRow[colIdx.hours] || row[colIdx.hours] || "",
         location: row[colIdx.location] || "",
         remarks: row[colIdx.remarks] || ""
       });
@@ -549,7 +584,9 @@ function getSupervisionDataRaw(volunteerName) {
 
     if (!sheet) return [];
 
-    const values = sheet.getDataRange().getValues();
+    const range = sheet.getDataRange();
+    const values = range.getValues();
+    const displayValues = range.getDisplayValues();
     const data = [];
 
     // Read header row to determine column indices dynamically
@@ -577,15 +614,16 @@ function getSupervisionDataRaw(volunteerName) {
 
     for (let i = 1; i < values.length; i++) {
       const row = values[i];
+      const dispRow = displayValues[i];
       // Skip only if supervisor AND time are both empty (use dynamic column indices)
       const supervisor = row[colIndex.supervisor];
       const time = row[colIndex.time];
       if (!supervisor && (time === undefined || time === "" || time === null)) continue;
 
       data.push({
-        date: formatDate(row[colIndex.date]) || (row[colIndex.date] ? String(row[colIndex.date]) : ""),
+        date: formatDate(row[colIndex.date]) || (dispRow[colIndex.date] || ""),
         supervisorName: supervisor || "",
-        timeInHrs: formatHoursValue(time),
+        timeInHrs: formatHoursValue(dispRow[colIndex.time] || time),
         remark: row[colIndex.remark] || ""
       });
     }
@@ -630,24 +668,78 @@ function formatDate(value) {
   return value.toString();
 }
 
+// Sanjeevni working hours: 10:00 AM - 8:30 PM
+// Corrects AM/PM based on working hours context (fixes old data stored incorrectly)
+// Rule: 10-11 → AM, 12 → PM, 1-8 → PM, 9 → AM
+function applyWorkingHoursAmPm(timeStr) {
+  if (!timeStr) return timeStr;
+  var match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return timeStr;
+
+  var hours = parseInt(match[1]);
+  var mins = match[2];
+  var ampm = match[3].toUpperCase();
+
+  // Only correct AM values that should be PM during working hours
+  if (ampm === "AM" && hours >= 1 && hours <= 8) {
+    return hours + ":" + mins + " PM";
+  }
+  // Correct PM values that should be AM (e.g., 11:41 PM → 11:41 AM)
+  if (ampm === "PM" && hours >= 9 && hours <= 11) {
+    return hours + ":" + mins + " AM";
+  }
+
+  return timeStr;
+}
+
 function formatTime(value) {
   if (!value) return "";
+
+  var result = "";
+
   if (value instanceof Date) {
-    return Utilities.formatDate(
+    result = Utilities.formatDate(
       value,
       Session.getScriptTimeZone(),
-      "HH:mm"
+      "h:mm a"
     );
+    return applyWorkingHoursAmPm(result);
   }
+
   // Handle ISO string format
-  const str = String(value);
+  var str = String(value).trim();
+
+  // Already has AM/PM - apply working hours correction
+  if (/\d{1,2}:\d{2}\s*(AM|PM)/i.test(str)) {
+    return applyWorkingHoursAmPm(str);
+  }
+
   if (str.includes("T") && str.includes(":")) {
-    const timePart = str.split("T")[1];
+    var timePart = str.split("T")[1];
     if (timePart) {
-      const [hours, minutes] = timePart.split(":");
-      return hours + ":" + minutes;
+      var parts = timePart.split(":");
+      var hours = parseInt(parts[0]) || 0;
+      var mins = parseInt(parts[1]) || 0;
+      var ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12 || 12;
+      result = hours + ":" + (mins < 10 ? "0" : "") + mins + " " + ampm;
+      return applyWorkingHoursAmPm(result);
     }
   }
+
+  // Convert 24-hour "HH:mm" to 12-hour AM/PM
+  if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(str)) {
+    var parts = str.split(":");
+    var h = parseInt(parts[0]) || 0;
+    var m = parseInt(parts[1]) || 0;
+    if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+      var ap = h >= 12 ? "PM" : "AM";
+      h = h % 12 || 12;
+      result = h + ":" + (m < 10 ? "0" : "") + m + " " + ap;
+      return applyWorkingHoursAmPm(result);
+    }
+  }
+
   return str;
 }
 
