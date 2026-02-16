@@ -233,16 +233,8 @@ function doPost(e) {
       nextSNo = maxSNo > 0 ? maxSNo + 1 : lastRow;
     }
 
-    // Pre-format time-related columns as plain text BEFORE writing values
-    // This prevents Google Sheets from auto-converting "10:00 AM" to Time objects (causing timezone shifts)
-    sheet.getRange(newRow, 1).setNumberFormat("0");   // S. No (plain number)
-    sheet.getRange(newRow, 3).setNumberFormat("@");   // Time
-    sheet.getRange(newRow, 4).setNumberFormat("@");   // Extra Time (From)
-    sheet.getRange(newRow, 5).setNumberFormat("@");   // Extra Time (till)
-    sheet.getRange(newRow, 8).setNumberFormat("@");   // No.Of Hours
-
-    // Use setValues (not appendRow) so values go into pre-formatted cells
-    sheet.getRange(newRow, 1, 1, 10).setValues([[
+    // Append row first (reliable write)
+    sheet.appendRow([
       nextSNo,
       payload.date || "",
       payload.time || "",
@@ -253,7 +245,15 @@ function doPost(e) {
       payload.hours || "",
       payload.dutyFrom || "",
       payload.remarks || ""
-    ]]);
+    ]);
+
+    // Fix formats and re-set time values as plain text to prevent auto-conversion
+    var writtenRow = sheet.getLastRow();
+    sheet.getRange(writtenRow, 1).setNumberFormat("0");
+    sheet.getRange(writtenRow, 3).setNumberFormat("@").setValue(payload.time || "");
+    sheet.getRange(writtenRow, 4).setNumberFormat("@").setValue(payload.extraFrom || "");
+    sheet.getRange(writtenRow, 5).setNumberFormat("@").setValue(payload.extraTill || "");
+    sheet.getRange(writtenRow, 8).setNumberFormat("@").setValue(payload.hours || "");
 
     updateLastLogin(userEmail);
     return successResponse({});
