@@ -618,6 +618,8 @@ function getSupervisionDataRaw(volunteerName) {
       var h = String(header).toLowerCase().trim();
       if (h.indexOf("supervisor") !== -1 && h.indexOf("date") === -1) {
         colIndex.supervisor = idx;
+      } else if (h === "timestamp") {
+        // Skip - Timestamp column should not be mapped to any data field
       } else if (h.indexOf("time") !== -1 || h.indexOf("hrs") !== -1 || h.indexOf("hours") !== -1) {
         colIndex.time = idx;
       } else if (h.indexOf("date") !== -1 && h.indexOf("supervisor") === -1) {
