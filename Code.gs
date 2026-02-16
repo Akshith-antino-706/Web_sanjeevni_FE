@@ -209,17 +209,28 @@ function doPost(e) {
         "Remarks"
       ]);
       sheet.getRange(1, 1, 1, 10).setFontWeight("bold");
+    } else {
+      // Fix existing sheets: rename "Timestamp" header to "S. No"
+      var headerA = sheet.getRange(1, 1).getValue();
+      if (String(headerA).toLowerCase().trim() === "timestamp") {
+        sheet.getRange(1, 1).setValue("S. No");
+      }
     }
 
     const lastRow = sheet.getLastRow();
     const newRow = lastRow + 1;
 
-    // Auto-generate S. No: read last S. No and increment
-    let nextSNo = 1;
+    // Auto-generate S. No: find the highest S. No in column A and increment
+    let nextSNo = lastRow; // fallback: use row count minus header
     if (lastRow > 1) {
-      const lastSNo = sheet.getRange(lastRow, 1).getValue();
-      const parsed = parseInt(lastSNo);
-      nextSNo = isNaN(parsed) ? lastRow : parsed + 1;
+      // Scan column A to find the highest numeric S. No
+      const colAValues = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+      let maxSNo = 0;
+      for (var si = 0; si < colAValues.length; si++) {
+        var parsed = parseInt(colAValues[si][0]);
+        if (!isNaN(parsed) && parsed > maxSNo) maxSNo = parsed;
+      }
+      nextSNo = maxSNo > 0 ? maxSNo + 1 : lastRow;
     }
 
     // Pre-format time-related columns as plain text BEFORE writing values
