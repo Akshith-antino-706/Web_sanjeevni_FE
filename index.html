@@ -3307,7 +3307,9 @@
                 }
 
                 // Calculate extra hours from Extra Time From and Till fields
-                if (row.extraFrom && row.extraTill) {
+                // Exclude Supervisor meeting and EC meeting from extra hours count
+                const excludedDuties = ['Supervisor meeting', 'EC meeting'];
+                if (row.extraFrom && row.extraTill && !excludedDuties.includes(row.duty)) {
                     const fromMins = parseTimeToMinutes(row.extraFrom);
                     const tillMins = parseTimeToMinutes(row.extraTill);
 
