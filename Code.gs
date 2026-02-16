@@ -197,31 +197,42 @@ function doPost(e) {
     if (!sheet) {
       sheet = ss.insertSheet(sheetName);
       sheet.appendRow([
-        "Timestamp",
+        "S. No",
         "Date",
         "Time",
-        "Extra Time From",
-        "Extra Time Till",
-        "Reason for Other Duty",
+        "Extra Time (From)",
+        "Extra Time (till)",
+        "Reason for extra time",
         "Duty",
-        "No of Hours",
-        "Duty From",
+        "No.Of Hours",
+        "Duty from Centre/ Home",
         "Remarks"
       ]);
+      sheet.getRange(1, 1, 1, 10).setFontWeight("bold");
     }
 
-    const newRow = sheet.getLastRow() + 1;
+    const lastRow = sheet.getLastRow();
+    const newRow = lastRow + 1;
+
+    // Auto-generate S. No: read last S. No and increment
+    let nextSNo = 1;
+    if (lastRow > 1) {
+      const lastSNo = sheet.getRange(lastRow, 1).getValue();
+      const parsed = parseInt(lastSNo);
+      nextSNo = isNaN(parsed) ? lastRow : parsed + 1;
+    }
 
     // Pre-format time-related columns as plain text BEFORE writing values
     // This prevents Google Sheets from auto-converting "10:00 AM" to Time objects (causing timezone shifts)
-    sheet.getRange(newRow, 3).setNumberFormat("@");  // Time
-    sheet.getRange(newRow, 4).setNumberFormat("@");  // Extra Time From
-    sheet.getRange(newRow, 5).setNumberFormat("@");  // Extra Time Till
-    sheet.getRange(newRow, 8).setNumberFormat("@");  // No of Hours
+    sheet.getRange(newRow, 1).setNumberFormat("0");   // S. No (plain number)
+    sheet.getRange(newRow, 3).setNumberFormat("@");   // Time
+    sheet.getRange(newRow, 4).setNumberFormat("@");   // Extra Time (From)
+    sheet.getRange(newRow, 5).setNumberFormat("@");   // Extra Time (till)
+    sheet.getRange(newRow, 8).setNumberFormat("@");   // No.Of Hours
 
     // Use setValues (not appendRow) so values go into pre-formatted cells
     sheet.getRange(newRow, 1, 1, 10).setValues([[
-      new Date(),
+      nextSNo,
       payload.date || "",
       payload.time || "",
       payload.extraFrom || "",
@@ -539,7 +550,7 @@ function getVolunteerDataRaw(sheetName) {
       }
     });
 
-    // Fallback to default positions (accounting for Timestamp at index 0)
+    // Fallback to default positions (accounting for S. No at index 0)
     if (colIdx.date === undefined) colIdx.date = 1;
     if (colIdx.time === undefined) colIdx.time = 2;
     if (colIdx.extraFrom === undefined) colIdx.extraFrom = 3;
