@@ -188,7 +188,12 @@ function doPost(e) {
     }
 
     // ========== ATTENDANCE HANDLER (default) ==========
-    const sheetName = normalizeVolunteerName(user.volunteerSheetName);
+    // Admins can submit for any volunteer (use dropdown selection), volunteers only for themselves
+    let targetVolunteer = user.volunteerSheetName;
+    if (user.role === "admin" && payload.volunteerName) {
+      targetVolunteer = payload.volunteerName;
+    }
+    const sheetName = normalizeVolunteerName(targetVolunteer);
     if (!sheetName) return errorResponse("Volunteer sheet not mapped");
 
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
