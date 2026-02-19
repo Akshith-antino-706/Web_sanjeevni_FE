@@ -1921,10 +1921,6 @@
         let currentUser = null;
         let googleAuth = null;
 
-        // Advanced Performance Management
-        const CACHE_NAME = 'sanjeevni_data_v6';
-        const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours (Increased for persistence)
-        let dataCache = {};
         let selectedSupVolunteer = null; // Track which volunteer was explicitly selected for supervision
 
         // Keep-Alive connection to warm up Google Apps Script
@@ -1932,30 +1928,7 @@
             fetch(`${SCRIPT_URL}?action=ping`).catch(() => { });
         }
 
-        initDataCache();
         warmUpBackend();
-
-        function initDataCache() {
-            try {
-                const saved = localStorage.getItem(CACHE_NAME);
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    const now = Date.now();
-                    // Clean up stale entries
-                    Object.keys(parsed).forEach(k => {
-                        if (now - parsed[k].timestamp > CACHE_TTL) delete parsed[k];
-                    });
-                    dataCache = parsed;
-                }
-            } catch (e) { dataCache = {}; }
-        }
-
-        function persistToCache(name, attendance, supervision) {
-            dataCache[name] = { attendance, supervision, timestamp: Date.now() };
-            try {
-                localStorage.setItem(CACHE_NAME, JSON.stringify(dataCache));
-            } catch (e) { console.warn('Cache storage failed', e); }
-        }
 
         // Check for existing session on page load
         function checkExistingSession() {
@@ -2373,10 +2346,9 @@
             document.getElementById('attendanceDataPanel').classList.toggle('hidden', !isAttendance);
             document.getElementById('supervisionDataPanel').classList.toggle('hidden', isAttendance);
 
-            // When switching to supervision tab, re-render cached data if available
-            if (!isAttendance && selectedSupVolunteer && dataCache[selectedSupVolunteer]) {
-                const cached = dataCache[selectedSupVolunteer];
-                renderSupervision(selectedSupVolunteer, cached.supervision || []);
+            // When switching to supervision tab, re-fetch data for the selected volunteer
+            if (!isAttendance && selectedSupVolunteer) {
+                fetchAllVolunteerData(selectedSupVolunteer);
             }
         }
 
@@ -2481,7 +2453,6 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function () {
-            initDataCache();
             initializeGoogleSignIn();
             checkExistingSession();
 
@@ -3019,8 +2990,8 @@
             return applyWorkingHoursAmPm(to12Hour(str));
         }
 
-        // Batched Data Loader with "Stale-While-Revalidate" for Instant Speed
-        async function fetchAllVolunteerData(name, isSilent = false, forceRefresh = false) {
+        // Data Loader - Always fetches fresh data from server
+        async function fetchAllVolunteerData(name, isSilent = false) {
             if (!name) return;
 
             const attPlaceholder = document.getElementById('dataPlaceholder');
@@ -3032,25 +3003,8 @@
             const isAttActive = !document.getElementById('attendanceDataPanel').classList.contains('hidden');
             const isSupActive = !document.getElementById('supervisionDataPanel').classList.contains('hidden');
 
-            let hasCache = false;
-
-            // 1. Instant Render from Cache (Persistent & In-Memory) - Skip if force refresh
-            if (dataCache[name] && !forceRefresh) {
-                const cached = dataCache[name];
-                renderAttendance(name, cached.attendance);
-                // Only render supervision if this volunteer was explicitly selected for supervision
-                if (selectedSupVolunteer && selectedSupVolunteer.toLowerCase() === name.toLowerCase()) {
-                    renderSupervision(name, cached.supervision);
-                }
-                hasCache = true;
-
-                // If this is a background pre-fetch and we have cache, we can skip network if cache is fresh
-                const age = Date.now() - (cached.timestamp || 0);
-                if (isSilent && age < 300000) return; // 5 min freshness for background sync
-            }
-
-            // 2. Optimized UX: Show skeleton only in the ACTIVE panel if no cache exists
-            if (!hasCache && !isSilent) {
+            // Show skeleton loading indicator
+            if (!isSilent) {
                 const skeletonHtml = `
                     <div style="padding: 20px;">
                         <div style="display:flex; align-items:center; gap:10px; margin-bottom: 20px;">
@@ -3066,22 +3020,10 @@
                     attPlaceholder.style.display = 'block';
                     attSection.style.display = 'none';
                 }
-                // Only show skeleton for supervision if this volunteer was explicitly selected
                 if (isSupActive && selectedSupVolunteer && selectedSupVolunteer.toLowerCase() === name.toLowerCase()) {
                     supPlaceholder.innerHTML = skeletonHtml;
                     supPlaceholder.style.display = 'block';
                     supSection.style.display = 'none';
-                }
-            } else if (hasCache) {
-                // If we have cache, ensure the proper sections are visible regardless of background sync
-                if (isAttActive) {
-                    attPlaceholder.style.display = 'none';
-                    attSection.style.display = 'block';
-                }
-                // Only show supervision data section if volunteer was explicitly selected
-                if (isSupActive && selectedSupVolunteer && selectedSupVolunteer.toLowerCase() === name.toLowerCase()) {
-                    supPlaceholder.style.display = 'none';
-                    supSection.style.display = 'block';
                 }
             }
 
@@ -3091,9 +3033,6 @@
                 const result = await response.json();
 
                 if (result.status === 'error') throw new Error(result.message);
-
-                // 4. Update Cache and Reflect UI for both (hidden rendering is fast)
-                persistToCache(name, result.attendance || [], result.supervision || []);
 
                 // Render attendance always
                 renderAttendance(name, result.attendance || []);
@@ -3111,7 +3050,7 @@
                         <p style="font-size:0.8rem; color:#666; max-width:250px; margin-bottom:15px;">
                             ${error.message.includes('Unexpected token') ? 'Cloud returned an invalid response. Please check script deployment.' : 'We couldn\'t reach the Sanjeevni Cloud. Check your internet or VPN.'}
                         </p>
-                        <button onclick="fetchAllVolunteerData('${name}')" 
+                        <button onclick="fetchAllVolunteerData('${name}')"
                                 style="background:#2F4A7D; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.75rem;">
                             Try Reconnect
                         </button>
@@ -3121,7 +3060,7 @@
                     </div>
                 `;
 
-                // Only show error UI in the active panel to avoid cluttering the background tab
+                // Only show error UI in the active panel
                 if (isAttActive) {
                     attPlaceholder.innerHTML = errorHtml;
                     attPlaceholder.style.display = 'block';
@@ -3307,8 +3246,8 @@
                 }
 
                 // Calculate extra hours from Extra Time From and Till fields
-                // Exclude Supervisor meeting, EC meeting and CI meeting from extra hours count
-                const excludedDuties = ['Supervisor meeting', 'EC meeting', 'CI meeting'];
+                // Exclude CI, Supervisor meeting and EC meeting from extra hours count
+                const excludedDuties = ['CI', 'Supervisor meeting', 'EC meeting'];
                 if (row.extraFrom && row.extraTill && !excludedDuties.includes(row.duty)) {
                     const fromMins = parseTimeToMinutes(row.extraFrom);
                     const tillMins = parseTimeToMinutes(row.extraTill);
@@ -3486,11 +3425,8 @@
                             volunteerTrigger.classList.remove('placeholder');
                             document.getElementById('volunteer-name').value = volunteerName;
                             document.getElementById('headerVolunteerName').textContent = volunteerName;
-                            // Clear all caches completely
-                            Object.keys(dataCache).forEach(k => delete dataCache[k]);
-                            localStorage.removeItem(CACHE_NAME);
-                            // Force refresh from server (skip cache)
-                            fetchAllVolunteerData(volunteerName, false, true);
+                            // Refresh from server
+                            fetchAllVolunteerData(volunteerName);
                         }, 4000); // 4 seconds to allow Google Apps Script to process
                     }
                 })
@@ -3568,11 +3504,8 @@
 
                     if (volunteerName) {
                         setTimeout(() => {
-                            // Clear all caches completely
-                            Object.keys(dataCache).forEach(k => delete dataCache[k]);
-                            localStorage.removeItem(CACHE_NAME);
-                            // Force refresh from server (skip cache)
-                            fetchAllVolunteerData(volunteerName, false, true);
+                            // Refresh from server
+                            fetchAllVolunteerData(volunteerName);
                         }, 4000); // 4 seconds to allow Google Apps Script to process
                     }
                 })
