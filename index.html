@@ -3246,9 +3246,10 @@
                 }
 
                 // Calculate extra hours from Extra Time From and Till fields
-                // Exclude CI, Supervisor meeting and EC meeting from extra hours count
-                const excludedDuties = ['CI', 'Supervisor meeting', 'EC meeting'];
-                if (row.extraFrom && row.extraTill && !excludedDuties.includes(row.duty)) {
+                // Exclude CI, Supervisor meeting and EC meeting from extra hours count (case-insensitive)
+                const excludedDuties = ['ci', 'supervisor meeting', 'ec meeting'];
+                const dutyNormalized = (row.duty || '').toString().trim().toLowerCase();
+                if (row.extraFrom && row.extraTill && !excludedDuties.includes(dutyNormalized)) {
                     const fromMins = parseTimeToMinutes(row.extraFrom);
                     const tillMins = parseTimeToMinutes(row.extraTill);
 
