@@ -1993,8 +1993,7 @@
                 const fy = getFinancialYear(row.date);
                 if (fy) fySet.add(fy);
             });
-            // Only keep 2025-26 and future FYs
-            const fyList = Array.from(fySet).filter(fy => fy >= '2025-26').sort().reverse();
+            const fyList = Array.from(fySet).sort().reverse();
             const select = document.getElementById('fySelect');
             const previousFY = select.value;
             select.innerHTML = fyList.map(fy => `<option value="${fy}">${fy}</option>`).join('');
