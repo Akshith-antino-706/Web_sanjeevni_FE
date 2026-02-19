@@ -3245,24 +3245,12 @@
                     dutyCounts[row.duty][loc]++;
                 }
 
-                // Calculate extra hours from Extra Time From and Till fields
-                // Exclude CI, Supervisor meeting and EC meeting from extra hours count (case-insensitive)
+                // Sum No. of Hours column for all duties except CI, Supervisor meeting and EC meeting (case-insensitive)
                 const excludedDuties = ['ci', 'supervisor meeting', 'ec meeting'];
                 const dutyNormalized = (row.duty || '').toString().trim().toLowerCase();
-                if (row.extraFrom && row.extraTill && !excludedDuties.includes(dutyNormalized)) {
-                    const fromMins = parseTimeToMinutes(row.extraFrom);
-                    const tillMins = parseTimeToMinutes(row.extraTill);
-
-                    if (fromMins !== null && tillMins !== null) {
-                        let diff = tillMins - fromMins;
-                        // Handle overnight
-                        if (diff < 0) {
-                            diff += 24 * 60;
-                        }
-                        if (diff > 0 && diff < 24 * 60) {
-                            totalExtraMinutes += diff;
-                        }
-                    }
+                if (!excludedDuties.includes(dutyNormalized) && row.hours) {
+                    const parts = row.hours.toString().split(':');
+                    totalExtraMinutes += (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
                 }
             });
 
