@@ -203,6 +203,12 @@
             cursor: pointer;
         }
 
+        .form-table input:disabled {
+            background: #e9e4dd;
+            color: #999;
+            cursor: not-allowed;
+        }
+
         .form-table input:focus,
         .form-table select:focus,
         .form-table textarea:focus {
@@ -993,6 +999,35 @@
             background: #e0e0e0;
         }
 
+        .fy-filter {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .fy-filter label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #2F4A7D;
+            white-space: nowrap;
+        }
+
+        .fy-filter select {
+            padding: 6px 10px;
+            border: 1px solid #C4B5A0;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-family: 'Poppins', sans-serif;
+            color: #3A2F2F;
+            background: white;
+            cursor: pointer;
+        }
+
+        .fy-filter select:focus {
+            outline: none;
+            border-color: #2F4A7D;
+        }
+
         /* Admin Panel Modal */
         .admin-modal {
             display: none;
@@ -1385,6 +1420,11 @@
                     onclick="switchPanel('supervision')">Supervision</button>
             </nav>
             <div class="user-actions">
+                <div class="fy-filter">
+                    <label for="fySelect">FY:</label>
+                    <select id="fySelect" onchange="applyFinancialYearFilter()">
+                    </select>
+                </div>
                 <button class="admin-panel-btn hidden" id="adminPanelBtn" onclick="openAdminPanel()">Admin
                     Panel</button>
                 <button class="signout-btn" onclick="signOut()">Sign Out</button>
@@ -1490,11 +1530,11 @@
                                 </tr>
                                 <tr>
                                     <td>Extra Time (From)</td>
-                                    <td><input type="text" id="extra-time-from" name="extra_time_from" placeholder="e.g. 10:00" autocomplete="off"></td>
+                                    <td><input type="text" id="extra-time-from" name="extra_time_from" placeholder="e.g. 10:00" autocomplete="off" disabled></td>
                                 </tr>
                                 <tr>
                                     <td>Extra Time (till)</td>
-                                    <td><input type="text" id="extra-time-till" name="extra_time_till" placeholder="e.g. 2:30" autocomplete="off"></td>
+                                    <td><input type="text" id="extra-time-till" name="extra_time_till" placeholder="e.g. 2:30" autocomplete="off" disabled></td>
                                 </tr>
                                 <tr>
                                     <td>Duty</td>
@@ -1922,6 +1962,65 @@
         let googleAuth = null;
 
         let selectedSupVolunteer = null; // Track which volunteer was explicitly selected for supervision
+
+        // Financial Year filter state
+        let lastFetchedAttendance = [];
+        let lastFetchedSupervision = [];
+        let lastFetchedVolunteerName = '';
+
+        // Get financial year string for a date (Indian FY: April-March)
+        function getFinancialYear(dateStr) {
+            if (!dateStr) return null;
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return null;
+            const day = parseInt(parts[0]);
+            const month = parseInt(parts[1]);
+            const year = parseInt(parts[2]);
+            if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+            // FY starts in April: Apr 2025 - Mar 2026 = "2025-26"
+            if (month >= 4) return `${year}-${(year + 1).toString().slice(-2)}`;
+            return `${year - 1}-${year.toString().slice(-2)}`;
+        }
+
+        // Populate FY dropdown from data dates
+        function populateFYDropdown(attendance, supervision) {
+            const fySet = new Set();
+            attendance.forEach(row => {
+                const fy = getFinancialYear(row.date);
+                if (fy) fySet.add(fy);
+            });
+            supervision.forEach(row => {
+                const fy = getFinancialYear(row.date);
+                if (fy) fySet.add(fy);
+            });
+            // Only keep 2025-26 and future FYs
+            const fyList = Array.from(fySet).filter(fy => fy >= '2025-26').sort().reverse();
+            const select = document.getElementById('fySelect');
+            const previousFY = select.value;
+            select.innerHTML = fyList.map(fy => `<option value="${fy}">${fy}</option>`).join('');
+            // Restore previous selection if it still exists, otherwise default to 2025-26
+            if (previousFY && fyList.includes(previousFY)) {
+                select.value = previousFY;
+            } else if (fyList.includes('2025-26')) {
+                select.value = '2025-26';
+            }
+        }
+
+        // Filter data by selected financial year
+        function filterByFY(data) {
+            const fy = document.getElementById('fySelect').value;
+            if (fy === 'all') return data;
+            return data.filter(row => getFinancialYear(row.date) === fy);
+        }
+
+        // Re-render with current FY filter
+        function applyFinancialYearFilter() {
+            if (!lastFetchedVolunteerName) return;
+            renderAttendance(lastFetchedVolunteerName, filterByFY(lastFetchedAttendance));
+            if (selectedSupVolunteer && selectedSupVolunteer.toLowerCase() === lastFetchedVolunteerName.toLowerCase()) {
+                renderSupervision(lastFetchedVolunteerName, filterByFY(lastFetchedSupervision));
+            }
+        }
 
         // Keep-Alive connection to warm up Google Apps Script
         function warmUpBackend() {
@@ -2794,6 +2893,20 @@
             input.value = `${hours}:${mins.toString().padStart(2, '0')} ${ampm}`;
         }
 
+        // Enable/disable Extra Time fields based on Time dropdown
+        document.getElementById('time').addEventListener('change', function () {
+            const isExtra = this.value === 'extra time';
+            const fromField = document.getElementById('extra-time-from');
+            const tillField = document.getElementById('extra-time-till');
+            fromField.disabled = !isExtra;
+            tillField.disabled = !isExtra;
+            if (!isExtra) {
+                fromField.value = '';
+                tillField.value = '';
+                document.getElementById('no-of-hours').value = '';
+            }
+        });
+
         // Auto-calculate No. of Hours from Extra Time fields
         const extraTimeFrom = document.getElementById('extra-time-from');
         const extraTimeTill = document.getElementById('extra-time-till');
@@ -3034,11 +3147,17 @@
 
                 if (result.status === 'error') throw new Error(result.message);
 
-                // Render attendance always
-                renderAttendance(name, result.attendance || []);
+                // Store full data for FY filtering
+                lastFetchedAttendance = result.attendance || [];
+                lastFetchedSupervision = result.supervision || [];
+                lastFetchedVolunteerName = name;
+                populateFYDropdown(lastFetchedAttendance, lastFetchedSupervision);
+
+                // Render with FY filter applied
+                renderAttendance(name, filterByFY(lastFetchedAttendance));
                 // Only render supervision if this volunteer was explicitly selected for supervision
                 if (selectedSupVolunteer && selectedSupVolunteer.toLowerCase() === name.toLowerCase()) {
-                    renderSupervision(name, result.supervision || []);
+                    renderSupervision(name, filterByFY(lastFetchedSupervision));
                 }
 
             } catch (error) {
@@ -3183,18 +3302,29 @@
                 document.getElementById('time').value = lastEntry.time;
             }
 
-            // Extra Time From (already in AM/PM format from server)
-            if (lastEntry.extraFrom) {
-                document.getElementById('extra-time-from').value = formatTime(lastEntry.extraFrom);
-            }
+            // Enable/disable extra time fields based on prefilled time value
+            const isExtra = lastEntry.time === 'extra time';
+            document.getElementById('extra-time-from').disabled = !isExtra;
+            document.getElementById('extra-time-till').disabled = !isExtra;
 
-            // Extra Time Till (already in AM/PM format from server)
-            if (lastEntry.extraTill) {
-                document.getElementById('extra-time-till').value = formatTime(lastEntry.extraTill);
-            }
+            if (isExtra) {
+                // Extra Time From (already in AM/PM format from server)
+                if (lastEntry.extraFrom) {
+                    document.getElementById('extra-time-from').value = formatTime(lastEntry.extraFrom);
+                }
 
-            // Trigger calculation of No. of Hours
-            calculateExtraHours();
+                // Extra Time Till (already in AM/PM format from server)
+                if (lastEntry.extraTill) {
+                    document.getElementById('extra-time-till').value = formatTime(lastEntry.extraTill);
+                }
+
+                // Trigger calculation of No. of Hours
+                calculateExtraHours();
+            } else {
+                document.getElementById('extra-time-from').value = '';
+                document.getElementById('extra-time-till').value = '';
+                document.getElementById('no-of-hours').value = '';
+            }
 
             // Reason
             if (lastEntry.reason) {
@@ -3245,10 +3375,14 @@
                     dutyCounts[row.duty][loc]++;
                 }
 
-                // Sum No. of Hours column for all duties except CI, Supervisor meeting and EC meeting (case-insensitive)
-                const excludedDuties = ['ci', 'supervisor meeting', 'ec meeting'];
+                // Sum No. of Hours where:
+                // 1. Time = "extra time"
+                // 2. Duty is NOT EC meeting or Supervisor meeting
+                // 3. No. of Hours is present
+                const timeNormalized = (row.time || '').toString().trim().toLowerCase();
                 const dutyNormalized = (row.duty || '').toString().trim().toLowerCase();
-                if (!excludedDuties.includes(dutyNormalized) && row.hours) {
+                const excludedDuties = ['ec meeting', 'supervisor meeting'];
+                if (timeNormalized === 'extra time' && !excludedDuties.includes(dutyNormalized) && row.hours) {
                     const parts = row.hours.toString().split(':');
                     totalExtraMinutes += (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
                 }
