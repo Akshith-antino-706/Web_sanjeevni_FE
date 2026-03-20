@@ -1109,9 +1109,8 @@
 
         .user-list-header {
             display: grid;
-            grid-template-columns: 2fr 2fr 1fr 80px;
+            grid-template-columns: 2fr 2fr 1fr 100px 80px;
             background: #EAE0D1;
-            /* Lighter Beige */
             padding: 10px 12px;
             font-weight: 600;
             font-size: 0.75rem;
@@ -1121,11 +1120,38 @@
 
         .user-list-row {
             display: grid;
-            grid-template-columns: 2fr 2fr 1fr 80px;
+            grid-template-columns: 2fr 2fr 1fr 100px 80px;
             padding: 10px 12px;
             border-bottom: 1px solid #f0f0f0;
             font-size: 0.8rem;
             align-items: center;
+        }
+
+        .dropdown-toggle-btn {
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .dropdown-toggle-btn.add-btn {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .dropdown-toggle-btn.add-btn:hover {
+            background: #c8e6c9;
+        }
+
+        .dropdown-toggle-btn.remove-btn {
+            background: #fee;
+            color: #e74c3c;
+        }
+
+        .dropdown-toggle-btn.remove-btn:hover {
+            background: #fdd;
         }
 
         .user-list-row:last-child {
@@ -1171,9 +1197,25 @@
 
         .add-user-form {
             display: grid;
-            grid-template-columns: 2fr 2fr 1fr auto;
+            grid-template-columns: 2fr 2fr 1fr auto auto;
             gap: 10px;
             align-items: end;
+        }
+
+        .add-user-form .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: #3A2F2F;
+            cursor: pointer;
+            white-space: nowrap;
+            padding-bottom: 8px;
+        }
+
+        .add-user-form .checkbox-label input[type="checkbox"] {
+            width: auto;
+            cursor: pointer;
         }
 
         .add-user-form .form-field {
@@ -1381,6 +1423,12 @@
                                 <option value="admin">Admin</option>
                             </select>
                         </div>
+                        <div class="form-field">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="addToDropdown" checked>
+                                Add to Dropdown
+                            </label>
+                        </div>
                         <button class="add-user-btn" onclick="addUser()">Add User</button>
                     </div>
                 </div>
@@ -1391,6 +1439,7 @@
                             <span>Email</span>
                             <span>Name</span>
                             <span>Role</span>
+                            <span>Dropdown</span>
                             <span>Actions</span>
                         </div>
                         <div id="userListBody">
@@ -2469,23 +2518,35 @@
 
             try {
                 const token = localStorage.getItem('sanjeevni_token');
-                const response = await fetch(`${SCRIPT_URL}?action=getUsers&token=${encodeURIComponent(token)}`);
+                const email = currentUser ? currentUser.email : '';
+                const response = await fetch(`${SCRIPT_URL}?action=getUsers&token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`);
                 const result = await response.json();
 
                 if (result.status === 'success' && result.users) {
-                    listBody.innerHTML = result.users.map(user => `
+                    listBody.innerHTML = result.users.map(user => {
+                        const inDropdown = !!document.querySelector(`#volunteerList [data-value="${user.name}"]`);
+                        const escapedEmail = user.email.replace(/'/g, "\\'");
+                        const escapedName = user.name.replace(/'/g, "\\'");
+                        const escapedRole = user.role.replace(/'/g, "\\'");
+                        return `
                         <div class="user-list-row">
                             <span>${user.email}</span>
                             <span>${user.name}</span>
                             <span><span class="role-badge ${user.role}">${user.role}</span></span>
                             <span>
+                                ${inDropdown ?
+                            `<button class="dropdown-toggle-btn remove-btn" onclick="toggleDropdown('${escapedName}', '${escapedRole}', false)">Remove</button>` :
+                            `<button class="dropdown-toggle-btn add-btn" onclick="toggleDropdown('${escapedName}', '${escapedRole}', true)">Add</button>`
+                        }
+                            </span>
+                            <span>
                                 ${user.email !== currentUser.email ?
-                            `<button class="delete-user-btn" onclick="deleteUser('${user.email}')">Delete</button>` :
+                            `<button class="delete-user-btn" onclick="deleteUser('${escapedEmail}', '${escapedName}')">Delete</button>` :
                             '<span style="color:#999;font-size:0.7rem;">You</span>'
                         }
                             </span>
                         </div>
-                    `).join('');
+                    `}).join('');
                 } else {
                     listBody.innerHTML = '<div style="padding:20px;text-align:center;color:#e74c3c;">Failed to load users</div>';
                 }
@@ -2495,11 +2556,63 @@
             }
         }
 
+        // Toggle a user's presence in the dropdowns and refresh the user list
+        function toggleDropdown(name, role, add) {
+            if (add) {
+                addToDropdowns(name, role);
+            } else {
+                removeFromDropdowns(name);
+            }
+            loadUserList();
+        }
+
+        // Add a name to volunteer/supervisor dropdowns in alphabetical order
+        function addToDropdowns(name, role) {
+            const dropdownIds = ['volunteerList', 'supVolunteerList'];
+            // Admins/supervisors also get added to supervisor dropdown
+            if (role === 'admin') {
+                dropdownIds.push('supervisorList');
+            }
+
+            dropdownIds.forEach(id => {
+                const list = document.getElementById(id);
+                if (!list) return;
+                // Check if already exists
+                const existing = list.querySelector(`[data-value="${name}"]`);
+                if (existing) return;
+
+                const item = document.createElement('div');
+                item.className = 'custom-dropdown-item';
+                item.setAttribute('data-value', name);
+                item.textContent = name;
+
+                // Insert alphabetically
+                const items = Array.from(list.querySelectorAll('.custom-dropdown-item'));
+                const insertBefore = items.find(el => el.getAttribute('data-value').localeCompare(name) > 0);
+                if (insertBefore) {
+                    list.insertBefore(item, insertBefore);
+                } else {
+                    list.appendChild(item);
+                }
+            });
+        }
+
+        // Remove a name from all dropdowns
+        function removeFromDropdowns(name) {
+            ['volunteerList', 'supVolunteerList', 'supervisorList'].forEach(id => {
+                const list = document.getElementById(id);
+                if (!list) return;
+                const item = list.querySelector(`[data-value="${name}"]`);
+                if (item) item.remove();
+            });
+        }
+
         // Add new user
         async function addUser() {
             const email = document.getElementById('newUserEmail').value.trim();
             const name = document.getElementById('newUserName').value.trim();
             const role = document.getElementById('newUserRole').value;
+            const addToDrop = document.getElementById('addToDropdown').checked;
 
             if (!email || !name) {
                 alert('Please fill in email and name');
@@ -2508,13 +2621,18 @@
 
             try {
                 const token = localStorage.getItem('sanjeevni_token');
-                const response = await fetch(`${SCRIPT_URL}?action=addUser&token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&role=${encodeURIComponent(role)}`);
+                const requestingEmail = currentUser ? currentUser.email : '';
+                const response = await fetch(`${SCRIPT_URL}?action=addUser&token=${encodeURIComponent(token)}&requestingEmail=${encodeURIComponent(requestingEmail)}&email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&role=${encodeURIComponent(role)}`);
                 const result = await response.json();
 
                 if (result.status === 'success') {
+                    if (addToDrop) {
+                        addToDropdowns(name, role);
+                    }
                     document.getElementById('newUserEmail').value = '';
                     document.getElementById('newUserName').value = '';
                     document.getElementById('newUserRole').value = 'volunteer';
+                    document.getElementById('addToDropdown').checked = true;
                     loadUserList();
                 } else {
                     alert(result.message || 'Failed to add user');
@@ -2526,17 +2644,21 @@
         }
 
         // Delete user
-        async function deleteUser(email) {
-            if (!confirm(`Are you sure you want to delete ${email}?`)) {
+        async function deleteUser(email, userName) {
+            if (!confirm(`Are you sure you want to delete ${userName || email}?`)) {
                 return;
             }
 
             try {
                 const token = localStorage.getItem('sanjeevni_token');
-                const response = await fetch(`${SCRIPT_URL}?action=deleteUser&token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`);
+                const requestingEmail = currentUser ? currentUser.email : '';
+                const response = await fetch(`${SCRIPT_URL}?action=deleteUser&token=${encodeURIComponent(token)}&requestingEmail=${encodeURIComponent(requestingEmail)}&email=${encodeURIComponent(email)}`);
                 const result = await response.json();
 
                 if (result.status === 'success') {
+                    if (userName) {
+                        removeFromDropdowns(userName);
+                    }
                     loadUserList();
                 } else {
                     alert(result.message || 'Failed to delete user');
