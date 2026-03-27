@@ -1047,6 +1047,7 @@
         }
 
         .admin-modal-content {
+            position: relative;
             background: white;
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
@@ -1109,7 +1110,7 @@
 
         .user-list-header {
             display: grid;
-            grid-template-columns: 2fr 2fr 1fr 100px 80px;
+            grid-template-columns: 2fr 2fr 1fr 120px;
             background: #EAE0D1;
             padding: 10px 12px;
             font-weight: 600;
@@ -1120,7 +1121,7 @@
 
         .user-list-row {
             display: grid;
-            grid-template-columns: 2fr 2fr 1fr 100px 80px;
+            grid-template-columns: 2fr 2fr 1fr 120px;
             padding: 10px 12px;
             border-bottom: 1px solid #f0f0f0;
             font-size: 0.8rem;
@@ -1197,7 +1198,7 @@
 
         .add-user-form {
             display: grid;
-            grid-template-columns: 2fr 2fr 1fr auto auto;
+            grid-template-columns: 2fr 2fr 1fr auto;
             gap: 10px;
             align-items: end;
         }
@@ -1242,12 +1243,18 @@
             background: #C97C7C;
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 8px 24px;
             border-radius: 6px;
             font-size: 0.8rem;
             cursor: pointer;
             font-family: 'Poppins', sans-serif;
             height: 36px;
+            white-space: nowrap;
+        }
+
+        .add-user-form .add-user-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .add-user-form .add-user-btn:hover {
@@ -1374,6 +1381,47 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             overflow: hidden;
         }
+
+        /* Professional Toast Notification inside Modal */
+        .toast-notification {
+            position: absolute;
+            top: 24px;
+            left: 50%;
+            padding: 16px 24px;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 500;
+            font-size: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            z-index: 10000;
+            transform: translate(-50%, -20px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            pointer-events: none;
+            width: max-content;
+        }
+
+        .toast-notification.show {
+            transform: translate(-50%, 0);
+            opacity: 1;
+        }
+
+        .toast-notification.success {
+            background-color: #2e7d32;
+            border-left: 6px solid #1b5e20;
+        }
+
+        .toast-notification.error {
+            background-color: #d32f2f;
+            border-left: 6px solid #b71c1c;
+        }
+
+        .toast-icon {
+            font-size: 20px;
+        }
     </style>
 </head>
 
@@ -1384,8 +1432,7 @@
             <!-- Sanjivini Logo -->
             <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 24px;">
                 <img src="https://static.wixstatic.com/media/e258ec_51c21015d91b4893aca30922d1bc7830~mv2.png/v1/fill/w_566,h_312,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/sanjivini_logo.png"
-                     alt="Sanjivini Logo"
-                     style="width: 200px; height: auto;">
+                    alt="Sanjivini Logo" style="width: 200px; height: auto;">
             </div>
             <div class="email-login-form">
                 <input type="email" id="loginEmail" placeholder="Enter your email address">
@@ -1423,13 +1470,7 @@
                                 <option value="admin">Admin</option>
                             </select>
                         </div>
-                        <div class="form-field">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="addToDropdown" checked>
-                                Add to Dropdown
-                            </label>
-                        </div>
-                        <button class="add-user-btn" onclick="addUser()">Add User</button>
+                        <button class="add-user-btn" onclick="addUser()">Add</button>
                     </div>
                 </div>
                 <div class="admin-section">
@@ -1439,7 +1480,6 @@
                             <span>Email</span>
                             <span>Name</span>
                             <span>Role</span>
-                            <span>Dropdown</span>
                             <span>Actions</span>
                         </div>
                         <div id="userListBody">
@@ -1488,10 +1528,10 @@
                     <div class="card form-card">
                         <div class="form-header">
                             <!-- Sanjivini Logo -->
-                            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2px;">
+                            <div
+                                style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2px;">
                                 <img src="https://static.wixstatic.com/media/e258ec_51c21015d91b4893aca30922d1bc7830~mv2.png/v1/fill/w_566,h_312,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/sanjivini_logo.png"
-                                     alt="Sanjivini Logo"
-                                     style="width: 150px; height: auto;">
+                                    alt="Sanjivini Logo" style="width: 150px; height: auto;">
                             </div>
                         </div>
 
@@ -1510,50 +1550,6 @@
                                                         autocomplete="off">
                                                 </div>
                                                 <div class="custom-dropdown-list" id="volunteerList">
-                                                    <div class="custom-dropdown-item" data-value="Dheeraj">Dheeraj</div>
-                                                    <div class="custom-dropdown-item" data-value="Archana">Archana</div>
-                                                    <div class="custom-dropdown-item" data-value="Azhar">Azhar</div>
-                                                    <div class="custom-dropdown-item" data-value="Bhavna">Bhavna</div>
-                                                    <div class="custom-dropdown-item" data-value="Binu">Binu</div>
-                                                    <div class="custom-dropdown-item" data-value="Dharini">Dharini</div>
-                                                    <div class="custom-dropdown-item" data-value="Divya">Divya</div>
-                                                    <div class="custom-dropdown-item" data-value="Dolly">Dolly</div>
-                                                    <div class="custom-dropdown-item" data-value="Feisal">Feisal</div>
-                                                    <div class="custom-dropdown-item" data-value="Geeta">Geeta</div>
-                                                    <div class="custom-dropdown-item" data-value="Gopal">Gopal</div>
-                                                    <div class="custom-dropdown-item" data-value="K. Narayan">K. Narayan
-                                                    </div>
-                                                    <div class="custom-dropdown-item" data-value="Kalpana">Kalpana</div>
-                                                    <div class="custom-dropdown-item" data-value="Kavita">Kavita</div>
-                                                    <div class="custom-dropdown-item" data-value="Madhu">Madhu</div>
-                                                    <div class="custom-dropdown-item" data-value="Mamta V">Mamta V</div>
-                                                    <div class="custom-dropdown-item" data-value="Manas">Manas</div>
-                                                    <div class="custom-dropdown-item" data-value="Manish">Manish</div>
-                                                    <div class="custom-dropdown-item" data-value="Meera">Meera</div>
-                                                    <div class="custom-dropdown-item" data-value="Neelam">Neelam</div>
-                                                    <div class="custom-dropdown-item" data-value="Niharika">Niharika
-                                                    </div>
-                                                    <div class="custom-dropdown-item" data-value="Parul A">Parul A</div>
-                                                    <div class="custom-dropdown-item" data-value="Parul P">Parul P</div>
-                                                    <div class="custom-dropdown-item" data-value="Praveen">Praveen</div>
-                                                    <div class="custom-dropdown-item" data-value="Prerona">Prerona</div>
-                                                    <div class="custom-dropdown-item" data-value="Radhika">Radhika</div>
-                                                    <div class="custom-dropdown-item" data-value="Ranjita">Ranjita</div>
-                                                    <div class="custom-dropdown-item" data-value="Ritu">Ritu</div>
-                                                    <div class="custom-dropdown-item" data-value="Shivani">Shivani</div>
-                                                    <div class="custom-dropdown-item" data-value="Shuchi">Shuchi</div>
-                                                    <div class="custom-dropdown-item" data-value="Simran">Simran</div>
-                                                    <div class="custom-dropdown-item" data-value="Sonia">Sonia</div>
-                                                    <div class="custom-dropdown-item" data-value="Suminder">Suminder
-                                                    </div>
-                                                    <div class="custom-dropdown-item" data-value="Tanishqa">Tanishqa
-                                                    </div>
-                                                    <div class="custom-dropdown-item" data-value="Tanuja">Tanuja</div>
-                                                    <div class="custom-dropdown-item" data-value="Varun">Varun</div>
-                                                    <div class="custom-dropdown-item" data-value="Veena A">Veena A</div>
-                                                    <div class="custom-dropdown-item" data-value="Veena M">Veena M</div>
-                                                    <div class="custom-dropdown-item" data-value="Vickie">Vickie</div>
-                                                    <div class="custom-dropdown-item" data-value="Vidhu">Vidhu</div>
                                                 </div>
                                                 <div class="custom-dropdown-empty" style="display:none;">No match</div>
                                             </div>
@@ -1578,11 +1574,13 @@
                                 </tr>
                                 <tr>
                                     <td>Extra Time (From)</td>
-                                    <td><input type="text" id="extra-time-from" name="extra_time_from" placeholder="e.g. 10:00" autocomplete="off" disabled></td>
+                                    <td><input type="text" id="extra-time-from" name="extra_time_from"
+                                            placeholder="e.g. 10:00" autocomplete="off" disabled></td>
                                 </tr>
                                 <tr>
                                     <td>Extra Time (till)</td>
-                                    <td><input type="text" id="extra-time-till" name="extra_time_till" placeholder="e.g. 2:30" autocomplete="off" disabled></td>
+                                    <td><input type="text" id="extra-time-till" name="extra_time_till"
+                                            placeholder="e.g. 2:30" autocomplete="off" disabled></td>
                                 </tr>
                                 <tr>
                                     <td>Duty</td>
@@ -1642,10 +1640,10 @@
                     <div class="card form-card">
                         <div class="form-header">
                             <!-- Sanjivini Logo -->
-                            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2px;">
+                            <div
+                                style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2px;">
                                 <img src="https://static.wixstatic.com/media/e258ec_51c21015d91b4893aca30922d1bc7830~mv2.png/v1/fill/w_566,h_312,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/sanjivini_logo.png"
-                                     alt="Sanjivini Logo"
-                                     style="width: 150px; height: auto;">
+                                    alt="Sanjivini Logo" style="width: 150px; height: auto;">
                             </div>
                         </div>
 
@@ -1664,50 +1662,6 @@
                                                         autocomplete="off">
                                                 </div>
                                                 <div class="custom-dropdown-list" id="supVolunteerList">
-                                                    <div class="custom-dropdown-item" data-value="Dheeraj">Dheeraj</div>
-                                                    <div class="custom-dropdown-item" data-value="Archana">Archana</div>
-                                                    <div class="custom-dropdown-item" data-value="Azhar">Azhar</div>
-                                                    <div class="custom-dropdown-item" data-value="Bhavna">Bhavna</div>
-                                                    <div class="custom-dropdown-item" data-value="Binu">Binu</div>
-                                                    <div class="custom-dropdown-item" data-value="Dharini">Dharini</div>
-                                                    <div class="custom-dropdown-item" data-value="Divya">Divya</div>
-                                                    <div class="custom-dropdown-item" data-value="Dolly">Dolly</div>
-                                                    <div class="custom-dropdown-item" data-value="Feisal">Feisal</div>
-                                                    <div class="custom-dropdown-item" data-value="Geeta">Geeta</div>
-                                                    <div class="custom-dropdown-item" data-value="Gopal">Gopal</div>
-                                                    <div class="custom-dropdown-item" data-value="K. Narayan">K. Narayan
-                                                    </div>
-                                                    <div class="custom-dropdown-item" data-value="Kalpana">Kalpana</div>
-                                                    <div class="custom-dropdown-item" data-value="Kavita">Kavita</div>
-                                                    <div class="custom-dropdown-item" data-value="Madhu">Madhu</div>
-                                                    <div class="custom-dropdown-item" data-value="Mamta V">Mamta V</div>
-                                                    <div class="custom-dropdown-item" data-value="Manas">Manas</div>
-                                                    <div class="custom-dropdown-item" data-value="Manish">Manish</div>
-                                                    <div class="custom-dropdown-item" data-value="Meera">Meera</div>
-                                                    <div class="custom-dropdown-item" data-value="Neelam">Neelam</div>
-                                                    <div class="custom-dropdown-item" data-value="Niharika">Niharika
-                                                    </div>
-                                                    <div class="custom-dropdown-item" data-value="Parul A">Parul A</div>
-                                                    <div class="custom-dropdown-item" data-value="Parul P">Parul P</div>
-                                                    <div class="custom-dropdown-item" data-value="Praveen">Praveen</div>
-                                                    <div class="custom-dropdown-item" data-value="Prerona">Prerona</div>
-                                                    <div class="custom-dropdown-item" data-value="Radhika">Radhika</div>
-                                                    <div class="custom-dropdown-item" data-value="Ranjita">Ranjita</div>
-                                                    <div class="custom-dropdown-item" data-value="Ritu">Ritu</div>
-                                                    <div class="custom-dropdown-item" data-value="Shivani">Shivani</div>
-                                                    <div class="custom-dropdown-item" data-value="Shuchi">Shuchi</div>
-                                                    <div class="custom-dropdown-item" data-value="Simran">Simran</div>
-                                                    <div class="custom-dropdown-item" data-value="Sonia">Sonia</div>
-                                                    <div class="custom-dropdown-item" data-value="Suminder">Suminder
-                                                    </div>
-                                                    <div class="custom-dropdown-item" data-value="Tanishqa">Tanishqa
-                                                    </div>
-                                                    <div class="custom-dropdown-item" data-value="Tanuja">Tanuja</div>
-                                                    <div class="custom-dropdown-item" data-value="Varun">Varun</div>
-                                                    <div class="custom-dropdown-item" data-value="Veena A">Veena A</div>
-                                                    <div class="custom-dropdown-item" data-value="Veena M">Veena M</div>
-                                                    <div class="custom-dropdown-item" data-value="Vickie">Vickie</div>
-                                                    <div class="custom-dropdown-item" data-value="Vidhu">Vidhu</div>
                                                 </div>
                                                 <div class="custom-dropdown-empty" style="display:none;">No match</div>
                                             </div>
@@ -1736,7 +1690,8 @@
                                                     <div class="custom-dropdown-item" data-value="Kalpana">Kalpana</div>
                                                     <div class="custom-dropdown-item" data-value="Mamta">Mamta</div>
                                                     <div class="custom-dropdown-item" data-value="Neelam">Neelam</div>
-                                                    <div class="custom-dropdown-item" data-value="Niharika">Niharika</div>
+                                                    <div class="custom-dropdown-item" data-value="Niharika">Niharika
+                                                    </div>
                                                     <div class="custom-dropdown-item" data-value="Praveen">Praveen</div>
                                                     <div class="custom-dropdown-item" data-value="Ranjita">Ranjita</div>
                                                     <div class="custom-dropdown-item" data-value="Vickie">Vickie</div>
@@ -1751,7 +1706,8 @@
                                     <td>
                                         <div style="display: flex; gap: 6px; align-items: center;">
                                             <span>Time</span>
-                                            <select id="sup-time-unit" style="padding: 4px 8px; border: 1px solid #C97C7C; border-radius: 4px; background: white; font-size: 0.75rem; cursor: pointer;">
+                                            <select id="sup-time-unit"
+                                                style="padding: 4px 8px; border: 1px solid #C97C7C; border-radius: 4px; background: white; font-size: 0.75rem; cursor: pointer;">
                                                 <option value="minutes">Min</option>
                                                 <option value="hours">Hrs</option>
                                             </select>
@@ -1759,7 +1715,8 @@
                                     </td>
                                     <td>
                                         <input type="number" id="sup-time-hrs" name="sup_time_hrs" step="0.5" min="0"
-                                            placeholder="Enter value" required style="width: 100%; padding: 10px 12px; font-size: 0.9rem;">
+                                            placeholder="Enter value" required
+                                            style="width: 100%; padding: 10px 12px; font-size: 0.9rem;">
                                     </td>
                                 </tr>
                                 <tr>
@@ -2001,7 +1958,6 @@
 
         // Google Apps Script Web App URL for fetching data
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbylN9goG44Twx9_saG2hdAUrBJuH_ehzrGC7atJQ8JB6KnD423yONJAxG9J00me0PQv/exec";
-
         // =====================================================
         // AUTHENTICATION STATE
         // =====================================================
@@ -2258,6 +2214,24 @@
             onLoginSuccess();
         }
 
+        // Fetch users from Users sheet and add any new ones to dropdowns (non-blocking)
+        async function syncNewUsersToDropdowns() {
+            try {
+                const token = localStorage.getItem('sanjeevni_token');
+                const email = currentUser ? currentUser.email : '';
+                const response = await fetch(`${SCRIPT_URL}?action=getUsers&token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`);
+                const result = await response.json();
+                if (result.status === 'success' && result.users) {
+                    result.users.forEach(user => {
+                        if (!user || !user.name) return;
+                        addToDropdowns(String(user.name), String(user.role || 'volunteer'));
+                    });
+                }
+            } catch (e) {
+                console.warn('Could not sync users to dropdown:', e);
+            }
+        }
+
         // Clear session data
         function clearSession() {
             currentUser = null;
@@ -2293,6 +2267,8 @@
                 document.getElementById('adminPanelBtn').classList.remove('hidden');
                 // Set default view
                 switchPanel('attendance');
+                // Sync any new users from Users sheet into the dropdowns (runs in background)
+                syncNewUsersToDropdowns();
             } else if (currentUser.role === 'volunteer') {
                 document.body.classList.add('is-volunteer');
                 // Set default view for volunteers too
@@ -2523,8 +2499,8 @@
                 const result = await response.json();
 
                 if (result.status === 'success' && result.users) {
-                    listBody.innerHTML = result.users.map(user => {
-                        const inDropdown = !!document.querySelector(`#volunteerList [data-value="${user.name}"]`);
+                    // Reverse the array so the newest user appears at the top
+                    listBody.innerHTML = result.users.reverse().map(user => {
                         const escapedEmail = user.email.replace(/'/g, "\\'");
                         const escapedName = user.name.replace(/'/g, "\\'");
                         const escapedRole = user.role.replace(/'/g, "\\'");
@@ -2534,16 +2510,10 @@
                             <span>${user.name}</span>
                             <span><span class="role-badge ${user.role}">${user.role}</span></span>
                             <span>
-                                ${inDropdown ?
-                            `<button class="dropdown-toggle-btn remove-btn" onclick="toggleDropdown('${escapedName}', '${escapedRole}', false)">Remove</button>` :
-                            `<button class="dropdown-toggle-btn add-btn" onclick="toggleDropdown('${escapedName}', '${escapedRole}', true)">Add</button>`
-                        }
-                            </span>
-                            <span>
                                 ${user.email !== currentUser.email ?
-                            `<button class="delete-user-btn" onclick="deleteUser('${escapedEmail}', '${escapedName}')">Delete</button>` :
-                            '<span style="color:#999;font-size:0.7rem;">You</span>'
-                        }
+                                `<button class="delete-user-btn" onclick="deleteUser('${escapedEmail}', '${escapedName}')">Delete</button>` :
+                                '<span style="color:#999;font-size:0.7rem;">You</span>'
+                            }
                             </span>
                         </div>
                     `}).join('');
@@ -2607,15 +2577,38 @@
             });
         }
 
+        // Global Professional Toast Notification
+        function showToast(message, type = 'success') {
+            let toast = document.getElementById('globalToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'globalToast';
+                document.body.appendChild(toast);
+            }
+
+            const icon = type === 'success' ? '✓' : '⚠️';
+            toast.innerHTML = `<span class="toast-icon">${icon}</span><span>${message}</span>`;
+            toast.className = `toast-notification ${type}`;
+
+            // Force browser flow to ensure animation triggers if called rapidly
+            void toast.offsetWidth;
+
+            toast.classList.add('show');
+
+            if (window.toastTimeout) clearTimeout(window.toastTimeout);
+            window.toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
         // Add new user
         async function addUser() {
             const email = document.getElementById('newUserEmail').value.trim();
             const name = document.getElementById('newUserName').value.trim();
             const role = document.getElementById('newUserRole').value;
-            const addToDrop = document.getElementById('addToDropdown').checked;
 
             if (!email || !name) {
-                alert('Please fill in email and name');
+                showToast('Please fill in email and name', 'error');
                 return;
             }
 
@@ -2626,20 +2619,20 @@
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    if (addToDrop) {
-                        addToDropdowns(name, role);
-                    }
+                    // Always add to dropdown by default
+                    addToDropdowns(name, role);
+
                     document.getElementById('newUserEmail').value = '';
                     document.getElementById('newUserName').value = '';
                     document.getElementById('newUserRole').value = 'volunteer';
-                    document.getElementById('addToDropdown').checked = true;
                     loadUserList();
+                    showToast(`User "${name}" added successfully!`, 'success');
                 } else {
-                    alert(result.message || 'Failed to add user');
+                    showToast(result.message || 'Failed to add user', 'error');
                 }
             } catch (error) {
                 console.error('Error adding user:', error);
-                alert('Error adding user');
+                showToast('Error communicating with server', 'error');
             }
         }
 
