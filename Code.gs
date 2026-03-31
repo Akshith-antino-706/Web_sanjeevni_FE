@@ -151,19 +151,30 @@ function doPost(e) {
 
       // Column order: S.No | Supervisor Name | Time (in Hrs) | Date | Remark | Timestamp
       // Auto-generate S.No as next row number
-      const lastRow = sheet.getLastRow();
-      const nextSNo = lastRow; // S.No = current last row (since header is row 1)
-      const newRowNum = lastRow + 1;
+      // Auto-generate S. No and find the true last row (avoiding gaps from appendRow)
+      const lastDataRow = getLastDataRow(sheet, 2); // Check Supervisor Name column
+      const newRowNum = lastDataRow + 1;
+      
+      let nextSNo = 1;
+      if (lastDataRow > 1) {
+        const colAValues = sheet.getRange(2, 1, lastDataRow - 1, 1).getValues();
+        let maxSNo = 0;
+        for (var si = 0; si < colAValues.length; si++) {
+          var parsed = parseInt(colAValues[si][0]);
+          if (!isNaN(parsed) && parsed > maxSNo) maxSNo = parsed;
+        }
+        nextSNo = maxSNo + 1;
+      }
 
-      // Append the data
-      sheet.appendRow([
-        nextSNo, // Will be set as number format below
+      // Write data using setValues to pinpoint the correct row
+      sheet.getRange(newRowNum, 1, 1, 6).setValues([[
+        nextSNo,
         payload.supervisorName || "",
         payload.timeInHrs || "",
         payload.date || "",
         payload.remark || "",
         new Date()
-      ]);
+      ]]);
 
       // Ensure S.No column A is formatted as plain number (not date)
       sheet.getRange(newRowNum, 1).setNumberFormat("0");
@@ -222,24 +233,23 @@ function doPost(e) {
       }
     }
 
-    const lastRow = sheet.getLastRow();
-    const newRow = lastRow + 1;
+    // Auto-generate S. No and find the true last row (avoiding gaps from appendRow)
+    const lastDataRow = getLastDataRow(sheet, 2); // Check Date column
+    const writtenRow = lastDataRow + 1;
 
-    // Auto-generate S. No: find the highest S. No in column A and increment
-    let nextSNo = lastRow; // fallback: use row count minus header
-    if (lastRow > 1) {
-      // Scan column A to find the highest numeric S. No
-      const colAValues = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+    let nextSNo = 1;
+    if (lastDataRow > 1) {
+      const colAValues = sheet.getRange(2, 1, lastDataRow - 1, 1).getValues();
       let maxSNo = 0;
       for (var si = 0; si < colAValues.length; si++) {
         var parsed = parseInt(colAValues[si][0]);
         if (!isNaN(parsed) && parsed > maxSNo) maxSNo = parsed;
       }
-      nextSNo = maxSNo > 0 ? maxSNo + 1 : lastRow;
+      nextSNo = maxSNo + 1;
     }
 
-    // Append row first (reliable write)
-    sheet.appendRow([
+    // Write at next row instead of appendRow
+    sheet.getRange(writtenRow, 1, 1, 10).setValues([[
       nextSNo,
       payload.date || "",
       payload.time || "",
@@ -250,10 +260,9 @@ function doPost(e) {
       payload.hours || "",
       payload.dutyFrom || "",
       payload.remarks || ""
-    ]);
+    ]]);
 
     // Fix formats and re-set time values as plain text to prevent auto-conversion
-    var writtenRow = sheet.getLastRow();
     sheet.getRange(writtenRow, 1).setNumberFormat("0");
     sheet.getRange(writtenRow, 3).setNumberFormat("@").setValue(payload.time || "");
     sheet.getRange(writtenRow, 4).setNumberFormat("@").setValue(payload.extraFrom || "");
@@ -843,4 +852,23 @@ function normalizeAllSheetNames() {
       sheet.setName(clean);
     }
   });
+}
+
+/**
+ * Robustly finds the last row containing actual data in a specific column.
+ * This avoids being fooled by empty formatting or white space that 'getLastRow' picks up.
+ */
+function getLastDataRow(sheet, columnIndex) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow === 0) return 0;
+  
+  // Get data from the specified column to find the true bottom
+  const data = sheet.getRange(1, columnIndex, lastRow, 1).getValues();
+  for (let i = data.length - 1; i >= 0; i--) {
+    const val = data[i][0];
+    if (val !== "" && val !== null && val !== undefined) {
+      return i + 1;
+    }
+  }
+  return 0;
 }

@@ -99,7 +99,7 @@
             overflow: visible;
             display: flex;
             flex-direction: column;
-            margin-bottom: 0;
+            margin-bottom: 24px;
         }
 
         .card-header {
@@ -1359,8 +1359,6 @@
             flex: 1;
             min-height: 0;
             gap: 12px;
-            height: 100%;
-            /* Ensure it fills the parent height */
         }
 
         .panel-content.hidden {
@@ -2221,12 +2219,12 @@
                 const email = currentUser ? currentUser.email : '';
                 const response = await fetch(`${SCRIPT_URL}?action=getUsers&token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`);
                 const result = await response.json();
-                if (result.status === 'success' && result.users) {
-                    result.users.forEach(user => {
-                        if (!user || !user.name) return;
-                        addToDropdowns(String(user.name), String(user.role || 'volunteer'));
-                    });
-                }
+                result.users.forEach(user => {
+                    if (!user) return;
+                    const sheetName = user.volunteerSheetName || user.name || user.email || 'Unknown';
+                    const displayName = sheetName; // Use sheet name for display as well
+                    addToDropdowns(String(displayName), String(user.role || 'volunteer'), String(sheetName));
+                });
             } catch (e) {
                 console.warn('Could not sync users to dropdown:', e);
             }
@@ -2248,9 +2246,10 @@
             const userHeader = document.getElementById('userHeader');
             userHeader.classList.remove('hidden');
 
-            // Update user info display
-            document.getElementById('userName').textContent = currentUser.name || currentUser.email;
-            document.getElementById('userAvatar').textContent = (currentUser.name || currentUser.email).charAt(0).toUpperCase();
+            // Update user info display (Always use Sheet Name if available for consistency)
+            const displayHeaderName = currentUser.volunteerSheetName || currentUser.name || currentUser.email;
+            document.getElementById('userName').textContent = displayHeaderName;
+            document.getElementById('userAvatar').textContent = displayHeaderName.charAt(0).toUpperCase();
 
             const roleEl = document.getElementById('userRole');
             roleEl.textContent = currentUser.role;
@@ -2261,36 +2260,56 @@
             // Reset dropdown visibility first
             resetDropdownItems();
 
+            // Sync all users to dropdowns (runs in background)
+            syncNewUsersToDropdowns();
+
             if (currentUser.role === 'admin') {
                 roleEl.classList.add('admin');
                 document.body.classList.add('is-admin');
                 document.getElementById('adminPanelBtn').classList.remove('hidden');
                 // Set default view
                 switchPanel('attendance');
-                // Sync any new users from Users sheet into the dropdowns (runs in background)
-                syncNewUsersToDropdowns();
             } else if (currentUser.role === 'volunteer') {
                 document.body.classList.add('is-volunteer');
                 // Set default view for volunteers too
                 switchPanel('attendance');
                 if (currentUser.volunteerSheetName) {
-                    // Filter attendance volunteer dropdown to own name
-                    filterDropdownForVolunteer(currentUser.volunteerSheetName);
-                    // Filter supervision volunteer dropdown to own name (can only submit for themselves)
-                    filterSupVolunteerDropdownForVolunteer(currentUser.volunteerSheetName);
-                    autoSelectSupVolunteer(currentUser.volunteerSheetName);
-                    // Supervisor dropdown stays OPEN - volunteers select who supervised them
+                    const vName = currentUser.volunteerSheetName;
+
+                    // Update Attendance dropdown UI
+                    const vTrigger = document.getElementById('volunteerTrigger');
+                    const vInput = document.getElementById('volunteer-name');
+                    if (vTrigger && vInput) {
+                        vTrigger.textContent = vName;
+                        vTrigger.classList.remove('placeholder');
+                        vInput.value = vName;
+                    }
+
+                    // Update Supervision dropdown UI
+                    const svTrigger = document.getElementById('supVolunteerTrigger');
+                    const svInput = document.getElementById('sup-volunteer-name');
+                    if (svTrigger && svInput) {
+                        svTrigger.textContent = vName;
+                        svTrigger.classList.remove('placeholder');
+                        svInput.value = vName;
+                    }
+
+                    // Filter dropdowns to own name
+                    filterDropdownForVolunteer(vName);
+                    filterSupVolunteerDropdownForVolunteer(vName);
                 }
             }
 
             // Common logic: auto-select and pre-fetch for attendance + supervision
             if (currentUser.volunteerSheetName) {
                 autoSelectVolunteer(currentUser.volunteerSheetName);
-                // Ensure selectedSupVolunteer is set even if autoSelectSupVolunteer didn't find a match
+                autoSelectSupVolunteer(currentUser.volunteerSheetName);
+
+                // Ensure selectedSupVolunteer is set
                 if (!selectedSupVolunteer) {
                     selectedSupVolunteer = currentUser.volunteerSheetName;
                 }
-                // Background sync as fallback (autoSelect clicks already trigger fetches)
+                // Background sync as fallback
                 fetchAllVolunteerData(currentUser.volunteerSheetName, true);
             }
         }
@@ -2537,28 +2556,33 @@
         }
 
         // Add a name to volunteer/supervisor dropdowns in alphabetical order
-        function addToDropdowns(name, role) {
+        function addToDropdowns(name, role, sheetName) {
             const dropdownIds = ['volunteerList', 'supVolunteerList'];
             // Admins/supervisors also get added to supervisor dropdown
             if (role === 'admin') {
                 dropdownIds.push('supervisorList');
             }
 
+            const value = sheetName || name;
+
             dropdownIds.forEach(id => {
                 const list = document.getElementById(id);
                 if (!list) return;
                 // Check if already exists
-                const existing = list.querySelector(`[data-value="${name}"]`);
-                if (existing) return;
+                const existing = list.querySelector(`[data-value="${value}"]`);
+                if (existing) {
+                    existing.textContent = name;
+                    return;
+                }
 
                 const item = document.createElement('div');
                 item.className = 'custom-dropdown-item';
-                item.setAttribute('data-value', name);
+                item.setAttribute('data-value', value);
                 item.textContent = name;
 
                 // Insert alphabetically
                 const items = Array.from(list.querySelectorAll('.custom-dropdown-item'));
-                const insertBefore = items.find(el => el.getAttribute('data-value').localeCompare(name) > 0);
+                const insertBefore = items.find(el => el.getAttribute('data-value').localeCompare(value) > 0);
                 if (insertBefore) {
                     list.insertBefore(item, insertBefore);
                 } else {
@@ -3323,7 +3347,10 @@
             dataSection.style.display = 'block';
             document.getElementById('volunteerNameDisplay').textContent = name;
             document.getElementById('headerVolunteerName').textContent = name;
-            document.getElementById('recordCount').textContent = `${data.length} records`;
+
+            // Count unique working dates as records
+            const uniqueDates = new Set(data.filter(r => r.date).map(r => String(r.date).trim()));
+            document.getElementById('recordCount').textContent = `${uniqueDates.size} records`;
 
             tableBody.innerHTML = data.map((row, index) => `
                 <tr>
@@ -3364,7 +3391,10 @@
             dataSection.style.display = 'block';
             document.getElementById('supVolunteerNameDisplay').textContent = name;
             document.getElementById('supHeaderVolunteerName').textContent = name;
-            document.getElementById('supRecordCount').textContent = `${data.length} records`;
+
+            // Count unique working dates as records
+            const uniqueDates = new Set(data.filter(r => r.date).map(r => String(r.date).trim()));
+            document.getElementById('supRecordCount').textContent = `${uniqueDates.size} records`;
 
             tableBody.innerHTML = data.map((row, index) => `
                 <tr>
@@ -3458,7 +3488,7 @@
         }
 
         function updatePivots(data, name) {
-            // Duty mapping: duty name -> element prefix (only 3 main duties for pivot)
+            // Duty mapping: duty name -> element prefix (only the 3 visible meeting types)
             const dutyMap = {
                 'CI': 'ci',
                 'Supervisor meeting': 'sm',
@@ -3467,24 +3497,30 @@
 
             // Reset counts
             const dutyCounts = {};
-            Object.keys(dutyMap).forEach(duty => {
+            const standardDutiesArr = Object.keys(dutyMap);
+            standardDutiesArr.forEach(duty => {
                 dutyCounts[duty] = { Centre: 0, Home: 0 };
             });
 
             let totalExtraMinutes = 0;
 
+            // Track unique dates to ensure each day only counts ONCE in the total
+            const uniqueDatesPivot = new Set();
+
             data.forEach(row => {
-                if (row.duty && dutyCounts[row.duty]) {
-                    // Use row.location (from backend) and make case-insensitive
+                const date = (row.date || '').toString().trim();
+                // If this date already contributed to a count, skip further entries for this date
+                if (!date || uniqueDatesPivot.has(date)) return;
+
+                const rawDuty = (row.duty || '').toString().trim();
+                const matchedDuty = standardDutiesArr.find(d => d.toLowerCase() === rawDuty.toLowerCase());
+
+                if (matchedDuty && dutyCounts[matchedDuty]) {
                     const dutyFromValue = (row.location || row.dutyFrom || '').toString().trim().toLowerCase();
-                    // Debug log
-                    console.log('Row location:', row.location, 'dutyFromValue:', dutyFromValue);
-                    // Check explicitly - if contains 'home' count as Home, else count as Centre
-                    let loc = 'Centre'; // Default to Centre
-                    if (dutyFromValue.includes('home')) {
-                        loc = 'Home';
-                    }
-                    dutyCounts[row.duty][loc]++;
+                    let loc = dutyFromValue.includes('home') ? 'Home' : 'Centre';
+
+                    uniqueDatesPivot.add(date);
+                    dutyCounts[matchedDuty][loc]++;
                 }
 
                 // Sum No. of Hours where:
