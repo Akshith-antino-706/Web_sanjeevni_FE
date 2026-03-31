@@ -1556,7 +1556,7 @@
                                 </tr>
                                 <tr>
                                     <td>Date</td>
-                                    <td><input type="date" id="date" name="date" required></td>
+                                    <td><input type="date" id="date" name="date" required autocomplete="off"></td>
                                 </tr>
                                 <tr>
                                     <td>Time</td>
@@ -1668,7 +1668,8 @@
                                 </tr>
                                 <tr>
                                     <td>Date</td>
-                                    <td><input type="text" id="sup-date" name="sup_date" placeholder="Select date"></td>
+                                    <td><input type="date" id="sup-date" name="sup_date" required autocomplete="off">
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Supervisor</td>
@@ -2294,6 +2295,11 @@
                         svInput.value = vName;
                     }
 
+                    // Set default dates to today for both forms
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('date').value = today;
+                    document.getElementById('sup-date').value = today;
+
                     // Filter dropdowns to own name
                     filterDropdownForVolunteer(vName);
                     filterSupVolunteerDropdownForVolunteer(vName);
@@ -2711,12 +2717,7 @@
                 });
             }
 
-            // Initialize Flatpickr for supervision date field
-            flatpickr("#sup-date", {
-                dateFormat: "Y-m-d",
-                allowInput: true,
-                disableMobile: true
-            });
+
         });
 
         // DOM Elements
