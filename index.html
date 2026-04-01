@@ -3547,8 +3547,18 @@
             const uniqueDatesPivot = new Set();
 
             data.forEach(row => {
+                // 1. SUM EXTRA MINUTES (All valid 'extra time' entries should be counted)
+                const timeNormalized = (row.time || '').toString().trim().toLowerCase();
+                const dutyNormalized = (row.duty || '').toString().trim().toLowerCase();
+                const excludedDuties = ['ec meeting', 'supervisor meeting'];
+                if (timeNormalized === 'extra time' && !excludedDuties.includes(dutyNormalized) && row.hours) {
+                    const parts = row.hours.toString().split(':');
+                    totalExtraMinutes += (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
+                }
+
+                // 2. COUNT DUTY CATEGORIES (Apply unique date rule here to avoid double-counting meetings)
                 const date = (row.date || '').toString().trim();
-                // If this date already contributed to a count, skip further entries for this date
+                // If this date already contributed to a category count, skip further entries for this category on this date
                 if (!date || uniqueDatesPivot.has(date)) return;
 
                 const rawDuty = (row.duty || '').toString().trim();
@@ -3560,18 +3570,6 @@
 
                     uniqueDatesPivot.add(date);
                     dutyCounts[matchedDuty][loc]++;
-                }
-
-                // Sum No. of Hours where:
-                // 1. Time = "extra time"
-                // 2. Duty is NOT EC meeting or Supervisor meeting
-                // 3. No. of Hours is present
-                const timeNormalized = (row.time || '').toString().trim().toLowerCase();
-                const dutyNormalized = (row.duty || '').toString().trim().toLowerCase();
-                const excludedDuties = ['ec meeting', 'supervisor meeting'];
-                if (timeNormalized === 'extra time' && !excludedDuties.includes(dutyNormalized) && row.hours) {
-                    const parts = row.hours.toString().split(':');
-                    totalExtraMinutes += (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
                 }
             });
 
