@@ -1971,15 +1971,41 @@
         let lastFetchedVolunteerName = '';
 
         // Get financial year string for a date (Indian FY: April-March)
+        // Helper to convert YYYY-MM-DD (browser) to DD/MM/YYYY (sheet)
+        function formatDateToSheet(dateStr) {
+            if (!dateStr || !dateStr.includes('-')) return dateStr;
+            const parts = dateStr.split('-');
+            if (parts[0].length === 4) { // YYYY-MM-DD
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+            return dateStr;
+        }
+
+        // Get financial year string for a date (Indian FY: April-March)
         function getFinancialYear(dateStr) {
             if (!dateStr) return null;
-            const parts = dateStr.split('/');
-            if (parts.length !== 3) return null;
-            const day = parseInt(parts[0]);
-            const month = parseInt(parts[1]);
-            const year = parseInt(parts[2]);
+            let day, month, year;
+
+            // Handle both DD/MM/YYYY and YYYY-MM-DD
+            if (dateStr.includes('/')) {
+                const parts = dateStr.split('/');
+                day = parseInt(parts[0]);
+                month = parseInt(parts[1]);
+                year = parseInt(parts[2]);
+            } else if (dateStr.includes('-')) {
+                const parts = dateStr.split('-');
+                if (parts[0].length === 4) { // YYYY-MM-DD
+                    year = parseInt(parts[0]);
+                    month = parseInt(parts[1]);
+                    day = parseInt(parts[2]);
+                } else { // DD-MM-YYYY
+                    day = parseInt(parts[0]);
+                    month = parseInt(parts[1]);
+                    year = parseInt(parts[2]);
+                }
+            }
+
             if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
-            // FY starts in April: Apr 2025 - Mar 2026 = "2025-26"
             if (month >= 4) return `${year}-${(year + 1).toString().slice(-2)}`;
             return `${year - 1}-${year.toString().slice(-2)}`;
         }
@@ -1995,15 +2021,27 @@
                 const fy = getFinancialYear(row.date);
                 if (fy) fySet.add(fy);
             });
-            const fyList = Array.from(fySet).sort().reverse();
             const select = document.getElementById('fySelect');
             const previousFY = select.value;
+
+            // Always include "current" FY based on today's date
+            const today = new Date();
+            const currentMonth = today.getMonth() + 1;
+            const currentYear = today.getFullYear();
+            const currentFY = (currentMonth >= 4)
+                ? `${currentYear}-${(currentYear + 1).toString().slice(-2)}`
+                : `${currentYear - 1}-${currentYear.toString().slice(-2)}`;
+
+            if (!fySet.has(currentFY)) fySet.add(currentFY);
+
+            const fyList = Array.from(fySet).sort().reverse();
             select.innerHTML = fyList.map(fy => `<option value="${fy}">${fy}</option>`).join('');
-            // Restore previous selection if it still exists, otherwise default to 2025-26
+
+            // Default to current FY if no previous selection exists
             if (previousFY && fyList.includes(previousFY)) {
                 select.value = previousFY;
-            } else if (fyList.includes('2025-26')) {
-                select.value = '2025-26';
+            } else {
+                select.value = currentFY;
             }
         }
 
@@ -3663,7 +3701,7 @@
                 type: 'attendance',
                 email: currentUser ? currentUser.email : '',
                 volunteerName: document.getElementById('volunteer-name').value,
-                date: document.getElementById('date').value,
+                date: formatDateToSheet(document.getElementById('date').value),
                 time: document.getElementById('time').value,
                 extraFrom: document.getElementById('extra-time-from').value.trim(),
                 extraTill: document.getElementById('extra-time-till').value.trim(),
@@ -3749,7 +3787,7 @@
                 volunteerName: document.getElementById('sup-volunteer-name').value,
                 supervisorName: document.getElementById('supervisor-name').value,
                 timeInHrs: timeInHours,
-                date: document.getElementById('sup-date').value,
+                date: formatDateToSheet(document.getElementById('sup-date').value),
                 remark: document.getElementById('sup-remark').value
             };
 
