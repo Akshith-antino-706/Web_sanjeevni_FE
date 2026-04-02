@@ -3387,9 +3387,29 @@
             document.getElementById('volunteerNameDisplay').textContent = name;
             document.getElementById('headerVolunteerName').textContent = name;
 
-            // Count unique working dates as records
-            const uniqueDates = new Set(data.filter(r => r.date).map(r => String(r.date).trim()));
-            document.getElementById('recordCount').textContent = `${uniqueDates.size} records`;
+            // Count primary records (unique Date + Core Duty) and all Other records
+            const coreDuties = ['CI', 'Supervisor meeting', 'EC meeting'];
+            const coreSet = new Set();
+            let coreCount = 0;
+            let otherCount = 0;
+
+            data.forEach(r => {
+                if (!r.date || !r.duty) return;
+                const dNorm = String(r.duty).trim().toLowerCase();
+                const matched = coreDuties.find(cd => cd.toLowerCase() === dNorm);
+
+                if (matched) {
+                    const key = `${String(r.date).trim()}_${matched.toLowerCase()}`;
+                    if (!coreSet.has(key)) {
+                        coreSet.add(key);
+                        coreCount++;
+                    }
+                } else {
+                    // All other duties (Workshop, Orientation, etc.) are counted individually
+                    otherCount++;
+                }
+            });
+            document.getElementById('recordCount').textContent = `${coreCount + otherCount} records`;
 
             tableBody.innerHTML = data.map((row, index) => `
                 <tr>
@@ -3543,9 +3563,6 @@
 
             let totalExtraMinutes = 0;
 
-            // Track unique dates to ensure each day only counts ONCE in the total
-            const uniqueDatesPivot = new Set();
-
             data.forEach(row => {
                 // 1. SUM EXTRA MINUTES (All valid 'extra time' entries should be counted)
                 const timeNormalized = (row.time || '').toString().trim().toLowerCase();
@@ -3556,19 +3573,17 @@
                     totalExtraMinutes += (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
                 }
 
-                // 2. COUNT DUTY CATEGORIES (Apply unique date rule here to avoid double-counting meetings)
+                // 2. COUNT DUTY CATEGORIES
                 const date = (row.date || '').toString().trim();
-                // If this date already contributed to a category count, skip further entries for this category on this date
-                if (!date || uniqueDatesPivot.has(date)) return;
-
                 const rawDuty = (row.duty || '').toString().trim();
+                if (!date || !rawDuty) return;
+
                 const matchedDuty = standardDutiesArr.find(d => d.toLowerCase() === rawDuty.toLowerCase());
 
                 if (matchedDuty && dutyCounts[matchedDuty]) {
                     const dutyFromValue = (row.location || row.dutyFrom || '').toString().trim().toLowerCase();
                     let loc = dutyFromValue.includes('home') ? 'Home' : 'Centre';
 
-                    uniqueDatesPivot.add(date);
                     dutyCounts[matchedDuty][loc]++;
                 }
             });
