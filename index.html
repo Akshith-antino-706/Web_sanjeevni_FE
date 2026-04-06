@@ -423,6 +423,118 @@
             z-index: 10;
         }
 
+        /* Spreadsheet-style column filters */
+        .th-filter-wrap {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .col-filter-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+            font-size: 0.55rem;
+            padding: 1px 3px;
+            border-radius: 3px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .col-filter-btn:hover, .col-filter-btn.active {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+        .col-filter-btn.filtered {
+            color: #FFD700;
+        }
+        .col-filter-panel {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 180px;
+            max-height: 260px;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+            z-index: 100;
+            flex-direction: column;
+            font-size: 0.7rem;
+            color: #333;
+        }
+        .col-filter-panel.open {
+            display: flex;
+        }
+        .col-filter-search {
+            padding: 6px;
+            border-bottom: 1px solid #eee;
+        }
+        .col-filter-search input {
+            width: 100%;
+            padding: 4px 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            outline: none;
+        }
+        .col-filter-actions {
+            display: flex;
+            gap: 6px;
+            padding: 4px 6px;
+            border-bottom: 1px solid #eee;
+        }
+        .col-filter-actions button {
+            background: none;
+            border: none;
+            color: #2F4A7D;
+            cursor: pointer;
+            font-size: 0.6rem;
+            font-weight: 600;
+            padding: 2px 4px;
+        }
+        .col-filter-actions button:hover {
+            text-decoration: underline;
+        }
+        .col-filter-list {
+            overflow-y: auto;
+            max-height: 170px;
+            padding: 4px 0;
+        }
+        .col-filter-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 8px;
+            cursor: pointer;
+            font-size: 0.65rem;
+        }
+        .col-filter-item:hover {
+            background: #f0f0f0;
+        }
+        .col-filter-item input[type="checkbox"] {
+            margin: 0;
+            accent-color: #2F4A7D;
+        }
+        .col-filter-apply {
+            padding: 6px;
+            border-top: 1px solid #eee;
+            text-align: right;
+        }
+        .col-filter-apply button {
+            background: #2F4A7D;
+            color: white;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 4px;
+            font-size: 0.6rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .col-filter-apply button:hover {
+            background: #243B66;
+        }
+
         .data-table td {
             padding: 6px;
             border: 1px solid #D9C3A3;
@@ -1751,18 +1863,18 @@
                                 <span class="badge" id="recordCount">0 records</span>
                             </div>
                             <div class="data-table-wrapper">
-                                <table class="data-table">
+                                <table class="data-table" id="attendanceTable">
                                     <thead>
                                         <tr>
                                             <th>S. No</th>
-                                            <th>Date</th>
-                                            <th>Time</th>
+                                            <th style="position:relative"><div class="th-filter-wrap">Date <button class="col-filter-btn" data-col="1">&#9660;</button></div><div class="col-filter-panel" data-col="1"></div></th>
+                                            <th style="position:relative"><div class="th-filter-wrap">Time <button class="col-filter-btn" data-col="2">&#9660;</button></div><div class="col-filter-panel" data-col="2"></div></th>
                                             <th>Extra Time (From)</th>
                                             <th>Extra Time (till)</th>
                                             <th>Reason for extra time</th>
-                                            <th>Duty</th>
+                                            <th style="position:relative"><div class="th-filter-wrap">Duty <button class="col-filter-btn" data-col="6">&#9660;</button></div><div class="col-filter-panel" data-col="6"></div></th>
                                             <th>No.Of Hours</th>
-                                            <th>Duty from Centre/Home</th>
+                                            <th style="position:relative"><div class="th-filter-wrap">Duty from Centre/Home <button class="col-filter-btn" data-col="8">&#9660;</button></div><div class="col-filter-panel" data-col="8"></div></th>
                                             <th>Remarks</th>
                                         </tr>
                                     </thead>
@@ -1862,12 +1974,12 @@
                                 <span class="badge" id="supRecordCount">0 records</span>
                             </div>
                             <div class="data-table-wrapper">
-                                <table class="data-table">
+                                <table class="data-table" id="supervisionTable">
                                     <thead>
                                         <tr>
                                             <th>S. No</th>
-                                            <th>Date</th>
-                                            <th>Supervisor</th>
+                                            <th style="position:relative"><div class="th-filter-wrap">Date <button class="col-filter-btn" data-col="1">&#9660;</button></div><div class="col-filter-panel" data-col="1"></div></th>
+                                            <th style="position:relative"><div class="th-filter-wrap">Supervisor <button class="col-filter-btn" data-col="2">&#9660;</button></div><div class="col-filter-panel" data-col="2"></div></th>
                                             <th>Time (in Hrs)</th>
                                             <th>Remark</th>
                                         </tr>
@@ -2308,6 +2420,31 @@
                 document.getElementById('adminPanelBtn').classList.remove('hidden');
                 // Set default view
                 switchPanel('attendance');
+
+                // Pre-select admin's own name in dropdowns (admin can change it)
+                if (currentUser.volunteerSheetName) {
+                    const vName = currentUser.volunteerSheetName;
+
+                    const vTrigger = document.getElementById('volunteerTrigger');
+                    const vInput = document.getElementById('volunteer-name');
+                    if (vTrigger && vInput) {
+                        vTrigger.textContent = vName;
+                        vTrigger.classList.remove('placeholder');
+                        vInput.value = vName;
+                    }
+
+                    const svTrigger = document.getElementById('supVolunteerTrigger');
+                    const svInput = document.getElementById('sup-volunteer-name');
+                    if (svTrigger && svInput) {
+                        svTrigger.textContent = vName;
+                        svTrigger.classList.remove('placeholder');
+                        svInput.value = vName;
+                    }
+
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('date').value = today;
+                    document.getElementById('sup-date').value = today;
+                }
             } else if (currentUser.role === 'volunteer') {
                 document.body.classList.add('is-volunteer');
                 // Set default view for volunteers too
@@ -3411,6 +3548,9 @@
             });
             document.getElementById('recordCount').textContent = `${coreCount + otherCount} records`;
 
+            // Reset column filters when new data loads
+            if (window.resetTableFilters) resetTableFilters('attendanceTable');
+
             tableBody.innerHTML = data.map((row, index) => `
                 <tr>
                     <td class="sno">${index + 1}</td>
@@ -3454,6 +3594,9 @@
             // Count unique working dates as records
             const uniqueDates = new Set(data.filter(r => r.date).map(r => String(r.date).trim()));
             document.getElementById('supRecordCount').textContent = `${uniqueDates.size} records`;
+
+            // Reset column filters when new data loads
+            if (window.resetTableFilters) resetTableFilters('supervisionTable');
 
             tableBody.innerHTML = data.map((row, index) => `
                 <tr>
@@ -3562,6 +3705,7 @@
             });
 
             let totalExtraMinutes = 0;
+            const dutyDateSet = new Set(); // Deduplicate core duties by date
 
             data.forEach(row => {
                 // 1. SUM EXTRA MINUTES (All valid 'extra time' entries should be counted)
@@ -3573,7 +3717,7 @@
                     totalExtraMinutes += (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
                 }
 
-                // 2. COUNT DUTY CATEGORIES
+                // 2. COUNT DUTY CATEGORIES (deduplicated by date + duty)
                 const date = (row.date || '').toString().trim();
                 const rawDuty = (row.duty || '').toString().trim();
                 if (!date || !rawDuty) return;
@@ -3581,6 +3725,10 @@
                 const matchedDuty = standardDutiesArr.find(d => d.toLowerCase() === rawDuty.toLowerCase());
 
                 if (matchedDuty && dutyCounts[matchedDuty]) {
+                    const key = `${date}_${matchedDuty.toLowerCase()}`;
+                    if (dutyDateSet.has(key)) return; // Skip duplicate date+duty
+                    dutyDateSet.add(key);
+
                     const dutyFromValue = (row.location || row.dutyFrom || '').toString().trim().toLowerCase();
                     let loc = dutyFromValue.includes('home') ? 'Home' : 'Centre';
 
@@ -3628,6 +3776,164 @@
             document.getElementById('eh-volunteer').textContent = '-';
             document.getElementById('eh-total').textContent = '0:00:00';
         }
+
+        // ── Spreadsheet-style column filters ──
+        (function initColumnFilters() {
+            // Track active filters per table: { tableId: { colIndex: Set of allowed values } }
+            const activeFilters = {};
+
+            function getUniqueValues(table, colIndex) {
+                const rows = table.tBodies[0] ? table.tBodies[0].rows : [];
+                const vals = new Set();
+                for (const row of rows) {
+                    if (row.style.display === 'none' && !row.dataset.filterHidden) continue;
+                    const cell = row.cells[colIndex];
+                    if (cell) vals.add(cell.textContent.trim());
+                }
+                // Sort values
+                return [...vals].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+            }
+
+            function buildFilterPanel(panel, table, colIndex) {
+                const tableId = table.id;
+                const values = getUniqueValues(table, colIndex);
+                const currentFilter = activeFilters[tableId] && activeFilters[tableId][colIndex];
+
+                panel.innerHTML = `
+                    <div class="col-filter-search"><input type="text" placeholder="Search..."></div>
+                    <div class="col-filter-actions">
+                        <button data-action="all">Select All</button>
+                        <button data-action="none">Clear All</button>
+                    </div>
+                    <div class="col-filter-list"></div>
+                    <div class="col-filter-apply"><button>Apply</button></div>
+                `;
+
+                const list = panel.querySelector('.col-filter-list');
+                const searchInput = panel.querySelector('.col-filter-search input');
+
+                values.forEach(val => {
+                    const display = val || '(Blank)';
+                    const checked = !currentFilter || currentFilter.has(val);
+                    const item = document.createElement('label');
+                    item.className = 'col-filter-item';
+                    item.innerHTML = `<input type="checkbox" value="${val.replace(/"/g, '&quot;')}" ${checked ? 'checked' : ''}> <span>${display}</span>`;
+                    list.appendChild(item);
+                });
+
+                // Search within filter values
+                searchInput.addEventListener('input', () => {
+                    const q = searchInput.value.toLowerCase();
+                    list.querySelectorAll('.col-filter-item').forEach(item => {
+                        const text = item.querySelector('span').textContent.toLowerCase();
+                        item.style.display = text.includes(q) ? '' : 'none';
+                    });
+                });
+
+                // Select All / Clear All
+                panel.querySelector('[data-action="all"]').addEventListener('click', () => {
+                    list.querySelectorAll('input[type="checkbox"]').forEach(cb => { if (cb.closest('.col-filter-item').style.display !== 'none') cb.checked = true; });
+                });
+                panel.querySelector('[data-action="none"]').addEventListener('click', () => {
+                    list.querySelectorAll('input[type="checkbox"]').forEach(cb => { if (cb.closest('.col-filter-item').style.display !== 'none') cb.checked = false; });
+                });
+
+                // Apply
+                panel.querySelector('.col-filter-apply button').addEventListener('click', () => {
+                    const selected = new Set();
+                    list.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => selected.add(cb.value));
+
+                    if (!activeFilters[tableId]) activeFilters[tableId] = {};
+
+                    // If all are selected, remove the filter for this column
+                    if (selected.size === values.length) {
+                        delete activeFilters[tableId][colIndex];
+                    } else {
+                        activeFilters[tableId][colIndex] = selected;
+                    }
+
+                    applyFilters(table);
+                    closeAllFilterPanels();
+                });
+            }
+
+            function applyFilters(table) {
+                const tableId = table.id;
+                const filters = activeFilters[tableId] || {};
+                const rows = table.tBodies[0] ? table.tBodies[0].rows : [];
+                let visibleIndex = 0;
+
+                for (const row of rows) {
+                    let show = true;
+                    for (const [colIndex, allowed] of Object.entries(filters)) {
+                        const cell = row.cells[parseInt(colIndex)];
+                        if (cell && !allowed.has(cell.textContent.trim())) {
+                            show = false;
+                            break;
+                        }
+                    }
+                    row.style.display = show ? '' : 'none';
+                    row.dataset.filterHidden = show ? '' : '1';
+                    if (show) {
+                        visibleIndex++;
+                        row.cells[0].textContent = visibleIndex; // Re-number S.No
+                    }
+                }
+
+                // Update filter button styling
+                table.querySelectorAll('.col-filter-btn').forEach(btn => {
+                    const col = btn.dataset.col;
+                    if (filters[col]) {
+                        btn.classList.add('filtered');
+                    } else {
+                        btn.classList.remove('filtered');
+                    }
+                });
+            }
+
+            function closeAllFilterPanels() {
+                document.querySelectorAll('.col-filter-panel.open').forEach(p => p.classList.remove('open'));
+                document.querySelectorAll('.col-filter-btn.active').forEach(b => b.classList.remove('active'));
+            }
+
+            // Reset filters when new data is loaded
+            window.resetTableFilters = function(tableId) {
+                if (activeFilters[tableId]) delete activeFilters[tableId];
+                const table = document.getElementById(tableId);
+                if (table) {
+                    table.querySelectorAll('.col-filter-btn').forEach(btn => btn.classList.remove('filtered'));
+                }
+            };
+
+            // Event delegation for filter buttons
+            document.addEventListener('click', (e) => {
+                const btn = e.target.closest('.col-filter-btn');
+                if (btn) {
+                    e.stopPropagation();
+                    const th = btn.closest('th');
+                    const panel = th.querySelector('.col-filter-panel');
+                    const table = th.closest('table');
+                    const colIndex = parseInt(btn.dataset.col);
+                    const wasOpen = panel.classList.contains('open');
+
+                    closeAllFilterPanels();
+
+                    if (!wasOpen) {
+                        buildFilterPanel(panel, table, colIndex);
+                        panel.classList.add('open');
+                        btn.classList.add('active');
+                        // Focus search
+                        setTimeout(() => panel.querySelector('input[type="text"]')?.focus(), 50);
+                    }
+                    return;
+                }
+
+                // Close panels when clicking outside
+                if (!e.target.closest('.col-filter-panel')) {
+                    closeAllFilterPanels();
+                }
+            });
+        })();
 
         // Confetti
         const confettiCanvas = document.getElementById('confetti-canvas');
