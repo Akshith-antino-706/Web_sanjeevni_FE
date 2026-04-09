@@ -1867,14 +1867,14 @@
                                     <thead>
                                         <tr>
                                             <th>S. No</th>
-                                            <th style="position:relative"><div class="th-filter-wrap">Date <button class="col-filter-btn" data-col="1">&#9660;</button></div><div class="col-filter-panel" data-col="1"></div></th>
-                                            <th style="position:relative"><div class="th-filter-wrap">Time <button class="col-filter-btn" data-col="2">&#9660;</button></div><div class="col-filter-panel" data-col="2"></div></th>
+                                            <th><div class="th-filter-wrap">Date <button class="col-filter-btn" data-col="1">&#9660;</button></div><div class="col-filter-panel" data-col="1"></div></th>
+                                            <th><div class="th-filter-wrap">Time <button class="col-filter-btn" data-col="2">&#9660;</button></div><div class="col-filter-panel" data-col="2"></div></th>
                                             <th>Extra Time (From)</th>
                                             <th>Extra Time (till)</th>
                                             <th>Reason for extra time</th>
-                                            <th style="position:relative"><div class="th-filter-wrap">Duty <button class="col-filter-btn" data-col="6">&#9660;</button></div><div class="col-filter-panel" data-col="6"></div></th>
+                                            <th><div class="th-filter-wrap">Duty <button class="col-filter-btn" data-col="6">&#9660;</button></div><div class="col-filter-panel" data-col="6"></div></th>
                                             <th>No.Of Hours</th>
-                                            <th style="position:relative"><div class="th-filter-wrap">Duty from Centre/Home <button class="col-filter-btn" data-col="8">&#9660;</button></div><div class="col-filter-panel" data-col="8"></div></th>
+                                            <th><div class="th-filter-wrap">Duty from Centre/Home <button class="col-filter-btn" data-col="8">&#9660;</button></div><div class="col-filter-panel" data-col="8"></div></th>
                                             <th>Remarks</th>
                                         </tr>
                                     </thead>
@@ -1978,8 +1978,8 @@
                                     <thead>
                                         <tr>
                                             <th>S. No</th>
-                                            <th style="position:relative"><div class="th-filter-wrap">Date <button class="col-filter-btn" data-col="1">&#9660;</button></div><div class="col-filter-panel" data-col="1"></div></th>
-                                            <th style="position:relative"><div class="th-filter-wrap">Supervisor <button class="col-filter-btn" data-col="2">&#9660;</button></div><div class="col-filter-panel" data-col="2"></div></th>
+                                            <th><div class="th-filter-wrap">Date <button class="col-filter-btn" data-col="1">&#9660;</button></div><div class="col-filter-panel" data-col="1"></div></th>
+                                            <th><div class="th-filter-wrap">Supervisor <button class="col-filter-btn" data-col="2">&#9660;</button></div><div class="col-filter-panel" data-col="2"></div></th>
                                             <th>Time (in Hrs)</th>
                                             <th>Remark</th>
                                         </tr>
@@ -3532,6 +3532,8 @@
 
             data.forEach(r => {
                 if (!r.date || !r.duty) return;
+                const tNorm = String(r.time || '').trim().toLowerCase();
+                if (tNorm === 'extra time') return; // Skip extra time entries from record count
                 const dNorm = String(r.duty).trim().toLowerCase();
                 const matched = coreDuties.find(cd => cd.toLowerCase() === dNorm);
 
@@ -3546,7 +3548,9 @@
                     otherCount++;
                 }
             });
-            document.getElementById('recordCount').textContent = `${coreCount + otherCount} records`;
+            const totalRecordCount = coreCount + otherCount;
+            document.getElementById('recordCount').textContent = `${totalRecordCount} records`;
+            document.getElementById('recordCount').dataset.total = totalRecordCount;
 
             // Reset column filters when new data loads
             if (window.resetTableFilters) resetTableFilters('attendanceTable');
@@ -3594,6 +3598,7 @@
             // Count unique working dates as records
             const uniqueDates = new Set(data.filter(r => r.date).map(r => String(r.date).trim()));
             document.getElementById('supRecordCount').textContent = `${uniqueDates.size} records`;
+            document.getElementById('supRecordCount').dataset.total = uniqueDates.size;
 
             // Reset column filters when new data loads
             if (window.resetTableFilters) resetTableFilters('supervisionTable');
@@ -3717,10 +3722,11 @@
                     totalExtraMinutes += (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
                 }
 
-                // 2. COUNT DUTY CATEGORIES (deduplicated by date + duty)
+                // 2. COUNT DUTY CATEGORIES (skip "extra time" entries, deduplicate by date + duty)
                 const date = (row.date || '').toString().trim();
                 const rawDuty = (row.duty || '').toString().trim();
                 if (!date || !rawDuty) return;
+                if (timeNormalized === 'extra time') return; // Extra time entries don't count in COUNTA
 
                 const matchedDuty = standardDutiesArr.find(d => d.toLowerCase() === rawDuty.toLowerCase());
 
@@ -3889,6 +3895,19 @@
                         btn.classList.remove('filtered');
                     }
                 });
+
+                // Update record count badge based on visible rows
+                const badgeId = tableId === 'attendanceTable' ? 'recordCount' : tableId === 'supervisionTable' ? 'supRecordCount' : null;
+                if (badgeId) {
+                    const badge = document.getElementById(badgeId);
+                    if (badge) {
+                        const originalTotal = badge.dataset.total || rows.length;
+                        const hasFilters = Object.keys(filters).length > 0;
+                        badge.textContent = hasFilters
+                            ? `${visibleIndex} / ${originalTotal} records`
+                            : `${originalTotal} records`;
+                    }
+                }
             }
 
             function closeAllFilterPanels() {
