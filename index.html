@@ -2739,10 +2739,7 @@
         // Add a name to volunteer/supervisor dropdowns in alphabetical order
         function addToDropdowns(name, role, sheetName) {
             const dropdownIds = ['volunteerList', 'supVolunteerList'];
-            // Admins/supervisors also get added to supervisor dropdown
-            if (role === 'admin') {
-                dropdownIds.push('supervisorList');
-            }
+            // Supervisor dropdown is hardcoded — do not add users dynamically
 
             const value = sheetName || name;
 
@@ -2772,9 +2769,9 @@
             });
         }
 
-        // Remove a name from all dropdowns
+        // Remove a name from all dropdowns (supervisor list is hardcoded and untouched)
         function removeFromDropdowns(name) {
-            ['volunteerList', 'supVolunteerList', 'supervisorList'].forEach(id => {
+            ['volunteerList', 'supVolunteerList'].forEach(id => {
                 const list = document.getElementById(id);
                 if (!list) return;
                 const item = list.querySelector(`[data-value="${name}"]`);
