@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sanjeevni - Volunteer Attendance</title>
+    <title>Sanjivini - Volunteer Attendance</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
@@ -429,10 +429,11 @@
             align-items: center;
             gap: 4px;
         }
+
         .col-filter-btn {
             background: none;
             border: none;
-            color: rgba(255,255,255,0.6);
+            color: rgba(255, 255, 255, 0.6);
             cursor: pointer;
             font-size: 0.55rem;
             padding: 1px 3px;
@@ -440,13 +441,17 @@
             line-height: 1;
             flex-shrink: 0;
         }
-        .col-filter-btn:hover, .col-filter-btn.active {
-            background: rgba(255,255,255,0.2);
+
+        .col-filter-btn:hover,
+        .col-filter-btn.active {
+            background: rgba(255, 255, 255, 0.2);
             color: #fff;
         }
+
         .col-filter-btn.filtered {
             color: #FFD700;
         }
+
         .col-filter-panel {
             display: none;
             position: absolute;
@@ -457,19 +462,22 @@
             background: #fff;
             border: 1px solid #ccc;
             border-radius: 6px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
             z-index: 100;
             flex-direction: column;
             font-size: 0.7rem;
             color: #333;
         }
+
         .col-filter-panel.open {
             display: flex;
         }
+
         .col-filter-search {
             padding: 6px;
             border-bottom: 1px solid #eee;
         }
+
         .col-filter-search input {
             width: 100%;
             padding: 4px 6px;
@@ -478,12 +486,14 @@
             font-size: 0.65rem;
             outline: none;
         }
+
         .col-filter-actions {
             display: flex;
             gap: 6px;
             padding: 4px 6px;
             border-bottom: 1px solid #eee;
         }
+
         .col-filter-actions button {
             background: none;
             border: none;
@@ -493,14 +503,17 @@
             font-weight: 600;
             padding: 2px 4px;
         }
+
         .col-filter-actions button:hover {
             text-decoration: underline;
         }
+
         .col-filter-list {
             overflow-y: auto;
             max-height: 170px;
             padding: 4px 0;
         }
+
         .col-filter-item {
             display: flex;
             align-items: center;
@@ -509,18 +522,22 @@
             cursor: pointer;
             font-size: 0.65rem;
         }
+
         .col-filter-item:hover {
             background: #f0f0f0;
         }
+
         .col-filter-item input[type="checkbox"] {
             margin: 0;
             accent-color: #2F4A7D;
         }
+
         .col-filter-apply {
             padding: 6px;
             border-top: 1px solid #eee;
             text-align: right;
         }
+
         .col-filter-apply button {
             background: #2F4A7D;
             color: white;
@@ -531,6 +548,7 @@
             cursor: pointer;
             font-weight: 600;
         }
+
         .col-filter-apply button:hover {
             background: #243B66;
         }
@@ -1867,14 +1885,30 @@
                                     <thead>
                                         <tr>
                                             <th>S. No</th>
-                                            <th><div class="th-filter-wrap">Date <button class="col-filter-btn" data-col="1">&#9660;</button></div><div class="col-filter-panel" data-col="1"></div></th>
-                                            <th><div class="th-filter-wrap">Time <button class="col-filter-btn" data-col="2">&#9660;</button></div><div class="col-filter-panel" data-col="2"></div></th>
+                                            <th>
+                                                <div class="th-filter-wrap">Date <button class="col-filter-btn"
+                                                        data-col="1">&#9660;</button></div>
+                                                <div class="col-filter-panel" data-col="1"></div>
+                                            </th>
+                                            <th>
+                                                <div class="th-filter-wrap">Time <button class="col-filter-btn"
+                                                        data-col="2">&#9660;</button></div>
+                                                <div class="col-filter-panel" data-col="2"></div>
+                                            </th>
                                             <th>Extra Time (From)</th>
                                             <th>Extra Time (till)</th>
                                             <th>Reason for extra time</th>
-                                            <th><div class="th-filter-wrap">Duty <button class="col-filter-btn" data-col="6">&#9660;</button></div><div class="col-filter-panel" data-col="6"></div></th>
+                                            <th>
+                                                <div class="th-filter-wrap">Duty <button class="col-filter-btn"
+                                                        data-col="6">&#9660;</button></div>
+                                                <div class="col-filter-panel" data-col="6"></div>
+                                            </th>
                                             <th>No.Of Hours</th>
-                                            <th><div class="th-filter-wrap">Duty from Centre/Home <button class="col-filter-btn" data-col="8">&#9660;</button></div><div class="col-filter-panel" data-col="8"></div></th>
+                                            <th>
+                                                <div class="th-filter-wrap">Duty from Centre/Home <button
+                                                        class="col-filter-btn" data-col="8">&#9660;</button></div>
+                                                <div class="col-filter-panel" data-col="8"></div>
+                                            </th>
                                             <th>Remarks</th>
                                         </tr>
                                     </thead>
@@ -1978,8 +2012,16 @@
                                     <thead>
                                         <tr>
                                             <th>S. No</th>
-                                            <th><div class="th-filter-wrap">Date <button class="col-filter-btn" data-col="1">&#9660;</button></div><div class="col-filter-panel" data-col="1"></div></th>
-                                            <th><div class="th-filter-wrap">Supervisor <button class="col-filter-btn" data-col="2">&#9660;</button></div><div class="col-filter-panel" data-col="2"></div></th>
+                                            <th>
+                                                <div class="th-filter-wrap">Date <button class="col-filter-btn"
+                                                        data-col="1">&#9660;</button></div>
+                                                <div class="col-filter-panel" data-col="1"></div>
+                                            </th>
+                                            <th>
+                                                <div class="th-filter-wrap">Supervisor <button class="col-filter-btn"
+                                                        data-col="2">&#9660;</button></div>
+                                                <div class="col-filter-panel" data-col="2"></div>
+                                            </th>
                                             <th>Time (in Hrs)</th>
                                             <th>Remark</th>
                                         </tr>
@@ -3913,7 +3955,7 @@
             }
 
             // Reset filters when new data is loaded
-            window.resetTableFilters = function(tableId) {
+            window.resetTableFilters = function (tableId) {
                 if (activeFilters[tableId]) delete activeFilters[tableId];
                 const table = document.getElementById(tableId);
                 if (table) {
