@@ -3754,18 +3754,15 @@
             data.forEach(row => {
                 // 1. SUM EXTRA MINUTES (All valid 'extra time' entries should be counted)
                 const timeNormalized = (row.time || '').toString().trim().toLowerCase();
-                const dutyNormalized = (row.duty || '').toString().trim().toLowerCase();
-                const excludedDuties = ['ec meeting', 'supervisor meeting'];
-                if (timeNormalized === 'extra time' && !excludedDuties.includes(dutyNormalized) && row.hours) {
+                if (timeNormalized === 'extra time' && row.hours) {
                     const parts = row.hours.toString().split(':');
                     totalExtraMinutes += (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
                 }
 
-                // 2. COUNT DUTY CATEGORIES (skip "extra time" entries, deduplicate by date + duty)
+                // 2. COUNT DUTY CATEGORIES (deduplicate by date + duty)
                 const date = (row.date || '').toString().trim();
                 const rawDuty = (row.duty || '').toString().trim();
                 if (!date || !rawDuty) return;
-                if (timeNormalized === 'extra time') return; // Extra time entries don't count in COUNTA
 
                 const matchedDuty = standardDutiesArr.find(d => d.toLowerCase() === rawDuty.toLowerCase());
 
