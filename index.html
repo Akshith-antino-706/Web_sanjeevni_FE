@@ -3761,11 +3761,10 @@
                     totalExtraMinutes += (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
                 }
 
-                // 2. COUNT DUTY CATEGORIES (skip "extra time" entries, deduplicate by date + duty)
+                // 2. COUNT DUTY CATEGORIES (deduplicate by date + duty)
                 const date = (row.date || '').toString().trim();
                 const rawDuty = (row.duty || '').toString().trim();
                 if (!date || !rawDuty) return;
-                if (timeNormalized === 'extra time') return; // Extra time entries don't count in COUNTA
 
                 const matchedDuty = standardDutiesArr.find(d => d.toLowerCase() === rawDuty.toLowerCase());
 
